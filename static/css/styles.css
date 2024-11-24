@@ -1,0 +1,415 @@
+:root {
+    --primary-color: #4fc3f7; 
+    --secondary-color: #1e88e5;
+    --background-color: #0d1117; 
+    --text-color: #dee3e7;
+    --dark-text-color: #66829b;
+    --secondary-text-color: #eef0f1; 
+    --card-background: #161b22;
+    --hover-background: linear-gradient(135deg, #4fc3f7, #1e88e5); 
+    --footer-color: #0a0e13;
+    --highlight-color: #f1f8ff; 
+    --danger-color: #ff5555; 
+    --success-color: #4caf50; 
+    --animation-duration: 0.8s; 
+    --animation-ease: ease-in-out; 
+    --whatsapp-btn-hover: #25d366;
+}
+
+body, html {
+    color: var(--text-color);
+    font-family: 'Roboto', sans-serif;
+    height: 100%; /* Asegura que el HTML y body ocupen toda la altura */
+    margin: 0; /* Elimina márgenes predeterminados */
+    display: flex;
+    flex-direction: column; /* Organiza en columna */
+}
+
+.container {
+    flex: 1; /* Ocupa todo el espacio restante entre el header y el footer */
+}
+
+.navbar {
+    background: var(--hover-background);
+    border-bottom: 2px solid var(--secondary-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+.navbar-brand, .nav-link {
+    color: var(--text-color) !important;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.navbar-brand:hover, .nav-link:hover {
+    color: var(--dark-text-color) !important;
+}
+
+#about, .hero {
+    background: var(--hover-background);
+    padding: 40px;
+    border-radius: 15px;
+    color: var(--highlight-color);
+    margin-top: 40px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    animation: fadeIn var(--animation-duration) var(--animation-ease);
+    transition: filter 0.3s ease, box-shadow 0.3s ease;
+}
+
+h1 {
+    font-size: 3rem; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    color: var(--primary-color); 
+    letter-spacing: 2px; 
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
+    animation: fadeIn var(--animation-duration) var(--animation-ease);
+}
+
+
+
+h1:hover {
+    color: var(--secondary-color);
+    transform: scale(1.05);
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+
+#about p, .hero p {
+    line-height: 1.8;
+    text-align: justify;
+}
+
+.hero a, #about a {
+    color: var(--highlight-color);
+    text-decoration: none;
+    background-color: var(--primary-color);
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+#about:hover, .hero:hover {
+    filter: none;
+}
+
+.hero a:hover, #about a:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Contenedor de la imagen */
+.profile-image-container {
+    width: 14.5rem;
+    height: 14.5rem; 
+    border-radius: 50%;
+    background: var(--gradient-color);
+    padding: 5px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: fadeIn var(--animation-duration) var(--animation-ease);
+}
+
+.profile-image-container:hover {
+    transform: scale(1.05); 
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+}
+
+/* Imagen de perfil & tarjeta */
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--secondary-color);
+}
+
+
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    background-color: var(--card-background);
+    border-radius: 20px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    margin: 0 auto; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Iconos habilidades */
+.d-flex img {
+    max-width: 25px;
+    margin: 0 10px;
+    transition: transform 0.3s ease, filter 0.3s ease;
+    animation: scaleUp var(--animation-duration) var(--animation-ease);
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.d-flex img:hover {
+    transform: scale(1.5);
+}
+
+.profile-card .card-title {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+
+.profile-card .card-text {
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.card {
+    background-color: var(--card-background);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
+    animation: fadeIn var(--animation-duration) var(--animation-ease);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    animation: scaleUp var(--animation-duration) var(--animation-ease);
+    transition: transform 0.3s ease;
+}
+
+.card-img-top:hover {
+    transform: scale(1.1);
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+    text-align: center;
+}
+
+.card-title:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+.card-text {
+    font-size: 0.95rem;
+    color: #cccccc;
+    text-align: justify;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    color: var(--highlight-color);
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    transform: scale(1.05);
+}
+
+footer {
+    background-color: var(--footer-color);
+    color: var(--text-color);
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: var(--primary-color); 
+    text-decoration: none;
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+    transition: all 0.3s ease; 
+}
+
+footer a:hover {
+    color: var(--secondary-color); 
+    text-decoration: none; 
+}
+
+footer a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -3px; 
+    width: 0;
+    height: 2px;
+    background-color: #4fc3f7;
+    transition: width 0.3s ease; 
+}
+
+footer a:hover::after {
+    width: 100%;
+}
+
+.post-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--dark-text-color);
+    text-align: justify;
+}
+
+.post-content p {
+    margin-bottom: 1.2rem;
+}
+
+.post-footer a {
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.post-footer a:hover {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.blog-container .card {
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--card-background);
+}
+
+.blog-container .card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.blog-container .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.blog-container .card-title:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+.blog-container .card-footer {
+    background: transparent;
+    border-top: none;
+}
+
+/* Animación texto */
+.animated-text-container {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+}
+
+.animated-text {
+    font-size: 1.4rem; 
+    font-weight: bold;
+    color: var(--secondary-color);
+    white-space: nowrap;
+    border-right: 2px solid var(--primary-color); 
+    display: inline-block;
+    overflow: hidden;
+    animation: typing 4s steps(30, end), blink 0.7s step-end infinite;
+    width: fit-content; 
+}
+
+/* Cursor parpadeante */
+.cursor-blink::after {
+    content: "|";
+    display: inline-block;
+    margin-left: 2px;
+    animation: blink 1s steps(2, start) infinite;
+}
+
+.whatsapp-icon {
+    font-size: 1.5rem; 
+    color: white; 
+    display: inline-block; 
+    background-color: transparent; 
+    transition: transform 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.whatsapp-icon:hover {
+    color: var(--whatsapp-btn-hover);
+    text-shadow: 0 0 15px var(--whatsapp-btn-hover);
+    transition: all 0.5s ease;
+    transform: scale(1.2);
+}
+
+
+/* Cursor parpadeante */
+@keyframes blink {
+    from,
+    to {
+        border-color: transparent;
+    }
+    50% {
+        border-color: var(--primary-color);
+    }
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%; 
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 450px) {
+    .animated-text {
+        font-size: 1rem; 
+    }
+}
+
+
+

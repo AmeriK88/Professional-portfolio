@@ -1,0 +1,42 @@
+# Entorno virtual
+venv/
+
+# Base de datos
+db.sqlite3
+
+# Archivos de configuración sensibles
+.env
+
+# Archivos de Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Archivos de Log
+*.log
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Database
+portfolio_db.sql
+
+# Archivos temporales
+*.tmp
+*.swp
+*.swo
+*.bak
+*.pid
+
+# IDEs
+.vscode/
+
+# Archivos de compilación
+node_modules/
+dist/
+build/
+
+# Archivos imgs
+media/
+images/

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ post.title }} - Blog{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="post-header text-center">
+        <h1 class="mb-4 display-4">{{ post.title }}</h1>
+        {% if post.image %}
+            <img src="{{ post.image.url }}" class="img-fluid mb-4 rounded shadow-lg" alt="{{ post.title }}">
+        {% endif %}
+        <p class="text-muted">Publicado el {{ post.created_at|date:"d M Y" }}</p>
+    </div>
+    <div class="post-content mt-4">
+        {{ post.content|linebreaks }}
+    </div>
+    <div class="post-footer text-center mt-5">
+        <a href="{% url 'post_list' %}" class="btn btn-outline-primary">Volver al blog</a>
+    </div>
+</div>
+{% endblock %}
