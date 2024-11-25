@@ -14,19 +14,21 @@
     --animation-duration: 0.8s; 
     --animation-ease: ease-in-out; 
     --whatsapp-btn-hover: #25d366;
+    --github-btn-hover: #333333;
+    --linkedin-btn-hover: #0077b5;
 }
 
 body, html {
     color: var(--text-color);
     font-family: 'Roboto', sans-serif;
-    height: 100%; /* Asegura que el HTML y body ocupen toda la altura */
-    margin: 0; /* Elimina márgenes predeterminados */
+    height: 100%; 
+    margin: 0; 
     display: flex;
-    flex-direction: column; /* Organiza en columna */
+    flex-direction: column; 
 }
 
 .container {
-    flex: 1; /* Ocupa todo el espacio restante entre el header y el footer */
+    flex: 1; /
 }
 
 .navbar {
@@ -347,19 +349,26 @@ footer a:hover::after {
     animation: blink 1s steps(2, start) infinite;
 }
 
-.whatsapp-icon {
+.social-icons a {
     font-size: 1.5rem; 
     color: white; 
-    display: inline-block; 
-    background-color: transparent; 
-    transition: transform 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.social-icons a:hover {
+    transform: scale(1.2);
 }
 
 .whatsapp-icon:hover {
-    color: var(--whatsapp-btn-hover);
-    text-shadow: 0 0 15px var(--whatsapp-btn-hover);
-    transition: all 0.5s ease;
-    transform: scale(1.2);
+    color: var(--whatsapp-btn-hover); 
+}
+
+.github-icon:hover {
+    color: var(--github-btn-hover); 
+}
+
+.linkedin-icon:hover {
+    color: var(--linkedin-btn-hover); 
 }
 
 
@@ -410,6 +419,3 @@ footer a:hover::after {
         font-size: 1rem; 
     }
 }
-
-
-
