@@ -2,26 +2,31 @@
 {% load static %}
 
 {% block title %}Inicio - Portfolio{% endblock %}
+<!-- Extiende la plantilla base y define el título de la página como "Inicio - Portfolio". -->
 
 {% block content %}
 <div class="container my-5">
     <div class="row align-items-center">
+        <!-- Columna izquierda con el título animado -->
         <div class="col-12 col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
             <div class="animated-text-container">
                 <h1 class="animated-text">¿Desarrollamos el futuro?</h1>
+                <!-- Texto animado para captar atención -->
             </div>
         </div>
 
+        <!-- Columna derecha con tarjeta de perfil -->
         <div class="col-12 col-lg-6 text-center">
             <div class="profile-card mx-auto">
                 <div class="profile-image-container mx-auto">
+                    <!-- Imagen de perfil -->
                     <img src="{% static 'images/profile.jpg' %}" class="profile-image" alt="Foto de perfil">
                 </div>
                 <div class="card-body">
                     <h5 class="card-title mt-3">José Félix</h5>
                     <p class="card-text">Desarrollador Fullstack</p>
                 </div>
-                 <!-- Botón de WhatsApp -->
+                <!-- Botón de contacto por WhatsApp -->
                 <div class="text-center mt-4 whatsapp-div">
                     <a href="https://wa.me/+34639949187" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-whatsapp whatsapp-icon"></i>
@@ -31,20 +36,23 @@
         </div>
     </div>
 
+    <!-- Sección "Acerca de mí" -->
     <div id="about" class="mt-4 text-center">
         <p>
             ¡Hola! Soy José, desarrollador web con pasión por crear soluciones digitales modernas y eficaces. Me especializo en <strong>Django</strong> para construir aplicaciones web dinámicas y robustas. También tengo experiencia en automatización con <strong>Python</strong> y librerías como <strong>Kivy</strong> y KivyMD, además de sólidos conocimientos en <strong>HTML5, CSS3</strong> y <strong>JavaScript</strong>.
-
+            <br><br>
             Actualmente, estoy ampliando mis habilidades con <strong>React</strong> y <strong>Node.js</strong>, trabajando en proyectos que desafían mi creatividad y crecimiento. Si tienes una idea o un proyecto en mente, ¡estaré encantado de colaborar contigo!
-            
+            <br><br>
             ¿Tienes un proyecto en mente? ¡Hablemos y construyamos algo increíble juntos!
         </p>
         <a href="{% static 'docs/cv.pdf' %}" class="btn btn-primary" download>Descargar CV</a>
     </div>
-    <!-- Botón de WhatsApp -->
+
+    <!-- Sección de habilidades con íconos -->
     <div class="mt-4 text-center">
         <h5>Habilidades:</h5>
         <div class="d-flex justify-content-center flex-wrap mt-3">
+            <!-- Íconos de habilidades con descripción alternativa -->
             <img src="{% static 'icons/git.webp' %}" alt="Git" class="m-2" style="width: 30px;">
             <img src="{% static 'icons/html5.webp' %}" alt="HTML5" class="m-2" style="width: 30px;">
             <img src="{% static 'icons/css3.webp' %}" alt="CSS3" class="m-2" style="width: 30px;">
@@ -55,6 +63,5 @@
             <img src="{% static 'icons/react.webp' %}" alt="React" class="m-2" style="width: 30px;">
         </div>
     </div>
-    
 </div>
 {% endblock %}

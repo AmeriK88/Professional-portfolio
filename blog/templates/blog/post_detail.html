@@ -1,19 +1,28 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ post.title }} - Blog{% endblock %}
+<!-- Extiende la plantilla base y define el título de la página con el título del post. -->
 
 {% block content %}
 <div class="container my-5">
+    <!-- Encabezado del post -->
     <div class="post-header text-center">
         <h1 class="mb-4 display-4">{{ post.title }}</h1>
+        <!-- Imagen asociada, se muestra aquí -->
         {% if post.image %}
             <img src="{{ post.image.url }}" class="img-fluid mb-4 rounded shadow-lg" alt="{{ post.title }}">
         {% endif %}
+        <!-- Fecha de publicación del post -->
         <p class="text-muted">Publicado el {{ post.created_at|date:"d M Y" }}</p>
     </div>
+    
+    <!-- Contenido principal del post -->
     <div class="post-content mt-4">
         {{ post.content|linebreaks }}
+        <!-- `linebreaks` convierte saltos de línea en <br> y <p> -->
     </div>
+    
+    <!-- Pie de página -->
     <div class="post-footer text-center mt-5">
         <a href="{% url 'post_list' %}" class="btn btn-outline-primary">Volver al blog</a>
     </div>
