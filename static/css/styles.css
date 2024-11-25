@@ -2,7 +2,7 @@
     --primary-color: #4fc3f7; 
     --secondary-color: #1e88e5;
     --background-color: #0d1117; 
-    --text-color: #dee3e7;
+    --text-color: #ebeff1;
     --dark-text-color: #66829b;
     --secondary-text-color: #eef0f1; 
     --card-background: #161b22;
@@ -16,6 +16,7 @@
     --whatsapp-btn-hover: #25d366;
     --github-btn-hover: #333333;
     --linkedin-btn-hover: #0077b5;
+    --custom-text: #f5f5c4;
 }
 
 body, html {
@@ -31,20 +32,54 @@ body, html {
     flex: 1; /
 }
 
+/* Ajuste navegación */
 .navbar {
     background: var(--hover-background);
     border-bottom: 2px solid var(--secondary-color);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
 
-.navbar-brand, .nav-link {
+.navbar-brand {
     color: var(--text-color) !important;
     font-weight: bold;
+    font-size: 1.5rem;
     transition: color 0.3s ease;
 }
 
-.navbar-brand:hover, .nav-link:hover {
+.navbar-brand:hover {
     color: var(--dark-text-color) !important;
+}
+
+/* Links del menú */
+.navbar-nav .nav-link {
+    color: var(--secondary-text-color) !important;
+    font-weight: bold;
+    text-align: center; 
+    margin: 0 auto;
+    transition: color var(--animation-duration) var(--animation-ease);
+    position: relative;
+}
+
+/* Línea decorativa */
+.navbar-nav .nav-link::after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 2px;
+    background-color: var(--custom-text);
+    margin: 0 auto;
+    transition: width 0.3s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover::after, 
+.navbar-nav .nav-link.active::after {
+    width: 20%; 
+}
+
+/* Link activo */
+.navbar-nav .nav-link.active {
+    color: var(--custom-text) !important;
+    font-weight: bold;
 }
 
 #about, .hero {
@@ -77,7 +112,7 @@ h1:hover {
     transition: transform 0.3s ease, color 0.3s ease;
 }
 
-
+/* Hero section */
 #about p, .hero p {
     line-height: 1.8;
     text-align: justify;
