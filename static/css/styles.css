@@ -2,8 +2,8 @@
     --primary-color: #4fc3f7; 
     --secondary-color: #1e88e5;
     --background-color: #0d1117; 
-    --text-color: #ebeff1;
-    --dark-text-color: #66829b;
+    --text-color: #cbd9e0;
+    --dark-text-color: #849eb4;
     --secondary-text-color: #eef0f1; 
     --card-background: #161b22;
     --hover-background: linear-gradient(135deg, #4fc3f7, #1e88e5); 
@@ -51,7 +51,7 @@ body, html {
 
 /* Links del menú */
 .navbar-nav .nav-link {
-    color: var(--secondary-text-color) !important;
+    color: var(--text-color) !important;
     font-weight: bold;
     text-align: center; 
     margin: 0 auto;
@@ -67,7 +67,7 @@ body, html {
     display: block;
     width: 0;
     height: 2px;
-    background-color: var(--dark-text-color);
+    background-color: var(--text-color);
     margin: 0 auto;
     transition: width 0.3s ease-in-out;
 }
@@ -84,16 +84,105 @@ body, html {
 }
 
 #about, .hero {
-    background: var(--hover-background);
-    padding: 40px;
-    border-radius: 15px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: var(--highlight-color);
-    margin-top: 40px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 1s ease-in-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
-    animation: fadeIn var(--animation-duration) var(--animation-ease);
-    transition: filter 0.3s ease, box-shadow 0.3s ease;
 }
+
+#about:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Título */
+.about-title {
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+/* Texto */
+.about-text {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 30px;
+}
+
+/* Botón */
+.about-button {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--highlight-color);
+    background-color: var(--success-color);
+    border: none;
+    border-radius: 50px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.about-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Sección del Call-to-Action */
+.cta-section {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--highlight-color);
+    padding: 40px 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    animation: fadeIn 1s ease-in-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cta-section:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
+/* Texto principal */
+.cta-text {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.cta-subtext {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+}
+
+/* Botón del Call-to-Action */
+.cta-button {
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--highlight-color);
+    background-color: var(--success-color);
+    border: none;
+    border-radius: 50px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.cta-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+}
+
 
 h1 {
     font-size: 3rem; 
@@ -205,7 +294,6 @@ h1:hover {
     font-weight: bold;
 }
 
-
 .profile-card .card-text {
     font-size: 1rem;
     color: var(--text-color);
@@ -253,19 +341,6 @@ h1:hover {
     font-size: 0.95rem;
     color: #cccccc;
     text-align: justify;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    border: none;
-    color: var(--highlight-color);
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.btn-primary:hover {
-    background-color: var(--secondary-color);
-    transform: scale(1.05);
 }
 
 footer {
