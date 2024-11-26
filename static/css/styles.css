@@ -105,6 +105,7 @@ body, html {
     font-weight: bold;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
     margin-bottom: 20px;
+    text-align: center;
 }
 
 /* Texto */
