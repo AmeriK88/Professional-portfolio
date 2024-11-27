@@ -2,15 +2,15 @@
     --primary-color: #4fc3f7; 
     --secondary-color: #1e88e5;
     --background-color: #0d1117; 
-    --text-color: #cbd9e0;
+    --text-color: #d7dee2;
     --dark-text-color: #849eb4;
     --secondary-text-color: #eef0f1; 
     --card-background: #161b22;
-    --hover-background: linear-gradient(135deg, #4fc3f7, #1e88e5); 
+    --hover-background: linear-gradient(135deg, #d0d5d8, #1e88e5); 
     --footer-color: #0a0e13;
     --highlight-color: #f1f8ff; 
     --danger-color: #ff5555; 
-    --success-color: #4caf50; 
+    --success-color: linear-gradient(135deg, #5bc0de, #2fa8d7);
     --animation-duration: 0.8s; 
     --animation-ease: ease-in-out; 
     --whatsapp-btn-hover: #25d366;
@@ -33,7 +33,7 @@ body, html {
 
 /* Ajuste navegación */
 .navbar {
-    background: var(--hover-background);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     border-bottom: 2px solid var(--secondary-color);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
 }
@@ -115,26 +115,6 @@ body, html {
     margin-bottom: 30px;
 }
 
-/* Botón */
-.about-button {
-    padding: 15px 30px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    color: var(--highlight-color);
-    background-color: var(--success-color);
-    border: none;
-    border-radius: 50px;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-}
-
-.about-button:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
-}
-
 /* Sección del Call-to-Action */
 .cta-section {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
@@ -171,7 +151,7 @@ body, html {
     font-weight: bold;
     text-transform: uppercase;
     color: var(--highlight-color);
-    background-color: var(--success-color);
+    background: var(--success-color);
     border: none;
     border-radius: 50px;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -179,7 +159,7 @@ body, html {
 }
 
 .cta-button:hover {
-    background-color: var(--secondary-color);
+    background: var(--secondary-color);
     transform: translateY(-3px);
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
 }
@@ -194,8 +174,6 @@ h1 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
     animation: fadeIn var(--animation-duration) var(--animation-ease);
 }
-
-
 
 h1:hover {
     color: var(--secondary-color);
