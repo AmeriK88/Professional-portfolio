@@ -18,8 +18,7 @@
     
     <!-- Contenido principal del post -->
     <div class="post-content mt-4">
-        {{ post.content|linebreaks }}
-        <!-- `linebreaks` convierte saltos de línea en <br> y <p> -->
+        {{ post.content|safe }}
     </div>
     
     <!-- Pie de página -->

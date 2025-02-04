@@ -24,7 +24,7 @@
                         </a>
                     </h5>
                     <!-- Breve descripción del post, limit 100 caracteres -->
-                    <p class="card-text text-muted small">{{ post.content|truncatechars:100 }}</p>
+                    <p class="card-text text-muted small">{{ post.content|striptags|truncatechars:100 }}</p>
                 </div>
                 <!-- Fecha de publicación -->
                 <div class="card-footer text-muted small">
