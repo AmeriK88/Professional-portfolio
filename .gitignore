@@ -39,6 +39,6 @@ build/
 
 # Archivos imgs
 media/
-images/
-icons/
+static/images/
+static/icons/
 docs/
