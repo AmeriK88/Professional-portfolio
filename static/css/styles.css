@@ -322,6 +322,13 @@ h1:hover {
     text-align: justify;
 }
 
+.pi-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: text-bottom;
+  margin-right: 0.25em;
+}
+
 footer {
     background-color: var(--footer-color);
     color: var(--text-color);

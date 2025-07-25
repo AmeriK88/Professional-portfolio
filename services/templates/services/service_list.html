@@ -1,26 +1,64 @@
 {% extends 'base.html' %}
-{% block title %}Servicios{% endblock %}
+{% block title %}Servicios Profesionales{% endblock %}
 
 {% block content %}
+{% load static %}
 <div class="container">
-    <h1 class="text-center mb-4">Servicios Profesionales</h1>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for service in services %}
-        <div class="col">
-            <div class="card h-100 shadow">
-                {% if service.image %}
-                    <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.title }}">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ service.title }}</h5>
-                    <p class="card-text">{{ service.description|truncatechars:100 }}</p>
-                    <p><strong>{{ service.price }} PI</strong></p>
-                    <!-- Aquí irá el botón de pago con Pi SDK -->
-                    <button class="btn btn-primary" onclick="payWithPi('{{ service.title }}', {{ service.price }})">Pagar con Pi</button>
-                </div>
-            </div>
+  <h1 class="mb-5 text-center display-4">Servicios Profesionales</h1>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for service in services %}
+    <div class="col">
+      <div class="card h-100 shadow">
+        {% if service.preview %}
+          {# Extraemos los últimos 4 caracteres y comparamos con ".mp4" #}
+          {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
+            <video
+              src="{{ service.preview.url }}"
+              autoplay
+              muted
+              loop
+              playsinline
+              preload="metadata"
+              poster="{{ service.image.url }}"
+              aria-label="Preview de {{ service.title }}"
+              class="card-img-top">
+              Tu navegador no soporta vídeo.
+            </video>
+          {% else %}
+            <img
+              src="{{ service.preview.url }}"
+              alt="Preview de {{ service.title }}"
+              class="card-img-top">
+          {% endif %}
+        {% elif service.image %}
+          <img
+            src="{{ service.image.url }}"
+            alt="{{ service.title }}"
+            class="card-img-top">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ service.title }}</h5>
+          <p class="card-text">{{ service.description }}</p>
+          <p>
+            <strong>
+              {{ service.price }} €
+              <span class="sr-only"></span>
+            </strong>
+          </p>
+          <!-- Botón de pago con Pi SDK -->
+          <button
+            class="btn btn-primary"
+            onclick="payWithPi('{{ service.title }}', {{ service.price }})">
+            Pagar con <img
+                src="{% static 'images/pi-icon.svg' %}"
+                alt="Pi"
+                class="pi-icon">
+          </button>
         </div>
-        {% endfor %}
+      </div>
     </div>
+    {% endfor %}
+  </div>
 </div>
+
 {% endblock %}
