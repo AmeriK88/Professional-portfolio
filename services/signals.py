@@ -1,5 +1,3 @@
-# services/signals.py
-
 import os
 import subprocess
 from django.db.models.signals import post_save
