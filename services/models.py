@@ -1,6 +1,16 @@
+import os
+import uuid
 from django.db import models
 from django.core.validators import FileExtensionValidator
 
+def preview_upload_path(instance, filename):
+    """
+    Genera un nombre de 8 caracteres + extensión y lo guarda en
+    service_previews/, garantizando rutas cortas.
+    """
+    ext = os.path.splitext(filename)[1]
+    short_id = uuid.uuid4().hex[:8]
+    return f"service_previews/{short_id}{ext}"
 
 class Service(models.Model):
     title       = models.CharField(max_length=200)
@@ -12,10 +22,11 @@ class Service(models.Model):
         null=True
     )
     preview     = models.FileField(
-        upload_to='service_previews/',
+        upload_to=preview_upload_path,
+        max_length=255,
         blank=True,
         null=True,
-        validators=[FileExtensionValidator(allowed_extensions=['mp4', 'gif'])],
+        validators=[FileExtensionValidator(['mp4','gif'])],
         help_text='Carga un .mp4 o un .gif para la vista previa.'
     )
     is_active   = models.BooleanField(default=True)

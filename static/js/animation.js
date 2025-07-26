@@ -7,9 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
         if (i < text.length) {
             typingElement.textContent += text.charAt(i);
             i++;
-            setTimeout(type, 100); // Ajusta el tiempo para cambiar la velocidad
+            setTimeout(type, 100);
         } else {
-            typingElement.classList.add("cursor-blink"); // Activa la animación de parpadeo del cursor al finalizar
+            typingElement.classList.add("cursor-blink"); 
         }
     }
 
