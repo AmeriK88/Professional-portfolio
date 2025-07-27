@@ -42,3 +42,4 @@ media/
 static/images/
 static/icons/
 docs/
+staticfiles/
