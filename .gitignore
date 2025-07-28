@@ -43,4 +43,6 @@ static/images/
 static/icons/
 static/img/
 docs/
-staticfiles/
+# Ignorar carpeta staticfiles en la raíz
+/staticfiles/
+
