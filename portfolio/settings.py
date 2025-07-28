@@ -1,3 +1,6 @@
+from django.templatetags.static import static
+from django.urls import reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from pathlib import Path
 import os
 import environ
@@ -20,6 +23,8 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 # Application definition
 INSTALLED_APPS = [
+    'unfold',
+    'unfold.contrib.filters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -62,7 +67,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'portfolio.wsgi.application'
 
 
-# Configuración de la base de datos
+# DN CONFIG
 DATABASES = {
     'default': {
         'ENGINE': env('DB_ENGINE'),  
@@ -95,8 +100,108 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# UNFOLD CONFIG
+UNFOLD = {
+    # Títulos
+    "SITE_TITLE": "Portfolio Admin",
+    "SITE_HEADER": "José Lanza",
+    "SITE_SUBHEADER": "Developer Dashboard",
+    "SITE_URL": "/",
 
-# Configuración de idiomas y zona horaria
+    # Icono y logotipo (light/dark)
+    "SITE_ICON": {
+        "light": lambda request: static("img/admin/icon-light.svg"),
+        "dark": lambda request: static("img/admin/icon-dark.svg"),
+    },
+    "SITE_LOGO": {
+        "light": lambda request: static("img/admin/logo-light.png"),
+        "dark": lambda request: static("img/admin/jf_logo.png"),
+    },
+    "SITE_SYMBOL": "code",  # Material Symbols name
+
+    # Favicons (puedes añadir más tamaños si quieres)
+    "SITE_FAVICONS": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "type": "image/svg+xml",
+            "href": lambda request: static("img/admin/icon-light.svg"),
+        },
+    ],
+
+    # Botones superiores
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "SHOW_BACK_BUTTON": False,
+
+    # Tema (deja comentado para permitir el switcher)
+    # "THEME": "dark",  # o "light" para forzar
+
+    # Login
+    "LOGIN": {
+        "image": lambda request: static("img/admin/login-bg.svg"),
+        # redirige al listado que más uses
+        "redirect_after": lambda request: reverse_lazy("admin:projects_project_changelist"),
+    },
+
+    # Colores (primario morado, base gris). Ajusta si quieres tu paleta
+    "COLORS": {
+        "primary": {
+            "50": "250, 245, 255",
+            "100": "243, 232, 255",
+            "200": "233, 213, 255",
+            "300": "216, 180, 254",
+            "400": "192, 132, 252",
+            "500": "168, 85, 247",
+            "600": "147, 51, 234",
+            "700": "126, 34, 206",
+            "800": "107, 33, 168",
+            "900": "88, 28, 135",
+            "950": "59, 7, 100",
+        }
+    },
+
+    # Sidebar de navegación rápida
+    "SIDEBAR": {
+        "show_search": True,
+        "command_search": False,
+        "show_all_applications": True,
+        "navigation": [
+            {
+                "title": _("Navigation"),
+                "separator": True,
+                "collapsible": True,
+                "items": [
+                    {
+                        "title": _("Dashboard"),
+                        "icon": "dashboard",
+                        "link": reverse_lazy("admin:index"),
+                    },
+                    {
+                        "title": _("Posts"),
+                        "icon": "article",
+                        "link": reverse_lazy("admin:blog_post_changelist"),
+                    },
+                    {
+                        "title": _("Projects"),
+                        "icon": "work",
+                        "link": reverse_lazy("admin:projects_project_changelist"),
+                    },
+                    {
+                        "title": _("Services"),
+                        "icon": "sell",
+                        "link": reverse_lazy("admin:services_service_changelist"),
+                    },
+                ],
+            },
+        ],
+    },
+
+    # Dashboard: puedes inyectar variables si luego personalizas templates
+    "DASHBOARD_CALLBACK": "portfolio.admin_dashboard.dashboard_callback",
+}
+
+# LANG CONFIG
 LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
 USE_I18N = True
