@@ -104,7 +104,7 @@ AUTH_PASSWORD_VALIDATORS = [
 UNFOLD = {
     # Títulos
     "SITE_TITLE": "Portfolio Admin",
-    "SITE_HEADER": "José Lanza",
+    "SITE_HEADER": "José Admin",
     "SITE_SUBHEADER": "Developer Dashboard",
     "SITE_URL": "/",
 

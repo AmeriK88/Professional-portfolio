@@ -9,6 +9,7 @@
     {% for service in services %}
     <div class="col">
       <div class="card h-100 shadow">
+
         {% if service.preview %}
           {# Extraemos los últimos 4 caracteres y comparamos con ".mp4" #}
           {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
@@ -19,7 +20,8 @@
               loop
               playsinline
               preload="metadata"
-              poster="{{ service.image.url }}"
+              {# Solo añadimos poster si hay imagen asociada, para no acceder a .url sin archivo #}
+              {% if service.image %}poster="{{ service.image.url }}"{% endif %}
               aria-label="Preview de {{ service.title }}"
               class="card-img-top">
               Tu navegador no soporta vídeo.
@@ -36,15 +38,22 @@
             alt="{{ service.title }}"
             class="card-img-top">
         {% endif %}
+
         <div class="card-body">
           <h5 class="card-title">{{ service.title }}</h5>
-          <p class="card-text">{{ service.description }}</p>
-          <p>
+
+          {# IMPORTANTE: linebreaks genera <p> y <br>; úsalo dentro de un <div>, no de un <p> #}
+          <div class="card-text">
+            {{ service.description|linebreaks }}
+          </div>
+
+          <p class="mt-3">
             <strong>
               {{ service.price }} €
               <span class="sr-only"></span>
             </strong>
           </p>
+
           <!-- Botón de pago con Pi SDK -->
           <button
             class="btn btn-primary"
