@@ -4,7 +4,6 @@ from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import FieldTextFilter, RangeDateTimeFilter
 from unfold.decorators import action
 from unfold.enums import ActionVariant
-
 from .models import Post
 
 
@@ -35,7 +34,7 @@ class PostAdmin(ModelAdmin):
         cleared = 0
         for post in queryset:
             if post.image:
-                post.image.delete(save=False)  # borra el fichero físico
+                post.image.delete(save=False) 
                 post.image = None
                 post.save(update_fields=["image"])
                 cleared += 1
