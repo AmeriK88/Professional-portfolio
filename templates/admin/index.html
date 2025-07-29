@@ -13,51 +13,58 @@
 
 {% block content %}
 
-<div class="flex flex-wrap gap-3 mb-6">
-  {% if admin_user_list_url %}
-    <a href="{{ admin_user_list_url }}" class="btn btn-primary">Users</a>
-  {% endif %}
-
-  {% if can_edit_self and admin_user_change_url %}
-    <a href="{{ admin_user_change_url }}" class="btn">My profile</a>
-  {% endif %}
-
-  <a href="{% url 'admin:auth_group_changelist' %}" class="btn">Groups</a>
-</div>
-
-{% component "unfold/components/flex.html" with class="gap-6 flex-col lg:flex-row" %}
-  {% component "unfold/components/card.html" with class="lg:w-1/4" icon="article" label=_("Total") %}
-    {% component "unfold/components/text.html" %}Posts{% endcomponent %}
-    {% component "unfold/components/title.html" %}{{ kpi_posts|default:"0" }}{% endcomponent %}
-  {% endcomponent %}
-
-  {% component "unfold/components/card.html" with class="lg:w-1/4" icon="work" label=_("Total") %}
-    {% component "unfold/components/text.html" %}Projects{% endcomponent %}
-    {% component "unfold/components/title.html" %}{{ kpi_projects|default:"0" }}{% endcomponent %}
-  {% endcomponent %}
-
-  {% component "unfold/components/card.html" with class="lg:w-1/4" icon="sell" %}
-    {% component "unfold/components/text.html" %}Services{% endcomponent %}
-    {% component "unfold/components/title.html" %}{{ kpi_services|default:"0" }}{% endcomponent %}
-    {% component "unfold/components/text.html" with class="mt-2 text-xs opacity-70" %}
-      {{ _("Active") }}: {{ kpi_services_active|default:"0" }} ·
-      {{ _("Inactive") }}: {{ kpi_services_inactive|default:"0" }}
-    {% endcomponent %}
-    {% if kpi_services_sum_price %}
-      {% component "unfold/components/text.html" with class="mt-1 text-xs opacity-70" %}
-        {{ _("Sum €") }}: {{ kpi_services_sum_price }}
-      {% endcomponent %}
+  <div class="flex flex-wrap gap-3 mb-6">
+    {% if admin_user_list_url %}
+      <a href="{{ admin_user_list_url }}" class="btn btn-primary">Users</a>
     {% endif %}
+
+    {% if can_edit_self and admin_user_change_url %}
+      <a href="{{ admin_user_change_url }}" class="btn">My profile</a>
+    {% endif %}
+
+    <a href="{% url 'admin:auth_group_changelist' %}" class="btn">Groups</a>
+  </div>
+
+  {# Contenedor responsivo: columna en móvil, fila en lg, wrap y gap #}
+  {% component "unfold/components/flex.html" with class="flex flex-col lg:flex-row flex-wrap gap-6" %}
+
+    {# Tarjeta 1 #}
+    {% component "unfold/components/card.html" with class='w-full lg:w-1/4' icon="article" label=_("Total") %}
+      {% component "unfold/components/text.html" %}Posts{% endcomponent %}
+      {% component "unfold/components/title.html" %}{{ kpi_posts|default:"0" }}{% endcomponent %}
+    {% endcomponent %}
+
+    {# Tarjeta 2 #}
+    {% component "unfold/components/card.html" with class='w-full lg:w-1/4' icon="work" label=_("Total") %}
+      {% component "unfold/components/text.html" %}Projects{% endcomponent %}
+      {% component "unfold/components/title.html" %}{{ kpi_projects|default:"0" }}{% endcomponent %}
+    {% endcomponent %}
+
+    {# Tarjeta 3 #}
+    {% component "unfold/components/card.html" with class='w-full lg:w-1/4' icon="sell" %}
+      {% component "unfold/components/text.html" %}Services{% endcomponent %}
+      {% component "unfold/components/title.html" %}{{ kpi_services|default:"0" }}{% endcomponent %}
+      {% component "unfold/components/text.html" with class='mt-2 text-xs opacity-70' %}
+        {{ _("Active") }}: {{ kpi_services_active|default:"0" }} ·
+        {{ _("Inactive") }}: {{ kpi_services_inactive|default:"0" }}
+      {% endcomponent %}
+      {% if kpi_services_sum_price %}
+        {% component "unfold/components/text.html" with class='mt-1 text-xs opacity-70' %}
+          {{ _("Sum €") }}: {{ kpi_services_sum_price }}
+        {% endcomponent %}
+      {% endif %}
+    {% endcomponent %}
+
+    {# Tarjeta 4 #}
+    {% component "unfold/components/card.html" with class='w-full lg:w-1/4' icon="groups" label=_("Total") %}
+      {% component "unfold/components/text.html" %}Users{% endcomponent %}
+      {% component "unfold/components/title.html" %}{{ kpi_users|default:"0" }}{% endcomponent %}
+    {% endcomponent %}
+
   {% endcomponent %}
 
-  {% component "unfold/components/card.html" with class="lg:w-1/4" icon="groups" label=_("Total") %}
-    {% component "unfold/components/text.html" %}Users{% endcomponent %}
-    {% component "unfold/components/title.html" %}{{ kpi_users|default:"0" }}{% endcomponent %}
-  {% endcomponent %}
-{% endcomponent %}
-
-<div id="content-main" class="app-list mt-8">
-  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
-</div>
+  <div id="content-main" class="app-list mt-8">
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+  </div>
 
 {% endblock %}

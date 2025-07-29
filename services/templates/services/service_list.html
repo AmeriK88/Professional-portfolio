@@ -8,7 +8,7 @@
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for service in services %}
     <div class="col">
-      <div class="card h-100 shadow">
+      <div class="card h-100 shadow position-relative">
 
         {% if service.preview %}
           {# Extraemos los últimos 4 caracteres y comparamos con ".mp4" #}
@@ -20,7 +20,6 @@
               loop
               playsinline
               preload="metadata"
-              {# Solo añadimos poster si hay imagen asociada, para no acceder a .url sin archivo #}
               {% if service.image %}poster="{{ service.image.url }}"{% endif %}
               aria-label="Preview de {{ service.title }}"
               class="card-img-top">
@@ -42,7 +41,7 @@
         <div class="card-body">
           <h5 class="card-title">{{ service.title }}</h5>
 
-          {# IMPORTANTE: linebreaks genera <p> y <br>; úsalo dentro de un <div>, no de un <p> #}
+          {# linebreaks genera <p> y <br>; por eso lo envolvemos en un <div> #}
           <div class="card-text">
             {{ service.description|linebreaks }}
           </div>
@@ -57,17 +56,25 @@
           <!-- Botón de pago con Pi SDK -->
           <button
             class="btn btn-primary"
-            onclick="payWithPi('{{ service.title }}', {{ service.price }})">
-            Pagar con <img
-                src="{% static 'images/pi-icon.svg' %}"
-                alt="Pi"
-                class="pi-icon">
+            style="position:relative; z-index:1;"
+            onclick="payWithPi('{{ service.title|escapejs }}', {{ service.price }})">
+            Paga con
+            <img
+              src="{% static 'images/pi-icon.svg' %}"
+              alt="Pi"
+              class="pi-icon"
+              width="18" height="18">
           </button>
+
+          {# Overlay que hace clicable toda la tarjeta #}
+          <a href="{{ service.get_absolute_url }}"
+             class="stretched-link"
+             aria-label="Ver detalles de {{ service.title }}"></a>
         </div>
+
       </div>
     </div>
     {% endfor %}
   </div>
 </div>
-
 {% endblock %}

@@ -10,9 +10,27 @@ from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import redirect
 from django.urls import reverse
-import os, subprocess
+import os
+import subprocess
+from .models import Service, ServiceFAQ, ServiceFeature  
 
-from .models import Service
+
+# Inline para las características
+class ServiceFeatureInline(admin.TabularInline):
+    model = ServiceFeature
+    extra = 3
+    fields = ("order", "text", "icon")
+    ordering = ("order", "id")
+    classes = ("collapse",)
+
+
+# Inline existente para las FAQs
+class ServiceFAQInline(admin.TabularInline):
+    model = ServiceFAQ
+    extra = 1
+    fields = ("order", "question", "answer")
+    ordering = ("order", "id")
+    classes = ("collapse",)
 
 
 @admin.register(Service)
@@ -21,6 +39,9 @@ class ServiceAdmin(ModelAdmin):
     warn_unsaved_form = True
     list_filter_sheet = True
     list_filter_submit = True
+
+    # aquí añades ambos inlines
+    inlines = [ServiceFeatureInline, ServiceFAQInline]
 
     list_display = ("title", "price", "is_active", "preview_thumb")
     list_editable = ("price", "is_active")
@@ -34,18 +55,15 @@ class ServiceAdmin(ModelAdmin):
     ordering = ("-is_active", "title")
     list_per_page = 25
 
-    # Mostramos la descripción formateada como SOLO LECTURA
     readonly_fields = ("pretty_description",)
-
-    # Incluimos description (editable) + pretty_description (preview)
     fields = (
         "title",
         "price",
         "is_active",
         "image",
         "preview",
-        "description",         # editable (textarea)
-        "pretty_description",  # preview solo lectura
+        "description",
+        "pretty_description",
     )
 
     # --- Acciones bulk ---
@@ -116,17 +134,18 @@ class ServiceAdmin(ModelAdmin):
         if obj.preview:
             url = obj.preview.url
             if url.lower().endswith(".mp4"):
-                return format_html("<video src='{}' width='160' muted loop playsinline></video>", url)
+                return format_html(
+                    "<video src='{}' width='160' muted loop playsinline></video>", url
+                )
             return format_html("<img src='{}' width='160' />", url)
         if obj.image:
             return format_html("<img src='{}' width='160' />", obj.image.url)
         return "-"
 
-    # ---- Descripción bonita / segura ----
+    # Descripción bonita / segura
     @admin.display(description="Description (preview)")
     def pretty_description(self, obj):
         if not obj or not obj.description:
             return "-"
-        # Convierte \n a <p>/<br> y devuelve SafeString.
-        html = linebreaks(obj.description)   
+        html = linebreaks(obj.description)
         return format_html("<div style='line-height:1.4'>{}</div>", html)
