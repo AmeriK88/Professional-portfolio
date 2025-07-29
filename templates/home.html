@@ -69,6 +69,41 @@
         <a href="{% static 'docs/cv.pdf' %}" class="cta-button cta-section" download>Descargar CV</a>
     </div>
 
+    {# templates/home.html #}
+    <section class="mt-5">
+        <h2 class="mb-4 text-center">Últimos proyectos</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for p in latest_projects %}
+            <div class="col">
+                <a href="{{ p.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none">
+                {% if p.preview %}
+                    {% if p.preview.url|lower|slice:"-4:" == ".mp4" %}
+                    <video src="{{ p.preview.url }}" class="card-img-top" autoplay muted loop playsinline preload="metadata"
+                            poster="{{ p.image.url }}" aria-label="Preview de {{ p.name }}"></video>
+                    {% else %}
+                    <img src="{{ p.preview.url }}" class="card-img-top" alt="Preview de {{ p.name }}">
+                    {% endif %}
+                {% else %}
+                    <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title mb-0 text-center">{{ p.name }}</h5>
+                </div>
+                </a>
+            </div>
+            {% empty %}
+            <p class="text-muted">Aún no hay proyectos publicados.</p>
+            {% endfor %}
+        </div>
+        {# …después del div.row que contiene las tarjetas #}
+        <div class="d-flex justify-content-center mt-4">
+        <a href="{% url 'project_list' %}" 
+            class="cta-button">
+            Ver todos los proyectos
+        </a>
+        </div>
+    </section>
+
     
      <!-- Call-to-Action -->
      <div class="cta-section text-center my-5">
@@ -78,5 +113,43 @@
             ¡Contáctame Ahora!
         </a>
     </div>
+
+    <section class="mt-5">
+        <h2 class="mb-4 text-center">En el blog</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for post in latest_posts %}
+            <div class="col">
+                <a href="{% url 'post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <h6 class="card-title mb-2">{{ post.title|truncatechars:60 }}</h6>
+                    <p class="card-text text-muted small mb-0">
+                    {{ post.content|striptags|truncatechars:80 }}
+                    </p>
+                </div>
+                </a>
+            </div>
+            {% empty %}
+            <p class="text-muted">Sin entradas todavía.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="stats my-5 py-5 bg-light rounded">
+    <h2 class="text-center mb-4">En números</h2>
+    <div class="container">
+        <div class="row text-center">
+        {% for num, label in stats %}
+            <div class="col-4">
+            <h2 class="counter fw-bold display-6" data-target="{{ num }}">0</h2>
+            <p class="small text-uppercase text-muted mb-0">{{ label }}</p>
+            </div>
+        {% endfor %}
+        </div>
+    </div>
+    </section>
+
 </div>
 {% endblock %}
