@@ -62,14 +62,14 @@
     <div id="about" class="about-section mt-5">
         <h2 class="about-title">Acerca de mí</h2>
         <p class="about-text mt-3">
-            ¡Hola! Soy José, desarrollador web con pasión por crear soluciones digitales modernas y eficaces. Me especializo en <strong>Django</strong> para construir aplicaciones web dinámicas, robustas y seguras. Tengo experiencia en automatización con <strong>Python</strong> con librerías como <strong>Pyautogui</strong> para manejo de intarfaz junto <strong>Selenium</strong>. Tengo conocimientos en <strong>Kivy</strong> y KivyMD, además de sólidos conocimientos en <strong>HTML5, CSS3</strong> y <strong>JavaScript</strong>.
+            ¡Hola! Soy José, desarrollador de sofware con pasión por crear soluciones modernas y eficaces. Mi especialidad,<strong>Django</strong> para construir aplicaciones web dinámicas, robustas y seguras. Tengo experiencia en automatización con <strong>Python</strong> y librerías como <strong>Pyautogui</strong> para manejo de intarfaz junto <strong>Selenium</strong>. Tengo conocimientos en <strong>Kivy</strong> y <strong>KivyMD</strong>, además de sólidos conocimientos en <strong>HTML5, CSS3</strong> y <strong>JavaScript</strong>.
             <br><br>
             Actualmente, estoy ampliando mis habilidades con <strong>React</strong>, <strong>Flutter</strong> y <strong>Node.js</strong>, trabajando en proyectos que desafían mi creatividad y crecimiento.
         </p>
         <a href="{% static 'docs/cv.pdf' %}" class="cta-button cta-section" download>Descargar CV</a>
     </div>
 
-    {# templates/home.html #}
+    {# PROYECTOS #}
     <section class="mt-5">
         <h2 class="mb-4 text-center">Últimos proyectos</h2>
         <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -95,7 +95,7 @@
             <p class="text-muted">Aún no hay proyectos publicados.</p>
             {% endfor %}
         </div>
-        {# …después del div.row que contiene las tarjetas #}
+
         <div class="d-flex justify-content-center mt-4">
         <a href="{% url 'project_list' %}" 
             class="cta-button">
@@ -105,7 +105,7 @@
     </section>
 
     
-     <!-- Call-to-Action -->
+     <!-- CALL-TO-ACTION -->
      <div class="cta-section text-center my-5">
         <h2 class="cta-text mb-4">¿Tienes un proyecto en mente?</h2>
         <p class="cta-subtext mb-5">¡Hablemos y construyamos algo increíble juntos!</p>

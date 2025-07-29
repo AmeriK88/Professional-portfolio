@@ -1,4 +1,5 @@
 :root {
+    --code-font: 'JetBrains Mono', monospace;
     --primary-color: #4fc3f7; 
     --secondary-color: #1e88e5;
     --background-color: #0d1117; 
@@ -18,9 +19,11 @@
     --linkedin-btn-hover: #0077b5;
 }
 
+* {
+        font-family: var(--code-font), 'Roboto', sans-serif; 
+}
+
 body, html {
-    color: var(--text-color);
-    font-family: 'Roboto', sans-serif;
     height: 100%; 
     margin: 0; 
     display: flex;
@@ -31,7 +34,7 @@ body, html {
     flex: 1; /
 }
 
-/* Ajuste navegación */
+/* Navegación */
 .navbar {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     border-bottom: 2px solid var(--secondary-color);
@@ -164,13 +167,20 @@ body, html {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
 }
 
+h1,
+h2,
+.navbar-brand,
+.animated-text {
+  font-family: var(--code-font);
+  letter-spacing: 1px;
+}
+
 
 h1 {
     font-size: 3rem; 
     font-weight: bold; 
     text-transform: uppercase; 
     color: var(--primary-color); 
-    letter-spacing: 2px; 
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
     animation: fadeIn var(--animation-duration) var(--animation-ease);
 }
@@ -184,7 +194,7 @@ h1:hover {
 /* Hero section */
 #about p, .hero p {
     line-height: 1.8;
-    text-align: justify;
+    text-align: start;
 }
 
 .hero a, #about a {
