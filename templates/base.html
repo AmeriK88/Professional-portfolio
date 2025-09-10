@@ -13,12 +13,12 @@
     <meta http-equiv="Cache-Control" content="max-age=2592000, must-revalidate">
     <meta property="og:type" content="website">
     <meta property="og:url"  content="{{ request.build_absolute_uri }}">
-    <meta property="og:image" content="{{ STATIC_URL }}images/profile.jpg">
+    <meta property="og:image" content="{% static 'images/profile.jpg' %}">
     <meta name="twitter:card" content="summary_large_image">
 
     <title>{% block title %}Portfolio{% endblock %}</title>
 
-     <!-- Tipografía “coder” -->
+    <!-- Tipografía “coder” -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
@@ -28,19 +28,19 @@
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <!-- Marca de la barra -->
             <a class="navbar-brand" href="/">Portfolio</a>
-            
-            <!-- Botón de menú desplegable -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
+            <!-- Botón de menú -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <!-- Links del menú -->
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
@@ -55,11 +55,12 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.path == '/services/' %}active{% endif %}" href="/services/">Servicios</a>
-                    </li>                    
+                    </li>
                 </ul>
             </div>
         </div>
-    </nav>            
+    </nav>
+
     <div class="container my-4 rounded">
         {% block content %}
         <!-- Aquí va el contenido específico de cada página -->
@@ -67,50 +68,140 @@
     </div>
 
     <footer class="site-footer mt-auto py-4">
-    <div class="container">
+      <div class="container">
         <div class="row gy-4 align-items-center">
 
-        <!-- Brand / claim -->
-        <div class="col-12 col-md-4 text-center text-md-start">
+          <!-- Brand / claim -->
+          <div class="col-12 col-md-4 text-center text-md-start">
             <span class="footer-brand d-inline-flex align-items-center">
-            <i class="fas fa-terminal me-2"></i>
-            José Félix · Dev
+              <i class="fas fa-terminal me-2"></i>
+              José Félix · Dev
             </span>
-            <p class="small mb-0">Construyendo apps que escalan 🚀</p>
-        </div>
+            <p class="small mb-0">Construyendo apps que escalan 🚀</p>
+          </div>
 
-        <!-- Quick links -->
-        <div class="col-12 col-md-4 text-center">
-        <ul class="list-inline mb-0 footer-links">
-            <li class="list-inline-item mx-2"><a href="/">Inicio</a></li>
-            <li class="list-inline-item mx-2"><a href="/blog/">Blog</a></li>
-            <li class="list-inline-item mx-2"><a href="/projects/">Proyectos</a></li>
-            <li class="list-inline-item mx-2"><a href="/services/">Servicios</a></li>
-        </ul>
-        </div>
+          <!-- Quick links -->
+          <div class="col-12 col-md-4 text-center">
+            <ul class="list-inline mb-0 footer-links">
+              <li class="list-inline-item mx-2"><a href="/">Inicio</a></li>
+              <li class="list-inline-item mx-2"><a href="/blog/">Blog</a></li>
+              <li class="list-inline-item mx-2"><a href="/projects/">Proyectos</a></li>
+              <li class="list-inline-item mx-2"><a href="/services/">Servicios</a></li>
+              <li class="list-inline-item mx-2"><a href="#" data-ck-open>Preferences</a></li>
+            </ul>
+          </div>
 
-        <!-- Social & contact -->
-        <div class="col-12 col-md-4 text-center text-md-end">
+          <!-- Social & contact -->
+          <div class="col-12 col-md-4 text-center text-md-end">
             <div class="footer-social mb-2">
-            <a href="https://github.com/AmeriK88" class="me-3" aria-label="GitHub"><i class="fab fa-github"></i></a>
-            <a href="https://wa.me/+34639949187" class="me-3" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://www.linkedin.com/in/jose-felix-gordo-castaño-dev-es/" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+              <a href="https://github.com/AmeriK88"  aria-label="GitHub"><i class="fab fa-github github-icon"></i></a>
+              <a href="https://wa.me/+34639949187"   aria-label="WhatsApp"><i class="fab fa-whatsapp whatsapp-icon"></i></a>
+              <a href="https://www.linkedin.com/in/jose-felix-gordo-casta%C3%B1o-dev-es/" aria-label="LinkedIn"><i class="fab fa-linkedin linkedin-icon"></i></a>
             </div>
             <a href="mailto:josefe59@hotmail.com" class="btn btn-outline-light btn-sm">Hablemos</a>
-        </div>
+          </div>
 
         </div>
 
         <hr class="border-secondary-subtle my-4">
 
         <p class="text-center small mb-0">
-        © {% now "Y" %} José Félix • Desarrollado con <i class="fas fa-code me-2"></i> Django
+          © {% now "Y" %} José Félix • Desarrollado con <i class="fas fa-code me-2"></i> Django
         </p>
-    </div>
+      </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'js/animation.js' %}"></script>
-    <script src="{% static 'js/counters.js' %}"></script>
+    <!-- External service confirmation -->
+    <div id="ext-modal" class="modal fade" tabindex="-1" aria-labelledby="ext-title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header py-2">
+            <h5 id="ext-title" class="modal-title">Abrir servicio externo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body py-3">
+            <p class="mb-2">Vas a abrir un servicio externo en una nueva ventana:</p>
+            <code id="ext-host"></code>
+            <div class="form-check mt-3">
+              <input id="ext-remember" class="form-check-input" type="checkbox">
+              <label class="form-check-label" for="ext-remember">Recordad mi elección</label>
+            </div>
+          </div>
+          <div class="modal-footer py-2">
+            <button id="ext-cancel" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button id="ext-continue" class="btn btn-primary" disabled>Continuar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cookies first layer (modal) -->
+    <div id="ck-modal" class="modal fade" tabindex="-1" aria-labelledby="ckm-title" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header py-2">
+            <h5 id="ckm-title" class="modal-title">Tu privacidad</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body py-3">
+            <p class="mb-2">
+                Este sitio solo utiliza almacenamiento estrictamente necesario. Los servicios externos 
+                como WhatsApp, LinkedIn o GitHub se abrirán en una pestaña nueva. 
+                Puedes gestionar tu elección en cualquier momento desde el panel de preferencias.
+            </p>
+            <small class="text-muted">Solo necesarias por defecto.</small>
+          </div>
+          <div class="modal-footer py-2">
+            <button id="ck-reject" class="btn btn-outline-secondary">Only necessary</button>
+            <button id="ck-accept" class="btn btn-primary">Allow external services</button>
+            <button class="btn btn-ghost" data-ck-open type="button">Preferences</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cookies preferences (second layer) -->
+    <div class="modal fade" id="ck-panel" tabindex="-1" aria-labelledby="ck-title" aria-hidden="true">
+      <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header py-2">
+            <h5 id="ck-title" class="modal-title">Preferences</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body py-3">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item py-2 d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>Necessary</strong>
+                  <div class="text-muted small">Basic site operation</div>
+                </div>
+                <div class="form-check form-switch m-0 ms-3">
+                  <input class="form-check-input" type="checkbox" checked disabled>
+                </div>
+              </li>
+              <li class="list-group-item py-2 d-flex justify-content-between align-items-start">
+                <div>
+                  <strong>External services</strong>
+                  <div class="text-muted small">Open WhatsApp, LinkedIn, GitHub without extra prompt</div>
+                </div>
+                <div class="form-check form-switch m-0 ms-3">
+                  <input class="form-check-input" type="checkbox" id="ck-external">
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer py-2">
+            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button id="ck-save" class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="{% static 'js/animation.js' %}" defer></script>
+    <script src="{% static 'js/counters.js' %}" defer></script>
+    <script src="{% static 'js/cookiesConsent.portfolio.js' %}" defer></script>
 </body>
 </html>

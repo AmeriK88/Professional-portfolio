@@ -131,68 +131,32 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 .pi-icon { width: 1em; height: 1em; vertical-align: text-bottom; margin-right: 0.25em;}
 
 /* --- Footer (versión adaptada) ------------------------------- */
-.site-footer {
-  background-color: var(--footer-color);
-  color: var(--text-color);
-  padding: 10px 20px;
-  font-size: 0.9rem;
-  text-align: center;        /* centrado en mobile; se alinea por columnas en ≥ md */
-}
+.site-footer{ background-color:var(--footer-color); color:var(--text-color); padding:10px 20px; font-size:.9rem; text-align:center;}
 
-.site-footer a {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: bold;
-  position: relative;
-  display: inline-block;
-  transition: color 0.3s ease;
-}
+.site-footer a{ color:var(--primary-color); text-decoration:none; font-weight:bold; position:relative; display:inline-block; transition:color .3s ease;}
 
-.site-footer a:hover {
-  color: var(--secondary-color);
-}
+.site-footer a:hover{color:var(--secondary-color);}
 
 /* subrayado animado */
-.site-footer a::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -3px;
-  width: 0;
-  height: 2px;
-  background-color: var(--primary-color);
-  transition: width 0.3s ease;
-}
+.site-footer a::after{ content:''; position:absolute; left:0;bottom:-3px; width:0;height:2px; background:var(--primary-color); transition:width .3s ease;}
+.site-footer a:hover::after{width:100%;}
 
-.site-footer a:hover::after {
-  width: 100%;
-}
-
-/* listas de navegación (“Quick links”) */
-.footer-links { margin: 0; padding: 0; }
-.footer-links li { list-style: none; display: inline-block; }
+/* listas de navegación */
+.footer-links{margin:0;padding:0;}
+.footer-links li{list-style:none;display:inline-block;}
 
 /* redes sociales */
-.footer-social a {
-  font-size: 1.4rem;
-  margin-right: 0.75rem;
-  color: var(--text-color);
-  transition: transform 0.3s ease, color 0.3s ease;
-}
-.footer-social a:last-child { margin-right: 0; }
-
-.footer-social a:hover {
-  transform: translateY(-3px);
-  color: var(--primary-color);
-}
+.footer-social a{ font-size:1.4rem; margin-right:.75rem; color:var(--text-color); transition:transform .3s ease,color .3s ease;}
+.footer-social a:last-child{margin-right:0;}
+.footer-social a:hover{transform:translateY(-3px);}   /* color lo manejan clases específicas */
 
 /* botón de contacto */
-.btn-outline-light {
-  --bs-btn-color: var(--highlight-color);
-  --bs-btn-border-color: var(--highlight-color);
-  --bs-btn-hover-bg: var(--primary-color);
-  --bs-btn-hover-border-color: var(--primary-color);
-  --bs-btn-hover-color: #fff;
+.btn-outline-light{
+  --bs-btn-color:var(--highlight-color);
+  --bs-btn-border-color:var(--highlight-color);
+  --bs-btn-hover-bg:var(--primary-color);
+  --bs-btn-hover-border-color:var(--primary-color);
+  --bs-btn-hover-color:#fff;
 }
 
 
@@ -224,51 +188,34 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 
 .linkedin-icon:hover { color: var(--linkedin-btn-hover); }
 
+/* Cookie table-panel */
+.ck-panel .modal-body { padding: 1rem; }
+.ck-panel .modal-header, .ck-panel .modal-footer { padding: .5rem 1rem; }
+.ck-list .list-group-item { padding-top: .5rem; padding-bottom: .5rem; }
+
 
 /* Cursor parpadeante */
 @keyframes blink {
     from,
-    to {
-        border-color: transparent;
-    }
-    50% {
-        border-color: var(--primary-color);
-    }
+    to { border-color: transparent;}
+    50% { border-color: var(--primary-color);}
 }
 
 @keyframes typing {
-    from {
-        width: 0;
-    }
-    to {
-        width: 100%; 
-    }
+    from { width: 0;}
+    to { width: 100%; }
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
 }
 
 @keyframes scaleUp {
-    from {
-        transform: scale(0.8);
-        opacity: 0.5;
-    }
-    to {
-        transform: scale(1);
-        opacity: 1;
-    }
+    from { transform: scale(0.8); opacity: 0.5;}
+    to { transform: scale(1); opacity: 1;}
 }
 
 @media (max-width: 450px) {
-    .animated-text {
-        font-size: 1rem; 
-    }
+    .animated-text { font-size: 1rem;}
 }
