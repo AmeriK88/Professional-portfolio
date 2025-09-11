@@ -7,8 +7,8 @@ def home(request):
     latest_posts    = Post.objects.order_by('-created_at')[:3]
 
     stats = [           
-        (+33, 'Repos'),
-        (+7, 'Clientes'),
+        (+34, 'Repos'),
+        (+8, 'Clientes'),
         (+5,  'Años de experiencia'),
     ]
 
