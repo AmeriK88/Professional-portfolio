@@ -18,7 +18,7 @@
   </nav>
 
   <h1 class="mb-3">{{ service.title }}</h1>
-  <p class="text-muted mb-4">Desde <strong>{{ service.price }} €</strong></p>
+  <p class="text-muted mb-4">Desde <strong>{{ service.price }} €</strong></p>
 
   {# Media preview #}
   {% if service.preview %}
@@ -41,41 +41,43 @@
          alt="{{ service.title }}">
   {% endif %}
 
-    {# 1) Descripción ampliada #}
-    <section class="mb-5">
-        <h2 class="h4">Descripción</h2>
-        <div class="lead">
-        {{ service.description|linebreaks }}
-        </div>
-    </section>
+  {# 1) Descripción #}
+  <section class="mb-5">
+    <h2 class="h4">Descripción</h2>
+    <div class="lead">
+      {{ service.description|linebreaks }}
+    </div>
+  </section>
 
-    {# 2) Características incluidas dinámicas #}
-    {% if service.features.exists %}
+  {# 2) Características #}
+  {% if service.features.exists %}
     <section class="mb-5">
-    <h2 class="h4">Lo que incluye este servicio</h2>
-    <ul class="list-unstyled ps-3">
+      <h2 class="h4">Lo que incluye este servicio</h2>
+      <ul class="list-unstyled ps-3">
         {% for feat in service.features.all %}
-        <li>✅ {{ feat.text|linebreaksbr }}</li>
+          <li>✅ {{ feat.text|linebreaksbr }}</li>
         {% endfor %}
-    </ul>
+      </ul>
     </section>
-    {% endif %}
+  {% endif %}
 
-  {# 3) CTA #}
+  {# --- CTA --- #}
   <div class="d-flex gap-2 mb-5">
-    <a href="{% url 'services:service_list' %}"
-       class="btn btn-outline-secondary">
+    <a href="{% url 'services:service_list' %}" class="btn btn-outline-secondary">
       ← Volver
     </a>
-    <button class="btn btn-primary"
-            onclick="payWithPi('{{ service.title }}', {{ service.price }})">
+
+    <button
+      id="pi-pay-btn"
+      class="btn btn-primary"
+      data-title="{{ service.title|escapejs }}"
+      data-amount="{{ service.price }}"
+      data-service-id="{{ service.id }}">
       Pagar con
-      <img src="{% static 'images/pi-icon.svg' %}"
-           alt="Pi"
-           class="pi-icon"
-           width="18" height="18">
+      <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon" width="18" height="18">
     </button>
   </div>
+
 
   {# 4) FAQs #}
   {% if service.faqs.exists %}
@@ -104,7 +106,7 @@
     </div>
   {% endif %}
 
-  {# 5) JSON‑LD para SEO #}
+  {# 5) JSON-LD #}
   {% if service.faqs.exists %}
     <script type="application/ld+json">
     {
@@ -125,6 +127,25 @@
     }
     </script>
   {% endif %}
-
 </div>
 {% endblock %}
+
+{% block extra_scripts %}
+  <!-- Pi SDK -->
+  <script src="https://sdk.minepi.com/pi-sdk.js" defer></script>
+
+  <!-- Config para el JS estático -->
+  <script>
+    window.PI_CFG = {
+      sandbox: true,  // pon false cuando pases a real
+      approveUrl: "{% url 'pi:approve' %}",
+      completeUrl: "{% url 'pi:complete' %}",
+      cancelUrl: "{% url 'pi:cancel' %}",
+      successUrl: "{% url 'services:payment_success' %}"
+    };
+  </script>
+
+  <!-- Manejador -->
+  <script src="{% static 'js/pi_payments.js' %}" defer></script>
+{% endblock %}
+

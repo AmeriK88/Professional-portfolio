@@ -21,6 +21,11 @@ DEBUG = env('DEBUG')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')  
 
 
+# Configuración de Pi Payments
+PI_API_KEY = env("PI_API_KEY")
+
+
+
 # Application definition
 INSTALLED_APPS = [
     'unfold',
@@ -34,6 +39,7 @@ INSTALLED_APPS = [
     'blog',
     'projects',
     'services',
+    'pi_payments',
 ]
 
 MIDDLEWARE = [

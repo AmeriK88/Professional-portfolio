@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Pago completado{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-3">¡Gracias! Pago completado ✅</h1>
+  {% if payment_id %}
+    <p class="text-muted">Id de pago: <code>{{ payment_id }}</code></p>
+  {% endif %}
+  <a href="{% url 'services:service_list' %}" class="btn btn-primary mt-3">Volver a servicios</a>
+</div>
+{% endblock %}

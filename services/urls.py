@@ -7,4 +7,5 @@ app_name = "services"
 urlpatterns = [
     path('', views.service_list, name='service_list'),
     path("<slug:slug>/", views.service_detail, name="detail"),
+    path('payment/success/', views.payment_success, name='payment_success'),
 ]
