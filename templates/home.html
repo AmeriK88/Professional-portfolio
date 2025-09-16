@@ -1,157 +1,276 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Inicio - Portfolio{% endblock %}
-<!-- Extiende la plantilla base y define el título. -->
+{% block title %}Inicio - Plataforma{% endblock %}
 
 {% block content %}
 <div class="container my-5">
-    <div class="row align-items-center">
-        <!-- Columna izquierda con el título animado -->
-        <div class="col-12 col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
-            <div class="animated-text-container">
-                <h1 class="animated-text">¿Desarrollamos el futuro?</h1>
-                <!-- Texto animado para captar atención -->
-            </div>
-        </div>
-
-        <!-- Columna derecha con tarjeta de perfil -->
-        <div class="col-12 col-lg-6 text-center">
-            <div class="profile-card mx-auto">
-                <div class="profile-image-container mx-auto">
-                    <!-- Imagen de perfil -->
-                    <img src="{% static 'images/profile.jpg' %}" class="profile-image" alt="Foto de perfil">
-                </div>
-                <div class="card-body">
-                    <h5 class="card-title mt-3">José Félix</h5>
-                    <p class="card-text">Desarrollador Fullstack</p>
-                </div>
-                <!-- Iconos de redes sociales -->
-                <div class="social-icons d-flex justify-content-center align-items-center mt-4">
-                    <a href="https://wa.me/+34639949187" target="_blank" rel="noopener noreferrer" class="mx-2">
-                        <i class="fab fa-whatsapp whatsapp-icon"></i>
-                    </a>
-                    <a href="https://github.com/AmeriK88" target="_blank" rel="noopener noreferrer" class="mx-2">
-                        <i class="fab fa-github github-icon"></i>
-                    </a>
-                    <a href="https://www.linkedin.com/in/jose-felix-gordo-casta%C3%B1o-dev-es/" target="_blank" rel="noopener noreferrer" class="mx-2">
-                        <i class="fab fa-linkedin linkedin-icon"></i>
-                    </a>
-                </div>
-            </div>
-        </div>        
+  <div class="row align-items-center">
+    <!-- Columna izquierda con el título animado -->
+    <div class="col-12 col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
+      <div class="animated-text-container">
+        <h1 class="animated-text">¿Desarrollamos el futuro?</h1>
+      </div>
+      <p class="mt-3 text-muted">
+        Plataforma para contratar, pagar y gestionar servicios de desarrollo de software con total transparencia.
+      </p>
+      <div class="d-flex gap-2 justify-content-center justify-content-lg-start mt-3">
+        <a href="{% url 'services:service_list' %}" class="btn btn-primary">Ver servicios</a>
+        <a href="https://wa.me/+34639949187" class="btn btn-outline-secondary" target="_blank" rel="noopener noreferrer">
+          Hablar ahora
+        </a>
+      </div>
     </div>
 
-    <!-- Habilidades con íconos -->
-    <div class="mt-4 text-center">
-        <h5>Habilidades</h5>
-        <div class="d-flex justify-content-center flex-wrap mt-3">
-            <!-- Íconos de habilidades con descripción alternativa -->
-            <img src="{% static 'icons/git.webp' %}" alt="Git" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/html5.webp' %}" alt="HTML5" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/css3.webp' %}" alt="CSS3" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/javascript.webp' %}" alt="JavaScript" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/python.webp' %}" alt="Python" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/django.webp' %}" alt="Django" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/bootstrap.webp' %}" alt="Bootstrap" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/react.webp' %}" alt="React" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/mySQL_img.webp' %}" alt="MySQL" class="m-2" style="width: 30px;">
-            <img src="{% static 'icons/tailwindcss.webp' %}" alt="Tailwindcss" class="m-2" style="width: 30px;">
+    <!-- Columna derecha: tarjeta “plataforma” (mismo estilo oscuro) -->
+    <div class="col-12 col-lg-6 text-center">
+      <div class="profile-card mx-auto">
+        <div class="profile-image-container mx-auto">
+          <!-- Puedes usar tu logo para mantener estilo; el círculo lo recorta “bonito” -->
+          <img src="{% static 'images/hero-jfgc.png' %}" class="profile-image" alt="Logo plataforma">
         </div>
+
+        <div class="card-body">
+          <h5 class="card-title mt-3">Desarrollamos tu software</h5>
+          <p class="card-text mb-3">Contrata packs cerrados o solicita un presupuesto a medida.</p>
+
+          <!-- Lista con iconos alineados -->
+          <div class="mt-3 text-center">
+            <ul class="list-unstyled text-start small text-light d-inline-block my-0">
+              <li class="d-flex align-items-center mb-1">
+                <i class="fa-solid fa-circle-check me-2 text-success"></i>
+                <span>Pagos seguros y seguimiento</span>
+              </li>
+              <li class="d-flex align-items-center mb-1">
+                <i class="fa-solid fa-circle-check me-2 text-success"></i>
+                <span>Entregas iterativas</span>
+              </li>
+              <li class="d-flex align-items-center">
+                <i class="fa-solid fa-circle-check me-2 text-success"></i>
+                <span>Soporte post-entrega</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pb-3">
+            <a href="{% url 'services:service_list' %}" class="btn btn-primary mt-2">Explorar servicios</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Habilidades con íconos (mantenemos TODAS las que tenías) -->
+  <div class="mt-4 text-center">
+    <h5>Tecnologías</h5>
+    <div class="d-flex justify-content-center flex-wrap mt-3">
+      <img src="{% static 'icons/git.webp' %}"         alt="Git"         class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/html5.webp' %}"       alt="HTML5"       class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/css3.webp' %}"        alt="CSS3"        class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/javascript.webp' %}"  alt="JavaScript"  class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/python.webp' %}"      alt="Python"      class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/django.webp' %}"      alt="Django"      class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/bootstrap.webp' %}"   alt="Bootstrap"   class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/react.webp' %}"       alt="React"       class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/mySQL_img.webp' %}"   alt="MySQL"       class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/tailwindcss.webp' %}" alt="Tailwindcss" class="m-2" style="width: 30px;">
+    </div>
+  </div>
+
+  <!-- Sección “Cómo funciona” (reutiliza tu bloque azul #about) -->
+  <div id="about" class="about-section mt-5">
+    <h2 class="about-title">Cómo funciona</h2>
+    <p class="about-text mt-3">
+      1) Explora servicios y packs.<br>
+      2) Contrata y paga con seguridad.<br>
+      3) Seguimiento ágil y entregas iterativas.<br>
+      4) Soporte post-entrega y mejoras continuas.
+    </p>
+    <a href="{% url 'services:service_list' %}" class="cta-button cta-section text-nowrap" aria-label="Ver servicios">
+      Ver servicios
+    </a>
+  </div>
+
+  {# SERVICIOS DESTACADOS (oscuro, mismo estilo de cards) #}
+  {% if featured_services %}
+  <section class="mt-5">
+    <h2 class="mb-4 text-center">Servicios destacados</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for s in featured_services %}
+      <div class="col">
+        <a href="{{ s.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none">
+          {% if s.preview %}
+            {% if s.preview.url|lower|slice:"-4:" == ".mp4" %}
+            <video src="{{ s.preview.url }}" class="card-img-top" autoplay muted loop playsinline preload="metadata"
+                   {% if s.image %}poster="{{ s.image.url }}"{% endif %} aria-label="Preview de {{ s.title }}"></video>
+            {% else %}
+            <img src="{{ s.preview.url }}" class="card-img-top" alt="Preview de {{ s.title }}">
+            {% endif %}
+          {% elif s.image %}
+            <img src="{{ s.image.url }}" class="card-img-top" alt="{{ s.title }}">
+          {% endif %}
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title mb-2 text-center">{{ s.title }}</h5>
+            {% if s.price %}
+              <p class="text-center small text-muted mb-3">Desde <strong>{{ s.price }} €</strong></p>
+            {% endif %}
+            {% if s.description %}
+              <p class="card-text text-muted small mb-3">{{ s.description|striptags|truncatechars:120 }}</p>
+            {% endif %}
+            <div class="mt-auto text-center">
+              <span class="btn btn-outline-primary">Ver detalles</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="d-flex justify-content-center mt-4">
+      <a href="{% url 'services:service_list' %}" class="cta-button">Ver todos los servicios</a>
+    </div>
+  </section>
+  {% endif %}
+
+  {# PROYECTOS #}
+  <section class="mt-5">
+    <h2 class="mb-4 text-center">Últimos proyectos</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for p in latest_projects %}
+      <div class="col">
+        <a href="{{ p.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none">
+          {% if p.preview %}
+            {% if p.preview.url|lower|slice:"-4:" == ".mp4" %}
+            <video src="{{ p.preview.url }}" class="card-img-top" autoplay muted loop playsinline preload="metadata"
+                   poster="{{ p.image.url }}" aria-label="Preview de {{ p.name }}"></video>
+            {% else %}
+            <img src="{{ p.preview.url }}" class="card-img-top" alt="Preview de {{ p.name }}">
+            {% endif %}
+          {% else %}
+            <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title mb-0 text-center">{{ p.name }}</h5>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <p class="text-muted">Aún no hay proyectos publicados.</p>
+      {% endfor %}
     </div>
 
-    <!-- Sección "Acerca de mí" -->
-    <div id="about" class="about-section mt-5">
-        <h2 class="about-title">Acerca de mí</h2>
+    <div class="d-flex justify-content-center mt-4">
+      <a href="{% url 'projects:project_list' %}" class="cta-button">Ver todos los proyectos</a>
+    </div>
+  </section>
+
+  <!-- CALL-TO-ACTION -->
+  <div class="cta-section text-center my-5">
+    <h2 class="cta-text mb-4">¿Tienes un proyecto en mente?</h2>
+    <p class="cta-subtext mb-5">¡Hablemos y construyamos algo increíble juntos!</p>
+    <a href="https://wa.me/+34639949187" class="cta-button" target="_blank" rel="noopener noreferrer">
+      ¡Contáctame Ahora!
+    </a>
+  </div>
+
+  <!-- BLOG -->
+  <section class="mt-5">
+    <h2 class="mb-4 text-center">En el blog</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for post in latest_posts %}
+      <div class="col">
+        <a href="{% url 'post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
+          {% if post.image %}
+            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h6 class="card-title mb-2">{{ post.title|truncatechars:60 }}</h6>
+            <p class="card-text text-muted small mb-0">{{ post.content|striptags|truncatechars:80 }}</p>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+      <p class="text-muted">Sin entradas todavía.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+    <!-- SOBRE MÍ (conciso, profesional, responsive) -->
+  <section id="about-me" class="about-section mt-5">
+    <div class="about-content mx-auto">
+        <h2 class="about-title text-center text-md-start">Sobre mí</h2>
+
         <p class="about-text mt-3">
-            ¡Hola! Soy José, desarrollador de sofware con pasión por crear soluciones modernas y eficaces. Mi especialidad,<strong>Django</strong> para construir aplicaciones web dinámicas, robustas y seguras. Tengo experiencia en automatización con <strong>Python</strong> y librerías como <strong>Pyautogui</strong> para manejo de intarfaz junto <strong>Selenium</strong>. Tengo conocimientos en <strong>Kivy</strong> y <strong>KivyMD</strong>, además de sólidos conocimientos en <strong>HTML5, CSS3</strong> y <strong>JavaScript</strong>.
-            <br><br>
-            Actualmente, estoy ampliando mis habilidades con <strong>React</strong>, <strong>Flutter</strong> y <strong>Node.js</strong>, trabajando en proyectos que desafían mi creatividad y crecimiento.
+        Soy <strong>José Félix</strong>, desarrollador <strong>full-stack</strong> especializado en
+        <strong>Python</strong> y <strong>Django</strong>. Ayudo a startups y pymes a pasar de idea a producto
+        en ciclos cortos, con foco en calidad, seguridad y escalabilidad.
         </p>
-        <a href="{% static 'docs/cv.pdf' %}" class="cta-button cta-section" download>Descargar CV</a>
-    </div>
 
-    {# PROYECTOS #}
-    <section class="mt-5">
-        <h2 class="mb-4 text-center">Últimos proyectos</h2>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for p in latest_projects %}
-            <div class="col">
-                <a href="{{ p.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none">
-                {% if p.preview %}
-                    {% if p.preview.url|lower|slice:"-4:" == ".mp4" %}
-                    <video src="{{ p.preview.url }}" class="card-img-top" autoplay muted loop playsinline preload="metadata"
-                            poster="{{ p.image.url }}" aria-label="Preview de {{ p.name }}"></video>
-                    {% else %}
-                    <img src="{{ p.preview.url }}" class="card-img-top" alt="Preview de {{ p.name }}">
-                    {% endif %}
-                {% else %}
-                    <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
-                {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title mb-0 text-center">{{ p.name }}</h5>
-                </div>
-                </a>
-            </div>
-            {% empty %}
-            <p class="text-muted">Aún no hay proyectos publicados.</p>
-            {% endfor %}
-        </div>
+        <!-- Lista en grid: 1 col en XS, 2 cols en SM+ -->
+        <ul class="about-features list-unstyled my-3">
+        <li class="d-flex align-items-start">
+            <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
+            <span>Backends robustos, APIs REST y paneles de administración a medida.</span>
+        </li>
+        <li class="d-flex align-items-start">
+            <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
+            <span>Automatización con Python (Selenium, tareas, notificaciones).</span>
+        </li>
+        <li class="d-flex align-items-start">
+            <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
+            <span>Frontends modernos con React/Bootstrap y buenas prácticas UX.</span>
+        </li>
+        </ul>
 
-        <div class="d-flex justify-content-center mt-4">
-        <a href="{% url 'project_list' %}" 
-            class="cta-button">
-            Ver todos los proyectos
+        <!-- Botones: se apilan en XS y ocupan 100% -->
+        <div class="btn-stack mt-3">
+        {% if request.user.is_authenticated %}
+        <a href="{% url 'users:cv_page' %}"
+            class="cta-button text-nowrap"
+            aria-label="Descargar CV (PDF)">
+            <i class="fa-regular fa-file-pdf me-1"></i>
+            <span class="d-none d-sm-inline">Descargar CV</span>
+            <span class="d-inline d-sm-none">CV</span>
+        </a>
+        {% else %}
+        <a href="{% url 'users:login' %}?next={% url 'users:cv_page' %}"
+            class="cta-button text-nowrap"
+            aria-label="Iniciar sesión para descargar CV">
+            <span class="d-none d-sm-inline">Iniciar sesión para descargar CV</span>
+            <span class="d-inline d-sm-none">Inicia sesión</span>
+        </a>
+        {% endif %}
+
+        <a href="https://www.linkedin.com/in/jose-felix-gordo-casta%C3%B1o-dev-es/"
+            class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
+            target="_blank" rel="noopener noreferrer">
+            Ver LinkedIn
+        </a>
+
+        <a href="https://github.com/AmeriK88"
+            class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
+            target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-github github-icon me-2"></i>
+            Ver GitHub
         </a>
         </div>
-    </section>
-
-    
-     <!-- CALL-TO-ACTION -->
-     <div class="cta-section text-center my-5">
-        <h2 class="cta-text mb-4">¿Tienes un proyecto en mente?</h2>
-        <p class="cta-subtext mb-5">¡Hablemos y construyamos algo increíble juntos!</p>
-        <a href="https://wa.me/+34639949187" class="cta-button" target="_blank" rel="noopener noreferrer">
-            ¡Contáctame Ahora!
-        </a>
     </div>
+  </section>
 
-    <section class="mt-5">
-        <h2 class="mb-4 text-center">En el blog</h2>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% for post in latest_posts %}
-            <div class="col">
-                <a href="{% url 'post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
-                {% if post.image %}
-                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
-                {% endif %}
-                <div class="card-body">
-                    <h6 class="card-title mb-2">{{ post.title|truncatechars:60 }}</h6>
-                    <p class="card-text text-muted small mb-0">
-                    {{ post.content|striptags|truncatechars:80 }}
-                    </p>
-                </div>
-                </a>
-            </div>
-            {% empty %}
-            <p class="text-muted">Sin entradas todavía.</p>
-            {% endfor %}
-        </div>
-    </section>
 
-    <section class="stats my-5 py-5 bg-light rounded">
+  <!-- STATS -->
+  <section class="stats my-5 py-5 bg-light rounded">
     <h2 class="text-center mb-4">En números</h2>
     <div class="container">
-        <div class="row text-center">
+      <div class="row text-center">
         {% for num, label in stats %}
-            <div class="col-4">
-            <h2 class="counter fw-bold display-6" data-target="{{ num }}">0</h2>
-            <p class="small text-uppercase text-muted mb-0">{{ label }}</p>
-            </div>
-        {% endfor %}
+        <div class="col-4">
+          <h2 class="counter fw-bold display-6" data-target="{{ num }}">0</h2>
+          <p class="small text-uppercase text-muted mb-0">{{ label }}</p>
         </div>
+        {% endfor %}
+      </div>
     </div>
-    </section>
+  </section>
 
 </div>
 {% endblock %}
