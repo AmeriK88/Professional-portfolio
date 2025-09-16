@@ -1,2 +1,17 @@
+# nixpacks.toml
+
+# 1) Garantiza Python y ffmpeg en la imagen
 [phases.setup]
-nixPkgs = ["ffmpeg"]
+# usa python 3.12 explícito y ffmpeg
+nixPkgs = ["python312", "ffmpeg"]
+
+# 2) Instala dependencias con pip
+[phases.install]
+cmds = [
+  "python3 -m pip install --upgrade pip",
+  "pip3 install -r requirements.txt"
+]
+
+# 3) Comando de arranque
+[start]
+cmd = "gunicorn portfolio.wsgi:application --bind 0.0.0.0:${PORT:-8000}"
