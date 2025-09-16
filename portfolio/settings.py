@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from pathlib import Path
 import os
 import environ
+import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -11,20 +12,40 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Inicializa django-environ
 env = environ.Env(
-    DEBUG=(bool, False)  
+    DEBUG=(bool, False)
 )
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))  
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-# Configuración de seguridad
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')  
+# Seguridad/entorno
+SECRET_KEY = env('SECRET_KEY', default='DEAFAULT_SK')
+DEBUG = env.bool('DEBUG', default=False)
+
+ALLOWED_HOSTS = env.list(
+    'ALLOWED_HOSTS',
+    default=[]
+)
+
+# CSRF: en Railway añade tu host exacto con https://
+CSRF_TRUSTED_ORIGINS = env.list(
+    'CSRF_TRUSTED_ORIGINS',
+    default=[]
+)
 
 
 # Configuración de Pi Payments
 PI_API_KEY = env("PI_API_KEY")
 
+# Detrás de proxy (Railway)
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# Cookies seguras en prod
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,6 +68,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -76,21 +98,31 @@ TEMPLATES = [
 WSGI_APPLICATION = 'portfolio.wsgi.application'
 
 
-# DN CONFIG
-DATABASES = {
-    'default': {
-        'ENGINE': env('DB_ENGINE'),  
-        'NAME': env('DB_NAME'),
-        'USER': env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
-        'OPTIONS': {
-             'charset': 'utf8mb4',
-             'init_command': "SET sql_mode='STRICT_TRANS_TABLES', time_zone = '+00:00'",
-        },
+# DB: usa DATABASE_URL si existe (Railway), si no, tu configuración por variables sueltas
+if env('DATABASE_URL', default=None):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=env('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=not DEBUG
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('DB_ENGINE'),
+            'NAME': env('DB_NAME'),
+            'USER': env('DB_USER'),
+            'PASSWORD': env('DB_PASSWORD'),
+            'HOST': env('DB_HOST'),
+            'PORT': env('DB_PORT'),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES', time_zone = '+00:00'",
+            },
+        }
+    }
+
 
 
 # Password validation
@@ -236,7 +268,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT     = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# WhiteNoise: servir estáticos comprimidos con hash
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Opcional:
+# WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+
 
 
 # Default primary key field type
