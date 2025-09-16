@@ -1,0 +1,5 @@
+[phases.setup]
+# instala ffmpeg para que esté disponible en runtime
+nixPkgs = ["ffmpeg"]
+# (opcional) si prefieres usar apt:
+# aptPkgs = ["ffmpeg"]

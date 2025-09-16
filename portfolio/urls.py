@@ -17,7 +17,6 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 else:
-    # Servir MEDIA en producción desde el volumen
     urlpatterns += [
         re_path(r"^media/(?P<path>.*)$", mediaserve, {"document_root": settings.MEDIA_ROOT}),
     ]
