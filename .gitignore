@@ -42,7 +42,8 @@ media/
 static/images/
 static/icons/
 static/img/
-docs/
+static/avatars/
+private/cv.pdf
 # Ignorar carpeta staticfiles en la raíz
 /staticfiles/
 
