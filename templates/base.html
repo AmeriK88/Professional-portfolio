@@ -31,35 +31,123 @@
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-            <!-- Marca de la barra -->
-            <a class="navbar-brand" href="/">Portfolio</a>
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="/" aria-label="Inicio">
+          <img src="{% static 'images/logo-jfgc.png' %}"
+              alt="José Félix · Dev"
+              class="brand-logo align-text-top">
+        </a>
 
-            <!-- Botón de menú -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#mainNav" aria-controls="mainNav"
+                aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- Links del menú -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/blog/' %}active{% endif %}" href="/blog/">Blog</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/projects/' %}active{% endif %}" href="/projects/">Proyectos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/services/' %}active{% endif %}" href="/services/">Servicios</a>
-                    </li>
+        <div class="collapse navbar-collapse" id="mainNav">
+          <ul class="navbar-nav ms-auto align-items-lg-center">
+
+            <!-- Menú compacto -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="exploreMenu" role="button"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                Explorar
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="exploreMenu">
+                <li>
+                  <a class="dropdown-item {% if request.path == '/' %}active{% endif %}" href="/">
+                    <i class="fa-solid fa-house me-2"></i>Inicio
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item {% if request.path|slice:':6' == '/blog/' %}active{% endif %}" href="/blog/">
+                    <i class="fa-regular fa-newspaper me-2"></i>Blog
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item {% if request.path|slice:':10' == '/projects/' %}active{% endif %}" href="/projects/">
+                    <i class="fa-solid fa-flask me-2"></i>Proyectos
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item {% if request.path|slice:':10' == '/services/' %}active{% endif %}" href="/services/">
+                    <i class="fa-solid fa-briefcase me-2"></i>Servicios
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/#about-me" data-no-loader><i class="fa-regular fa-id-card me-2"></i>Sobre mí</a></li>
+                <li><a class="dropdown-item" href="mailto:josefe59@hotmail.com"><i class="fa-regular fa-envelope me-2"></i>Contacto</a></li>
+              </ul>
+            </li>
+
+            {% if request.user.is_authenticated %}
+              <!-- Menú de usuario con avatar -->
+              <li class="nav-item dropdown ms-lg-2">
+                <a class="nav-link dropdown-toggle p-0 d-flex align-items-center gap-2"
+                  href="#" id="userMenu" role="button" data-bs-toggle="dropdown"
+                  aria-expanded="false" aria-label="Menú de usuario"
+                  title="{{ request.user.display_name|default:request.user.username }}">
+                  <!-- Anillo alrededor del avatar con utilidades Bootstrap -->
+                  <span class="avatar-ring d-inline-flex rounded-circle p-1 bg-white bg-opacity-25 shadow-sm">
+                    <img
+                      src="{{ request.user.avatar_url|default:'/static/images/default-avatar.png' }}"
+                      alt="Avatar"
+                      class="rounded-circle nav-avatar"
+                      width="36" height="36"
+                      style="object-fit:cover;display:block"
+                      referrerpolicy="no-referrer"
+                      loading="eager" decoding="async"
+                    >
+                  </span>
+                  <span class="visually-hidden">Cuenta</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                  <li><a class="dropdown-item" href="{% url 'users:profile' %}">
+                    <i class="fa-regular fa-user me-2"></i>Mi perfil</a></li>
+                  <li><a class="dropdown-item" href="{% url 'users:password_change' %}">
+                    <i class="fa-solid fa-key me-2"></i>Cambiar contraseña</a></li>
+                  <li><a class="dropdown-item" href="{% url 'users:cv_page' %}">
+                    <i class="fa-regular fa-file-pdf me-2"></i>Descargar CV</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <form action="{% url 'users:logout' %}" method="post" class="m-0 p-0">
+                      {% csrf_token %}
+                      <input type="hidden" name="next" value="{{ request.path }}">
+                      <button type="submit" class="dropdown-item">
+                        <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar sesión
+                      </button>
+                    </form>
+                  </li>
                 </ul>
-            </div>
+              </li>
+            {% else %}
+              <!-- Botón único de acceso -->
+              <li class="nav-item ms-lg-2">
+                <a class="btn btn-light btn-sm" href="{% url 'users:login' %}?next={{ request.path }}">
+                  Acceder
+                </a>
+              </li>
+            {% endif %}
+
+          </ul>
         </div>
+      </div>
     </nav>
+
+    {% if messages %}
+      <div class="container mt-3">
+        {% for message in messages %}
+          <div
+            class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade js-animated-message"
+            role="alert"
+            data-autoclose="4200"  {# opcional: ms para autocerrar; quítalo si no lo quieres #}
+          >
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
 
     <div class="container my-4 rounded">
         {% block content %}
@@ -203,7 +291,20 @@
     <script src="{% static 'js/animation.js' %}" defer></script>
     <script src="{% static 'js/counters.js' %}" defer></script>
     <script src="{% static 'js/cookiesConsent.portfolio.js' %}" defer></script>
+    <script src="{% static 'js/pageLoader.js' %}" defer></script>
+    <script src="{% static 'js/alerts.anim.js' %}" defer></script>
+
 
     {% block extra_scripts %}{% endblock %}
+
+      <!-- Page Loader Overlay -->
+    <div id="page-loader" class="page-loader" aria-hidden="true">
+      <div class="page-loader-backdrop"></div>
+      <div class="page-loader-content" role="status" aria-live="polite">
+        <div class="spinner-border" aria-hidden="true"></div>
+        <div class="mt-2 small text-white-50">Cargando…</div>
+      </div>
+    </div>
+
 </body>
 </html>
