@@ -1,17 +1,14 @@
-# nixpacks.toml
-
-# 1) Garantiza Python y ffmpeg en la imagen
+# 1) Traemos Python, pip y ffmpeg
 [phases.setup]
-# usa python 3.12 explícito y ffmpeg
-nixPkgs = ["python312", "ffmpeg"]
+# Nota: añadimos explícitamente python312Packages.pip
+nixPkgs = ["python312", "python312Packages.pip", "ffmpeg"]
 
-# 2) Instala dependencias con pip
+# 2) Instala dependencias con pip (ya disponible)
 [phases.install]
 cmds = [
-  "python3 -m pip install --upgrade pip",
-  "pip3 install -r requirements.txt"
+  "/opt/venv/bin/python -m pip install --upgrade pip",
+  "/opt/venv/bin/pip install -r requirements.txt"
 ]
-
-# 3) Comando de arranque
+# 3) Arranque: migraciones + collectstatic + gunicorn
 [start]
-cmd = "gunicorn portfolio.wsgi:application --bind 0.0.0.0:${PORT:-8000}"
+cmd = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && /opt/venv/bin/gunicorn portfolio.wsgi:application --bind 0.0.0.0:${PORT:-8000}"
