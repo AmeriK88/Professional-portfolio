@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Descargando CV...{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body p-4 text-center">
+
+          <!-- Icono / Spinner -->
+          <div class="mb-3" aria-hidden="true">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+          </div>
+
+          <h1 class="h5 mb-2">Preparando tu descarga…</h1>
+          <p class="text-muted mb-3">
+            Tu CV debería comenzar a descargarse en unos segundos.
+            Te redirigiremos al inicio automáticamente.
+          </p>
+
+          <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <a class="btn btn-outline-secondary" href="{{ download_url }}">Reintentar descarga</a>
+            <a class="btn btn-primary" id="go-home-now" href="{{ redirect_to }}">Volver al inicio ahora</a>
+          </div>
+
+          <!-- Ayuda accesible -->
+          <div class="mt-3 small text-muted" aria-live="polite" id="status-msg">
+            Iniciando descarga…
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dispara la descarga en segundo plano -->
+<iframe src="{{ download_url }}" style="display:none" title="cv-download" id="cv-frame"></iframe>
+
+<!-- Fallback sin JS -->
+<noscript>
+  <meta http-equiv="refresh" content="3;url={{ redirect_to }}">
+</noscript>
+
+<script>
+  (function () {
+    // Pequeña mejora de UX: si el iframe carga, actualizamos el mensaje y reducimos la espera
+    var status = document.getElementById('status-msg');
+    var frame = document.getElementById('cv-frame');
+    var redirected = false;
+
+    function goHome() {
+      if (redirected) return;
+      redirected = true;
+      window.location.href = "{{ redirect_to }}";
+    }
+
+    // Si el iframe "carga", asumimos que el navegador ha recibido la respuesta del archivo
+    frame.addEventListener('load', function () {
+      if (status) status.textContent = 'Descarga iniciada. Redirigiendo…';
+      // Pequeño margen para que el prompt de descarga aparezca
+      setTimeout(goHome, 800);
+    });
+
+    // Safety net: si por lo que sea el evento no dispara, nos vamos igualmente
+    setTimeout(goHome, 3000);
+
+    // Permite volver instantáneamente con el botón
+    document.getElementById('go-home-now').addEventListener('click', function (e) {
+      // no prevenimos; dejamos que siga el enlace
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% load static %}  
+{% block title %}Mi perfil{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row g-4">
+
+    <!-- Resumen -->
+    <div class="col-12 col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Resumen de cuenta</h2>
+
+          <!-- Cabecera con avatar + nombre -->
+          <div class="d-flex align-items-center mb-3">
+            <img
+              src="{{ request.user.avatar_url|default:'/static/images/default-avatar.png' }}"
+              alt="Avatar"
+              class="rounded-circle me-3"
+              width="64" height="64"
+              style="object-fit: cover;"
+            >
+            <div>
+              <div class="fw-semibold">
+                {{ request.user.display_name|default:request.user.username }}
+              </div>
+              <div class="text-muted small">@{{ request.user.username }}</div>
+            </div>
+          </div>
+
+          <dl class="row mb-0 small">
+            <dt class="col-5 text-muted">Usuario</dt>
+            <dd class="col-7">{{ request.user.username }}</dd>
+
+            <dt class="col-5 text-muted">Nombre</dt>
+            <dd class="col-7">{{ request.user.first_name|default:"—" }}</dd>
+
+            <dt class="col-5 text-muted">Apellidos</dt>
+            <dd class="col-7">{{ request.user.last_name|default:"—" }}</dd>
+
+            <dt class="col-5 text-muted">Email</dt>
+            <dd class="col-7">{{ request.user.email|default:"—" }}</dd>
+
+            <dt class="col-5 text-muted">Alta</dt>
+            <dd class="col-7">{{ request.user.date_joined|date:"d M Y, H:i" }}</dd>
+
+            <dt class="col-5 text-muted">Último acceso</dt>
+            <dd class="col-7">{{ request.user.last_login|date:"d M Y, H:i"|default:"—" }}</dd>
+          </dl>
+
+          <hr class="my-3">
+
+          <div class="d-grid gap-2 mt-5">
+            <a class="btn btn-outline-secondary" href="{% url 'users:password_change' %}">
+              <i class="fa-solid fa-key me-2"></i> Cambiar contraseña
+            </a>
+            <form action="{% url 'users:logout' %}" method="post" class="m-0">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger w-100" type="submit">
+                <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar sesión
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editar perfil -->
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Editar perfil</h2>
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              {{ form.first_name }}
+              {{ form.first_name.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Apellidos</label>
+              {{ form.last_name }}
+              {{ form.last_name.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              {{ form.email }}
+              <div class="form-text">Usado para notificaciones y recibos.</div>
+              {{ form.email.errors }}
+            </div>
+
+            {# ---- AVATAR PREDEFINIDO (galería) ---- #}
+            <div class="mb-3">
+              <label class="form-label">Avatar</label>
+
+              {% with selected=form.avatar_choice.value|default:request.user.avatar_choice %}
+              <div class="row row-cols-3 row-cols-sm-4 g-3 avatar-picker">
+                {% for key,label in avatar_choices %}
+                  <div class="col">
+                    <label class="d-block text-center avatar-option">
+                      <!-- Radio oculto pero accesible -->
+                      <input
+                        type="radio"
+                        name="avatar_choice"
+                        value="{{ key }}"
+                        class="visually-hidden"
+                        {% if selected == key %}checked{% endif %}
+                      >
+                      <!-- La imagen debe ir justo DESPUÉS del input para el selector :checked + img -->
+                      <img
+                        src="{% static 'avatars/presets/' %}{{ key }}.png"
+                        alt="{{ label }}"
+                        class="rounded-circle avatar-img"
+                        width="72" height="72"
+                        style="object-fit:cover;"
+                      >
+                      <span class="small text-muted d-block mt-1">{{ label }}</span>
+                    </label>
+                  </div>
+                {% endfor %}
+              </div>
+              {% endwith %}
+
+              {{ form.avatar_choice.errors }}
+              <div class="form-text">Elige un avatar. Si no seleccionas, usaré el predeterminado.</div>
+            </div>
+
+
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pedidos (si existe) -->
+    <div class="col-12 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h5 mb-3">Pedidos</h2>
+
+          {% if orders_url %}
+            {% if orders_count != None %}
+              <p class="mb-2 small text-muted">Total de pedidos: <strong>{{ orders_count }}</strong></p>
+            {% endif %}
+
+            {% if last_order %}
+              <div class="small text-muted mb-2">Último pedido:</div>
+              <div class="border rounded p-2 small">
+                ID: {{ last_order.pk }}<br>
+                {% if last_order.created_at %}Fecha: {{ last_order.created_at|date:"d M Y, H:i" }}{% endif %}
+                {% if last_order.status %}<br>Estado: {{ last_order.status }}{% endif %}
+                {% if last_order.total %}<br>Total: {{ last_order.total }}{% endif %}
+              </div>
+            {% else %}
+              <p class="small text-muted">Aún no hay pedidos.</p>
+            {% endif %}
+
+            <a class="btn btn-outline-secondary w-100 mt-3" href="{{ orders_url }}">Ver mis pedidos</a>
+          {% else %}
+            <p class="small text-muted mb-0">La sección de pedidos estará disponible pronto.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
