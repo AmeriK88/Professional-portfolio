@@ -252,20 +252,24 @@ USE_I18N = True
 USE_L10N = True
 
 # --- Login redirects ---
-LOGIN_URL = "users:login"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
-
 # --- Archivos estáticos / media ---
+USE_VOLUME_MEDIA = env.bool("USE_VOLUME_MEDIA", default=False)
+
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+if USE_VOLUME_MEDIA:
+    # Producción en Railway (volumen montado en /data)
+    MEDIA_ROOT = "/data/media"
+else:
+    # Local
+    MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+os.makedirs(MEDIA_ROOT, exist_ok=True)
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
-# WhiteNoise: servir estáticos comprimidos con hash
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # Opcional:
 # WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
