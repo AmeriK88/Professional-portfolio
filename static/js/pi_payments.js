@@ -1,9 +1,7 @@
-/* pi_payments.js */
 (function () {
   'use strict';
 
   const cfg = window.PI_CFG || {};
-
   console.debug('[pi] pi_payments.js cargado');
 
   function getCookie(name) {
@@ -30,81 +28,79 @@
   async function postJSON(url, body) {
     return fetch(url, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrftoken
+        'X-CSRFToken': csrftoken || '',
+        'X-Requested-With': 'XMLHttpRequest',
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body || {})
     });
   }
 
-  function toAmount(value) {
-    if (typeof value === 'number') return value;
-    const s = String(value).trim().replace(',', '.');
-    const n = Number(s);
-    if (Number.isNaN(n)) {
-      throw new Error('Importe inválido: ' + value);
+  async function startCheckout(checkoutUrl) {
+    const res = await fetch(checkoutUrl, {
+      credentials: 'same-origin',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    // Si el backend te redirige a login, seguimos esa redirección
+    if (res.redirected || (res.url && res.url.includes('/login'))) {
+      window.location.href = res.url || ('/login/?next=' + window.location.pathname);
+      return null;
     }
-    return n;
+
+    if (!res.ok) throw new Error('No se pudo iniciar el pedido.');
+    const data = await res.json();
+    if (!data.ok || !data.payment) throw new Error('Respuesta de checkout inválida.');
+    return data; // { ok, order_number, payment }
   }
 
-  async function doPay(title, amount, serviceId) {
-    if (!ensurePiReady()) {
-      alert('Abre esta página dentro de Pi Browser para pagar con Pi.');
-      return;
+  function createPayment(paymentPayload) {
+    const { approveUrl, completeUrl, cancelUrl, successUrl } = cfg;
+    if (!approveUrl || !completeUrl || !cancelUrl) {
+      throw new Error('Faltan URLs de callbacks de Pi en PI_CFG.');
     }
 
-    let amt;
-    try {
-      amt = toAmount(amount);
-    } catch (err) {
-      console.error('[pi] Importe inválido:', err);
-      alert('Importe inválido.');
-      return;
-    }
-
-    const paymentData = {
-      amount: amt,
-      memo: `Pago servicio: ${title}`,
-      metadata: { service_id: serviceId }
-    };
-
-    const callbacks = {
+    window.Pi.createPayment(paymentPayload, {
       onReadyForServerApproval: async (paymentId) => {
         console.debug('[pi] onReadyForServerApproval', paymentId);
-        if (cfg.approveUrl) await postJSON(cfg.approveUrl, { paymentId });
+        try {
+          const r = await postJSON(approveUrl, { paymentId });
+          if (!r.ok) throw new Error('Fallo aprobando en servidor');
+        } catch (e) {
+          console.error(e);
+          alert('Error aprobando el pago. Intenta de nuevo.');
+        }
       },
       onReadyForServerCompletion: async (paymentId, txid) => {
         console.debug('[pi] onReadyForServerCompletion', paymentId, txid);
-        if (!cfg.completeUrl) return;
-        const r = await postJSON(cfg.completeUrl, { paymentId, txid });
-        if (r.ok) {
-          const base = cfg.successUrl || '/';
-          const sep = base.includes('?') ? '&' : '?';
-          window.location.href = `${base}${sep}pid=${encodeURIComponent(paymentId)}`;
-        } else {
-          alert('No se pudo completar el pago. Intenta de nuevo.');
+        try {
+          const r = await postJSON(completeUrl, { paymentId, txid });
+          if (r.ok) {
+            const base = successUrl || '/';
+            const url = new URL(base, window.location.origin);
+            url.searchParams.set('pid', paymentId);
+            window.location.assign(url.toString());
+          } else {
+            alert('No se pudo completar el pago en el servidor.');
+          }
+        } catch (e) {
+          console.error(e);
+          alert('Error completando el pago.');
         }
       },
       onCancel: async (paymentId) => {
         console.debug('[pi] onCancel', paymentId);
-        if (cfg.cancelUrl) await postJSON(cfg.cancelUrl, { paymentId });
+        try { await postJSON(cancelUrl, { paymentId }); } catch {}
       },
       onError: (error, payment) => {
         console.error('[pi] onError', error, payment);
         alert('Ha ocurrido un error con Pi. Reintenta en unos segundos.');
       }
-    };
-
-    try {
-      await Pi.createPayment(paymentData, callbacks);
-    } catch (e) {
-      console.error('[pi] createPayment falló:', e);
-      alert('No se pudo iniciar el flujo de pago.');
-    }
+    });
   }
 
-  // Vincular el botón al cargar el DOM
   document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('pi-pay-btn');
     if (!btn) {
@@ -113,14 +109,27 @@
     }
     console.debug('[pi] Botón de pago listo');
 
-    btn.addEventListener('click', () => {
-      const title = btn.getAttribute('data-title') || '';
-      const amount = btn.getAttribute('data-amount') || '';
-      const sid = Number(btn.getAttribute('data-service-id') || '0');
-      doPay(title, amount, sid);
+    btn.addEventListener('click', async () => {
+      if (!ensurePiReady()) {
+        alert('Abre esta página dentro de Pi Browser para pagar con Pi.');
+        return;
+      }
+      try {
+        const checkoutUrl = btn.getAttribute('data-checkout-url');
+        const data = await startCheckout(checkoutUrl);
+        if (!data) return; // probablemente redirigido a login
+        createPayment(data.payment);
+      } catch (e) {
+        console.error(e);
+        alert(e.message || 'No se pudo iniciar el pago.');
+      }
     });
   });
 
-  // Por si quieres seguir usando el inline, lo exponemos también
-  window.payWithPi = (title, amount, serviceId) => doPay(title, amount, serviceId);
+  // API opcional
+  window.payWithPi = async (checkoutUrl) => {
+    if (!ensurePiReady()) return;
+    const data = await startCheckout(checkoutUrl);
+    if (data) createPayment(data.payment);
+  };
 })();

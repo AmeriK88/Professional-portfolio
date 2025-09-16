@@ -1,4 +1,3 @@
-# pi_payments/views.py
 import os, json, requests
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.views.decorators.http import require_POST
