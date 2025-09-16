@@ -6,93 +6,90 @@ import os
 import environ
 import dj_database_url
 
-
+# Usar PyMySQL como drop-in de mysqlclient si está disponible
 try:
     import pymysql
-    pymysql.install_as_MySQLdb()  # PyMySQL como mysqlclient
+    pymysql.install_as_MySQLdb()
 except Exception:
     pass
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# --- Paths base ---
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Inicializa django-environ
+# --- Entorno (.env) ---
 env = environ.Env(
-    DEBUG=(bool, False)
+    DEBUG=(bool, False),
 )
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
-# Seguridad/entorno
-SECRET_KEY = env('SECRET_KEY', default='DEAFAULT_SK')
-DEBUG = env.bool('DEBUG', default=False)
+# --- Seguridad / entorno ---
+# Fallback: si no hay SECRET_KEY, intenta con DEAFAULT_SK (como lo tienes escrito en tus variables),
+# y si tampoco existe, usa "change-me".
+SECRET_KEY = env("SECRET_KEY", default=env("DEAFAULT_SK", default="change-me"))
+DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = env.list(
-    'ALLOWED_HOSTS',
-    default=[]
-)
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
-# CSRF: en Railway añade tu host exacto con https://
-CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[]) 
+# Pi Payments
+PI_API_KEY = env("PI_API_KEY", default="")
 
-# Configuración de Pi Payments
-PI_API_KEY = env("PI_API_KEY")
-
-# Detrás de proxy (Railway)
+# Detrás de proxy (Railway / proxies)
 USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-
-# Application definition
+# --- Apps ---
 INSTALLED_APPS = [
-    'unfold',
-    'unfold.contrib.filters',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'blog',
-    'projects',
-    'services',
-    'pi_payments',
-    'users.apps.UsersConfig',
-    'orders',
-
+    "unfold",
+    "unfold.contrib.filters",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "blog",
+    "projects",
+    "services",
+    "pi_payments",
+    "users.apps.UsersConfig",
+    "orders",
 ]
 
+# --- Middleware ---
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware', 
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",  # estáticos en prod
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'portfolio.urls'
+ROOT_URLCONF = "portfolio.urls"
 
+# --- Templates ---
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS':  [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'portfolio.wsgi.application'
+WSGI_APPLICATION = "portfolio.wsgi.application"
 
-
+# Endurece cookies/HSTS en no-DEBUG
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -101,61 +98,72 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # --- Base de datos ---
-if env('DATABASE_URL', default=None):
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=env('DATABASE_URL'),
-            conn_max_age=600,
-            ssl_require=not DEBUG, 
-        )
-    }
+DB_URL = env("DATABASE_URL", default=None)
+
+def _is_mysql_url(url: str | None) -> bool:
+    """Detecta si la URL apunta a MySQL (mysql:// o mysql+pymysql://)."""
+    return bool(url) and (url.startswith("mysql://") or url.startswith("mysql+pymysql://"))
+
+if DB_URL:
+    # Sólo forzar SSL en no-MySQL (por ejemplo PostgreSQL). MySQL no acepta 'sslmode'.
+    db_default = dj_database_url.config(
+        default=DB_URL,
+        conn_max_age=600,
+        ssl_require=(not DEBUG and not _is_mysql_url(DB_URL)),
+    )
+
+    # Limpiar 'sslmode' si existiera (evita error con MySQL)
+    opts = dict(db_default.get("OPTIONS", {}))
+    opts.pop("sslmode", None)
+
+    # Asegura charset en MySQL si no viene en la URL
+    if _is_mysql_url(DB_URL):
+        opts.setdefault("charset", "utf8mb4")
+
+    db_default["OPTIONS"] = opts
+    DATABASES = {"default": db_default}
 else:
+    # Fallback por variables sueltas
     DATABASES = {
-        'default': {
-            'ENGINE': env('DB_ENGINE'),
-            'NAME': env('DB_NAME'),
-            'USER': env('DB_USER'),
-            'PASSWORD': env('DB_PASSWORD'),
-            'HOST': env('DB_HOST'),
-            'PORT': env('DB_PORT'),
-            'OPTIONS': {
-                'charset': 'utf8mb4',
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES', time_zone = '+00:00'",
+        "default": {
+            "ENGINE": env("DB_ENGINE"),
+            "NAME": env("DB_NAME"),
+            "USER": env("DB_USER"),
+            "PASSWORD": env("DB_PASSWORD"),
+            "HOST": env("DB_HOST"),
+            "PORT": env("DB_PORT"),
+            "OPTIONS": {
+                "charset": "utf8mb4",
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES', time_zone = '+00:00'",
             },
         }
     }
 
-
-
-# Password validation
+# --- Password validation ---
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Email backend (consola para desarrollo)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-
-# UNFOLD CONFIG
+# --- UNFOLD CONFIG ---
 UNFOLD = {
-    # Títulos
     "SITE_TITLE": "Portfolio Admin",
     "SITE_HEADER": "José Admin",
     "SITE_SUBHEADER": "Developer Dashboard",
     "SITE_URL": "/",
-
-    # Icono y logotipo (light/dark)
     "SITE_ICON": {
         "light": lambda request: static("img/admin/icon-light.svg"),
         "dark": lambda request: static("img/admin/icon-dark.svg"),
@@ -164,9 +172,7 @@ UNFOLD = {
         "light": lambda request: static("img/admin/logo-light.png"),
         "dark": lambda request: static("img/admin/jf_logo.png"),
     },
-    "SITE_SYMBOL": "code",  # Material Symbols name
-
-    # Favicons (puedes añadir más tamaños si quieres)
+    "SITE_SYMBOL": "code",
     "SITE_FAVICONS": [
         {
             "rel": "icon",
@@ -175,23 +181,14 @@ UNFOLD = {
             "href": lambda request: static("img/admin/icon-light.svg"),
         },
     ],
-
-    # Botones superiores
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "SHOW_BACK_BUTTON": False,
-
-    # Tema (deja comentado para permitir el switcher)
-    # "THEME": "dark",  # o "light" para forzar
-
-    # Login
+    # "THEME": "dark",  # o "light" si quisieras forzar
     "LOGIN": {
         "image": lambda request: static("img/admin/login-bg.svg"),
-        # redirige al listado que más uses
         "redirect_after": lambda request: reverse_lazy("admin:projects_project_changelist"),
     },
-
-    # Colores (primario morado, base gris). Ajusta si quieres tu paleta
     "COLORS": {
         "primary": {
             "50": "250, 245, 255",
@@ -207,8 +204,6 @@ UNFOLD = {
             "950": "59, 7, 100",
         }
     },
-
-    # Sidebar de navegación rápida
     "SIDEBAR": {
         "show_search": True,
         "command_search": False,
@@ -243,41 +238,36 @@ UNFOLD = {
             },
         ],
     },
-
-    # Dashboard: puedes inyectar variables si luego personalizas templates
     "DASHBOARD_CALLBACK": "portfolio.admin_dashboard.dashboard_callback",
 }
 
+# --- Usuario custom ---
+AUTH_USER_MODEL = "users.User"
 
-# Custom User Model
-AUTH_USER_MODEL = 'users.User'
-
-# LANG CONFIG
-LANGUAGE_CODE = 'es'
-TIME_ZONE = 'UTC'
+# --- i18n / zona horaria ---
+LANGUAGE_CODE = "es"
+TIME_ZONE = "UTC"
 USE_TZ = True
 USE_I18N = True
 USE_L10N = True
 
+# --- Login redirects ---
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
-LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = '/'  
-LOGOUT_REDIRECT_URL = '/'
+# --- Archivos estáticos / media ---
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-# Static files (CSS, JavaScript, Images)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # WhiteNoise: servir estáticos comprimidos con hash
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Opcional:
 # WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
-
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# --- Default PK field ---
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

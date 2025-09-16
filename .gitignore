@@ -44,6 +44,5 @@ static/icons/
 static/img/
 static/avatars/
 private/cv.pdf
-# Ignorar carpeta staticfiles en la raíz
-/staticfiles/
+
 
