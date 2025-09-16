@@ -40,6 +40,9 @@ INSTALLED_APPS = [
     'projects',
     'services',
     'pi_payments',
+    'users.apps.UsersConfig',
+    'orders',
+
 ]
 
 MIDDLEWARE = [
@@ -83,8 +86,8 @@ DATABASES = {
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
         'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+             'charset': 'utf8mb4',
+             'init_command': "SET sql_mode='STRICT_TRANS_TABLES', time_zone = '+00:00'",
         },
     }
 }
@@ -105,6 +108,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# Email backend (consola para desarrollo)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
 
 # UNFOLD CONFIG
 UNFOLD = {
@@ -207,12 +214,21 @@ UNFOLD = {
     "DASHBOARD_CALLBACK": "portfolio.admin_dashboard.dashboard_callback",
 }
 
+
+# Custom User Model
+AUTH_USER_MODEL = 'users.User'
+
 # LANG CONFIG
 LANGUAGE_CODE = 'es'
 TIME_ZONE = 'UTC'
+USE_TZ = True
 USE_I18N = True
 USE_L10N = True
-USE_TZ = True
+
+
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = '/'  
+LOGOUT_REDIRECT_URL = '/'
 
 # Static files (CSS, JavaScript, Images)
 MEDIA_URL = '/media/'
