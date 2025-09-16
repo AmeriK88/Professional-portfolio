@@ -7,6 +7,12 @@ import environ
 import dj_database_url
 
 
+try:
+    import pymysql
+    pymysql.install_as_MySQLdb()  # PyMySQL como mysqlclient
+except Exception:
+    pass
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,11 +32,7 @@ ALLOWED_HOSTS = env.list(
 )
 
 # CSRF: en Railway añade tu host exacto con https://
-CSRF_TRUSTED_ORIGINS = env.list(
-    'CSRF_TRUSTED_ORIGINS',
-    default=[]
-)
-
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[]) 
 
 # Configuración de Pi Payments
 PI_API_KEY = env("PI_API_KEY")
@@ -39,13 +41,6 @@ PI_API_KEY = env("PI_API_KEY")
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Cookies seguras en prod
-if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 60 * 60 * 24
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
 
 # Application definition
 INSTALLED_APPS = [
@@ -98,13 +93,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'portfolio.wsgi.application'
 
 
-# DB: usa DATABASE_URL si existe (Railway), si no, tu configuración por variables sueltas
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+# --- Base de datos ---
 if env('DATABASE_URL', default=None):
     DATABASES = {
         'default': dj_database_url.config(
             default=env('DATABASE_URL'),
             conn_max_age=600,
-            ssl_require=not DEBUG
+            ssl_require=not DEBUG, 
         )
     }
 else:
