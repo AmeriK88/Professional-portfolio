@@ -67,15 +67,19 @@
       ← Volver
     </a>
 
+  {% if request.user.is_authenticated %}
     <button
       id="pi-pay-btn"
       class="btn btn-primary"
-      data-title="{{ service.title|escapejs }}"
-      data-amount="{{ service.price }}"
-      data-service-id="{{ service.id }}">
+      data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
       Pagar con
       <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon" width="18" height="18">
     </button>
+  {% else %}
+    <a class="btn btn-primary" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
+      Iniciar sesión para pagar
+    </a>
+  {% endif %}
   </div>
 
 
