@@ -8,9 +8,15 @@ import uuid
 
 # ========= Validadores =========
 
-def validate_file_size(value, max_mb=20):
+def validate_file_size(value, max_mb):
     if value.size and value.size > max_mb * 1024 * 1024:
         raise ValidationError(f"El archivo supera {max_mb} MB.")
+
+def validate_image_size_5mb(value):
+    validate_file_size(value, 5)
+
+def validate_preview_size_20mb(value):
+    validate_file_size(value, 20)
 
 def validate_image_ext(value):
     ext = os.path.splitext(value.name)[1].lower()
@@ -65,14 +71,14 @@ class Service(models.Model):
         upload_to=image_upload_path,
         blank=True,
         null=True,
-        validators=[validate_image_ext, lambda f: validate_file_size(f, 5)],  # 5 MB máx imagen
+        validators=[validate_image_ext, validate_image_size_5mb],  # 5 MB máx imagen
     )
     preview     = models.FileField(
         upload_to=preview_upload_path,
         max_length=255,
         blank=True,
         null=True,
-        validators=[validate_preview_ext, lambda f: validate_file_size(f, 20)],  # 20 MB máx preview
+        validators=[validate_preview_ext, validate_preview_size_20mb],  # 20 MB máx preview
         help_text="Sube un MP4 ligero (recomendado) o una imagen (WEBP/JPG/PNG).",
     )
 
