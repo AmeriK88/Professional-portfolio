@@ -1,66 +1,100 @@
-# projects/signals.py
-
 import os
+import shutil
 import subprocess
+import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 from .models import Project
 
+log = logging.getLogger(__name__)
+
+def _compress_mp4(src_abs: str, dst_abs: str) -> bool:
+    """Devuelve True si la compresión fue OK; no lanza excepción."""
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg:
+        log.error("ffmpeg no encontrado en PATH; se omite compresión para %s", src_abs)
+        return False
+
+    os.makedirs(os.path.dirname(dst_abs), exist_ok=True)
+
+    cmd = [
+        ffmpeg, "-y",
+        "-i", src_abs,
+        "-vf", "scale=320:trunc(ow/a/2)*2,fps=10",
+        "-c:v", "libx264",
+        "-crf", "28",
+        "-preset", "veryfast",
+        "-movflags", "+faststart",
+        "-an",  # quita audio en previews (opcional)
+        dst_abs,
+    ]
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        if res.stderr:
+            log.info("ffmpeg: %s", res.stderr[:2000])
+        return os.path.exists(dst_abs) and os.path.getsize(dst_abs) > 0
+    except subprocess.CalledProcessError as e:
+        log.exception("ffmpeg falló (%s): %s", e.returncode, (e.stderr or "")[:2000])
+        return False
+
 @receiver(post_save, sender=Project)
 def compress_preview(sender, instance, created, **kwargs):
     """
-    Comprime un preview MP4 a *_s.mp4 solo una vez: si el nombre
-    ya termina en '_s.mp4' no hace nada. Además elimina el archivo
-    original tras guardar la versión comprimida.
+    Comprime un preview MP4 a *_s.mp4 solo una vez y elimina el original.
+    Nunca lanza excepción (evita 500 en admin).
     """
-    if not instance.preview:
+    # Evita re-entradas si guardamos el propio objeto
+    if getattr(instance, "_compressing_preview", False):
         return
 
-    name_lower = instance.preview.name.lower()
-    # 1) Sólo .mp4
-    if not name_lower.endswith('.mp4'):
+    field = getattr(instance, "preview", None)
+    if not field or not getattr(field, "name", None):
         return
 
-    # 2) Si ya es la versión pequeña, salimos
-    if name_lower.endswith('_s.mp4'):
+    name_lower = field.name.lower()
+    if not name_lower.endswith(".mp4"):
+        return
+    if name_lower.endswith("_s.mp4"):
         return
 
-    # 3) Rutas y nombres
-    src = instance.preview.path
-    base, _ = os.path.splitext(os.path.basename(src))
+    # Paths
+    try:
+        src_abs = field.path  # requiere FileSystemStorage local
+    except Exception:
+        log.warning("Storage no expone .path; se omite compresión para %s", field.name)
+        return
+
+    base, _ = os.path.splitext(os.path.basename(src_abs))
     small_name = f"{base}_s.mp4"
-    small_rel  = f"projects/previews/{small_name}"
-    small_abs  = os.path.join(settings.MEDIA_ROOT, small_rel)
+    small_rel = os.path.join("projects", "previews", small_name).replace("\\", "/")
+    small_abs = os.path.join(settings.MEDIA_ROOT, small_rel)
 
-    # 4) Si ya existe la versión comprimida, actualizar nombre y borrar viejos
+    # Si ya existe el comprimido: asigna y borra origen
     if os.path.exists(small_abs):
         instance.preview.name = small_rel
-        instance.save(update_fields=['preview'])
+        instance._compressing_preview = True
+        instance.save(update_fields=["preview"])
+        instance._compressing_preview = False
         try:
-            os.remove(src)
+            if os.path.exists(src_abs):
+                os.remove(src_abs)
         except OSError:
             pass
         return
 
-    # 5) Llamada a ffmpeg para comprimir
-    subprocess.run([
-        'ffmpeg', '-y',
-        '-i', src,
-        '-vf', 'scale=320:-2,fps=10',
-        '-c:v', 'libx264',
-        '-crf', '28',
-        '-preset', 'veryfast',
-        '-movflags', '+faststart',
-        small_abs
-    ], check=True)
+    # Comprimir
+    ok = _compress_mp4(src_abs, small_abs)
+    if not ok:
+        return
 
-    # 6) Guarda la ruta comprimida en el modelo
+    # Asignar nuevo archivo y borrar original
     instance.preview.name = small_rel
-    instance.save(update_fields=['preview'])
-
-    # 7) Elimina el archivo original ya que ya está comprimido
+    instance._compressing_preview = True
+    instance.save(update_fields=["preview"])
+    instance._compressing_preview = False
     try:
-        os.remove(src)
+        if os.path.exists(src_abs):
+            os.remove(src_abs)
     except OSError:
         pass
