@@ -1,3 +1,4 @@
+# projects/signals.py
 import os
 import shutil
 import subprocess
@@ -10,38 +11,71 @@ from .models import Project
 log = logging.getLogger(__name__)
 
 def _compress_mp4(src_abs: str, dst_abs: str) -> bool:
-    """Devuelve True si la compresión fue OK; no lanza excepción."""
+    """
+    Comprime a un clip muy ligero (3s, 240px ancho, 12fps, CRF 32, ~300kbps).
+    Escribe a un archivo temporal y luego hace replace atómico.
+    Devuelve True si fue OK; no lanza excepciones.
+    """
     ffmpeg = shutil.which("ffmpeg")
     if not ffmpeg:
         log.error("ffmpeg no encontrado en PATH; se omite compresión para %s", src_abs)
         return False
 
     os.makedirs(os.path.dirname(dst_abs), exist_ok=True)
+    tmp_abs = dst_abs + ".tmp"
 
     cmd = [
         ffmpeg, "-y",
         "-i", src_abs,
-        "-vf", "scale=320:trunc(ow/a/2)*2,fps=10",
+        "-t", "3",   
+        "-r", "12",    
+        "-vf", "scale=240:trunc(ow/a/2)*2",  
         "-c:v", "libx264",
-        "-crf", "28",
-        "-preset", "veryfast",
+        "-crf", "32",             
+        "-maxrate", "300k", "-bufsize", "600k",
+        "-preset", "faster",
         "-movflags", "+faststart",
-        "-an",  # quita audio en previews (opcional)
-        dst_abs,
+        "-an",          
+        tmp_abs,
     ]
     try:
         res = subprocess.run(cmd, capture_output=True, text=True, check=True)
         if res.stderr:
             log.info("ffmpeg: %s", res.stderr[:2000])
-        return os.path.exists(dst_abs) and os.path.getsize(dst_abs) > 0
+        # valida salida
+        if not (os.path.exists(tmp_abs) and os.path.getsize(tmp_abs) > 0):
+            # limpia si quedó vacío
+            try:
+                if os.path.exists(tmp_abs):
+                    os.remove(tmp_abs)
+            except OSError:
+                pass
+            return False
+        # replace atómico
+        os.replace(tmp_abs, dst_abs)
+        return True
     except subprocess.CalledProcessError as e:
         log.exception("ffmpeg falló (%s): %s", e.returncode, (e.stderr or "")[:2000])
+        try:
+            if os.path.exists(tmp_abs):
+                os.remove(tmp_abs)
+        except OSError:
+            pass
+        return False
+    except Exception:
+        # fallback de seguridad
+        try:
+            if os.path.exists(tmp_abs):
+                os.remove(tmp_abs)
+        except OSError:
+            pass
+        log.exception("Error inesperado comprimiendo %s", src_abs)
         return False
 
 @receiver(post_save, sender=Project)
 def compress_preview(sender, instance, created, **kwargs):
     """
-    Comprime un preview MP4 a *_s.mp4 solo una vez y elimina el original.
+    Comprime un preview MP4 a *_s.mp4 una vez y elimina el original.
     Nunca lanza excepción (evita 500 en admin).
     """
     # Evita re-entradas si guardamos el propio objeto
@@ -53,9 +87,8 @@ def compress_preview(sender, instance, created, **kwargs):
         return
 
     name_lower = field.name.lower()
-    if not name_lower.endswith(".mp4"):
-        return
-    if name_lower.endswith("_s.mp4"):
+    # Solo .mp4 y que no sea ya _s.mp4
+    if not name_lower.endswith(".mp4") or name_lower.endswith("_s.mp4"):
         return
 
     # Paths

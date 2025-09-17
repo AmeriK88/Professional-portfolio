@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "blog",
     "projects",
-    "services",
+    "services.apps.ServicesConfig",
     "pi_payments",
     "users.apps.UsersConfig",
     "orders",

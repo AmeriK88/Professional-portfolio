@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container my-5">
   <div class="row align-items-center">
-    <!-- Columna izquierda con el título animado -->
+    <!-- Hero -->
     <div class="col-12 col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
       <div class="animated-text-container">
         <h1 class="animated-text">¿Desarrollamos el futuro?</h1>
@@ -16,24 +16,29 @@
       </p>
       <div class="d-flex gap-2 justify-content-center justify-content-lg-start mt-3">
         <a href="{% url 'services:service_list' %}" class="btn btn-primary">Ver servicios</a>
-        <a href="https://wa.me/+34639949187" class="btn btn-outline-secondary" target="_blank" rel="noopener noreferrer">
+        <a href="https://wa.me/+34639949187"
+           class="btn btn-outline-secondary"
+           target="_blank" rel="noopener noreferrer nofollow">
           Hablar ahora
         </a>
       </div>
     </div>
 
-    <!-- Columna derecha: tarjeta “plataforma” (mismo estilo oscuro) -->
+    <!-- Card hero (ligera) -->
     <div class="col-12 col-lg-6 text-center">
       <div class="profile-card mx-auto">
         <div class="profile-image-container mx-auto">
-          <img src="{% static 'images/logo-jfgc.webp' %}" class="profile-image" alt="Logo plataforma">
+          <img src="{% static 'images/logo-jfgc.webp' %}"
+               class="profile-image"
+               alt="Logo plataforma"
+               width="256" height="256"
+               loading="lazy" decoding="async">
         </div>
 
         <div class="card-body">
           <h5 class="card-title mt-3">Desarrollamos tu software</h5>
           <p class="card-text mb-3">Contrata packs cerrados o solicita un presupuesto a medida.</p>
 
-          <!-- Lista con iconos alineados -->
           <div class="mt-3 text-center">
             <ul class="list-unstyled text-start small text-light d-inline-block my-0">
               <li class="d-flex align-items-center mb-1">
@@ -59,24 +64,24 @@
     </div>
   </div>
 
-  <!-- Habilidades con íconos (mantenemos TODAS las que tenías) -->
+  <!-- Tecnologías (lazy) -->
   <div class="mt-4 text-center">
     <h5>Tecnologías</h5>
     <div class="d-flex justify-content-center flex-wrap mt-3">
-      <img src="{% static 'icons/git.webp' %}"         alt="Git"         class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/html5.webp' %}"       alt="HTML5"       class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/css3.webp' %}"        alt="CSS3"        class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/javascript.webp' %}"  alt="JavaScript"  class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/python.webp' %}"      alt="Python"      class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/django.webp' %}"      alt="Django"      class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/bootstrap.webp' %}"   alt="Bootstrap"   class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/react.webp' %}"       alt="React"       class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/mySQL_img.webp' %}"   alt="MySQL"       class="m-2" style="width: 30px;">
-      <img src="{% static 'icons/tailwindcss.webp' %}" alt="Tailwindcss" class="m-2" style="width: 30px;">
+      <img src="{% static 'icons/git.webp' %}"         alt="Git"         class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/html5.webp' %}"       alt="HTML5"       class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/css3.webp' %}"        alt="CSS3"        class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/javascript.webp' %}"  alt="JavaScript"  class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/python.webp' %}"      alt="Python"      class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/django.webp' %}"      alt="Django"      class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/bootstrap.webp' %}"   alt="Bootstrap"   class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/react.webp' %}"       alt="React"       class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/mySQL_img.webp' %}"   alt="MySQL"       class="m-2" width="30" height="30" loading="lazy" decoding="async">
+      <img src="{% static 'icons/tailwindcss.webp' %}" alt="Tailwindcss" class="m-2" width="30" height="30" loading="lazy" decoding="async">
     </div>
   </div>
 
-  <!-- Sección “Cómo funciona” (reutiliza tu bloque azul #about) -->
+  <!-- Cómo funciona -->
   <div id="about" class="about-section mt-5">
     <h2 class="about-title">Cómo funciona</h2>
     <p class="about-text mt-3">
@@ -90,23 +95,30 @@
     </a>
   </div>
 
-  {# SERVICIOS DESTACADOS (oscuro, mismo estilo de cards) #}
+  {# Servicios destacados (vídeo lazy, sin autoplay) #}
   {% if featured_services %}
   <section class="mt-5">
     <h2 class="mb-4 text-center">Servicios destacados</h2>
     <div class="row row-cols-1 row-cols-md-3 g-4">
       {% for s in featured_services %}
       <div class="col">
-        <a href="{{ s.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none">
+        <a href="{{ s.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none position-relative">
           {% if s.preview %}
             {% if s.preview.url|lower|slice:"-4:" == ".mp4" %}
-            <video src="{{ s.preview.url }}" class="card-img-top" autoplay muted loop playsinline preload="metadata"
-                   {% if s.image %}poster="{{ s.image.url }}"{% endif %} aria-label="Preview de {{ s.title }}"></video>
+              <video
+                class="card-img-top js-lazy-video"
+                data-src="{{ s.preview.url }}"
+                muted loop playsinline
+                preload="none"
+                {% if s.image %}poster="{{ s.image.url }}"{% endif %}
+                aria-label="Preview de {{ s.title }}">
+                Tu navegador no soporta vídeo.
+              </video>
             {% else %}
-            <img src="{{ s.preview.url }}" class="card-img-top" alt="Preview de {{ s.title }}">
+              <img src="{{ s.preview.url }}" class="card-img-top" alt="Preview de {{ s.title }}" loading="lazy" decoding="async">
             {% endif %}
           {% elif s.image %}
-            <img src="{{ s.image.url }}" class="card-img-top" alt="{{ s.title }}">
+            <img src="{{ s.image.url }}" class="card-img-top" alt="{{ s.title }}" loading="lazy" decoding="async">
           {% endif %}
           <div class="card-body d-flex flex-column">
             <h5 class="card-title mb-2 text-center">{{ s.title }}</h5>
@@ -120,6 +132,7 @@
               <span class="btn btn-outline-primary">Ver detalles</span>
             </div>
           </div>
+          <span class="stretched-link"></span>
         </a>
       </div>
       {% endfor %}
@@ -130,26 +143,34 @@
   </section>
   {% endif %}
 
-  {# PROYECTOS #}
+  {# Proyectos (vídeo lazy, sin autoplay) #}
   <section class="mt-5">
     <h2 class="mb-4 text-center">Últimos proyectos</h2>
     <div class="row row-cols-1 row-cols-md-3 g-4">
       {% for p in latest_projects %}
       <div class="col">
-        <a href="{{ p.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none">
+        <a href="{{ p.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none position-relative">
           {% if p.preview %}
             {% if p.preview.url|lower|slice:"-4:" == ".mp4" %}
-            <video src="{{ p.preview.url }}" class="card-img-top" autoplay muted loop playsinline preload="metadata"
-                   poster="{{ p.image.url }}" aria-label="Preview de {{ p.name }}"></video>
+              <video
+                class="card-img-top js-lazy-video"
+                data-src="{{ p.preview.url }}"
+                muted loop playsinline
+                preload="none"
+                poster="{{ p.image.url }}"
+                aria-label="Preview de {{ p.name }}">
+                Tu navegador no soporta vídeo.
+              </video>
             {% else %}
-            <img src="{{ p.preview.url }}" class="card-img-top" alt="Preview de {{ p.name }}">
+              <img src="{{ p.preview.url }}" class="card-img-top" alt="Preview de {{ p.name }}" loading="lazy" decoding="async">
             {% endif %}
           {% else %}
-            <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}">
+            <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}" loading="lazy" decoding="async">
           {% endif %}
           <div class="card-body">
             <h5 class="card-title mb-0 text-center">{{ p.name }}</h5>
           </div>
+          <span class="stretched-link"></span>
         </a>
       </div>
       {% empty %}
@@ -162,16 +183,18 @@
     </div>
   </section>
 
-  <!-- CALL-TO-ACTION -->
+  <!-- CTA -->
   <div class="cta-section text-center my-5">
     <h2 class="cta-text mb-4">¿Tienes un proyecto en mente?</h2>
     <p class="cta-subtext mb-5">¡Hablemos y construyamos algo increíble juntos!</p>
-    <a href="https://wa.me/+34639949187" class="cta-button" target="_blank" rel="noopener noreferrer">
+    <a href="https://wa.me/+34639949187"
+       class="cta-button"
+       target="_blank" rel="noopener noreferrer nofollow">
       ¡Contáctame Ahora!
     </a>
   </div>
 
-  <!-- BLOG -->
+  <!-- Blog (imágenes lazy) -->
   <section class="mt-5">
     <h2 class="mb-4 text-center">En el blog</h2>
     <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -179,7 +202,7 @@
       <div class="col">
         <a href="{% url 'post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
           {% if post.image %}
-            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}" loading="lazy" decoding="async">
           {% endif %}
           <div class="card-body">
             <h6 class="card-title mb-2">{{ post.title|truncatechars:60 }}</h6>
@@ -193,70 +216,66 @@
     </div>
   </section>
 
-    <!-- SOBRE MÍ (conciso, profesional, responsive) -->
+  <!-- Sobre mí -->
   <section id="about-me" class="about-section mt-5">
     <div class="about-content mx-auto">
-        <h2 class="about-title text-center text-md-start">Sobre mí</h2>
-
-        <p class="about-text mt-3">
+      <h2 class="about-title text-center text-md-start">Sobre mí</h2>
+      <p class="about-text mt-3">
         Soy <strong>José Félix</strong>, desarrollador <strong>full-stack</strong> especializado en
         <strong>Python</strong> y <strong>Django</strong>. Ayudo a startups y pymes a pasar de idea a producto
         en ciclos cortos, con foco en calidad, seguridad y escalabilidad.
-        </p>
+      </p>
 
-        <!-- Lista en grid: 1 col en XS, 2 cols en SM+ -->
-        <ul class="about-features list-unstyled my-3">
+      <ul class="about-features list-unstyled my-3">
         <li class="d-flex align-items-start">
-            <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
-            <span>Backends robustos, APIs REST y paneles de administración a medida.</span>
+          <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
+          <span>Backends robustos, APIs REST y paneles de administración a medida.</span>
         </li>
         <li class="d-flex align-items-start">
-            <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
-            <span>Automatización con Python (Selenium, tareas, notificaciones).</span>
+          <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
+          <span>Automatización con Python (Selenium, tareas, notificaciones).</span>
         </li>
         <li class="d-flex align-items-start">
-            <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
-            <span>Frontends modernos con React/Bootstrap y buenas prácticas UX.</span>
+          <i class="fa-solid fa-circle-check me-2 mt-1 flex-shrink-0"></i>
+          <span>Frontends modernos con React/Bootstrap y buenas prácticas UX.</span>
         </li>
-        </ul>
+      </ul>
 
-        <!-- Botones: se apilan en XS y ocupan 100% -->
-        <div class="btn-stack mt-3">
+      <div class="btn-stack mt-3">
         {% if request.user.is_authenticated %}
-        <a href="{% url 'users:cv_page' %}"
-            class="cta-button text-nowrap"
-            aria-label="Descargar CV (PDF)">
+          <a href="{% url 'users:cv_page' %}"
+             class="cta-button text-nowrap"
+             aria-label="Descargar CV (PDF)">
             <i class="fa-regular fa-file-pdf me-1"></i>
             <span class="d-none d-sm-inline">Descargar CV</span>
             <span class="d-inline d-sm-none">CV</span>
-        </a>
+          </a>
         {% else %}
-        <a href="{% url 'users:login' %}?next={% url 'users:cv_page' %}"
-            class="cta-button text-nowrap"
-            aria-label="Iniciar sesión para descargar CV">
+          <a href="{% url 'users:login' %}?next={% url 'users:cv_page' %}"
+             class="cta-button text-nowrap"
+             aria-label="Iniciar sesión para descargar CV">
             <span class="d-none d-sm-inline">Iniciar sesión para descargar CV</span>
             <span class="d-inline d-sm-none">Inicia sesión</span>
-        </a>
+          </a>
         {% endif %}
 
         <a href="https://www.linkedin.com/in/jose-felix-gordo-casta%C3%B1o-dev-es/"
-            class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
-            target="_blank" rel="noopener noreferrer">
-            Ver LinkedIn
+           class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
+           target="_blank" rel="noopener noreferrer nofollow">
+          Ver LinkedIn
         </a>
 
         <a href="https://github.com/AmeriK88"
-            class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
-            target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-github github-icon me-2"></i>
-            Ver GitHub
+           class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
+           target="_blank" rel="noopener noreferrer nofollow">
+          <i class="fab fa-github github-icon me-2"></i>
+          Ver GitHub
         </a>
-        </div>
+      </div>
     </div>
   </section>
 
-
-  <!-- STATS -->
+  <!-- Stats -->
   <section class="stats my-5 py-5 bg-light rounded">
     <h2 class="text-center mb-4">En números</h2>
     <div class="container">
@@ -270,6 +289,12 @@
       </div>
     </div>
   </section>
-
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  {# Reutilizamos el lazy video de projects/services #}
+  <script src="{% static 'js/project-previews.js' %}" defer></script>
+  {# Animación de contadores #}
+  <script src="{% static 'js/counter.js' %}" defer></script>
 {% endblock %}

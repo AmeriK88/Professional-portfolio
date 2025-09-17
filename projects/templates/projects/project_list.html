@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Proyectos - JFGC ⇒ Dev{% endblock %}
 
 {% block content %}
@@ -9,29 +10,33 @@
     <div class="col">
       <div class="card h-100 shadow">
         {% if project.preview %}
-          {# sacamos los últimos 4 caracteres y comparamos con ".mp4" #}
           {% if project.preview.url|lower|slice:"-4:" == ".mp4" %}
             <video
-              src="{{ project.preview.url }}"
-              autoplay muted loop playsinline
-              preload="metadata"
+              class="card-img-top js-lazy-video"
+              data-src="{{ project.preview.url }}"
+              muted
+              loop
+              playsinline
+              preload="none"
               poster="{{ project.image.url }}"
-              aria-label="Preview de {{ project.name }}"
-              class="card-img-top">
+              aria-label="Preview de {{ project.name }}">
               Tu navegador no soporta vídeo.
             </video>
           {% else %}
             <img
               src="{{ project.preview.url }}"
               alt="Preview de {{ project.name }}"
-              class="card-img-top">
+              class="card-img-top"
+              loading="lazy">
           {% endif %}
         {% else %}
           <img
             src="{{ project.image.url }}"
             alt="{{ project.name }}"
-            class="card-img-top">
+            class="card-img-top"
+            loading="lazy">
         {% endif %}
+
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">{{ project.name }}</h5>
           <p class="card-text mb-4">
@@ -41,7 +46,8 @@
             <a
               href="{{ project.url }}"
               class="btn btn-primary mt-auto"
-              target="_blank">
+              target="_blank"
+              rel="noopener">
               Ver Proyecto
             </a>
           {% endif %}
@@ -51,4 +57,7 @@
     {% endfor %}
   </div>
 </div>
+
+{# Incluye el JS de previews (estático) #}
+<script src="{% static 'js/project-previews.js' %}" defer></script>
 {% endblock %}

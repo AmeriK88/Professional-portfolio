@@ -20,28 +20,32 @@
   <h1 class="mb-3">{{ service.title }}</h1>
   <p class="text-muted mb-4">Desde <strong>{{ service.price }} €</strong></p>
 
-  {# Media preview #}
+  {# Media preview (lazy) #}
   {% if service.preview %}
     {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
       <video
-        src="{{ service.preview.url }}"
-        class="w-100 rounded mb-4"
-        autoplay muted loop playsinline preload="metadata"
+        class="w-100 rounded mb-4 js-lazy-video"
+        data-src="{{ service.preview.url }}"
+        muted
+        loop
+        playsinline
+        preload="none"
         {% if service.image %}poster="{{ service.image.url }}"{% endif %}>
         Tu navegador no soporta vídeo.
       </video>
     {% else %}
       <img src="{{ service.preview.url }}"
            class="img-fluid rounded mb-4"
-           alt="{{ service.title }}">
+           alt="{{ service.title }}"
+           loading="lazy">
     {% endif %}
   {% elif service.image %}
     <img src="{{ service.image.url }}"
          class="img-fluid rounded mb-4"
-         alt="{{ service.title }}">
+         alt="{{ service.title }}"
+         loading="lazy">
   {% endif %}
 
-  {# 1) Descripción #}
   <section class="mb-5">
     <h2 class="h4">Descripción</h2>
     <div class="lead">
@@ -49,7 +53,6 @@
     </div>
   </section>
 
-  {# 2) Características #}
   {% if service.features.exists %}
     <section class="mb-5">
       <h2 class="h4">Lo que incluye este servicio</h2>
@@ -61,29 +64,26 @@
     </section>
   {% endif %}
 
-  {# --- CTA --- #}
   <div class="d-flex gap-2 mb-5">
     <a href="{% url 'services:service_list' %}" class="btn btn-outline-secondary">
       ← Volver
     </a>
 
-  {% if request.user.is_authenticated %}
-    <button
-      id="pi-pay-btn"
-      class="btn btn-primary"
-      data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
-      Pagar con
-      <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon" width="18" height="18">
-    </button>
-  {% else %}
-    <a class="btn btn-primary" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
-      Iniciar sesión para pagar
-    </a>
-  {% endif %}
+    {% if request.user.is_authenticated %}
+      <button
+        id="pi-pay-btn"
+        class="btn btn-primary"
+        data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
+        Pagar con
+        <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon" width="18" height="18">
+      </button>
+    {% else %}
+      <a class="btn btn-primary" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
+        Iniciar sesión para pagar
+      </a>
+    {% endif %}
   </div>
 
-
-  {# 4) FAQs #}
   {% if service.faqs.exists %}
     <h2 class="h4 mb-3">Preguntas frecuentes</h2>
     <div class="accordion mb-5" id="faqAccordion">
@@ -108,10 +108,7 @@
         </div>
       {% endfor %}
     </div>
-  {% endif %}
 
-  {# 5) JSON-LD #}
-  {% if service.faqs.exists %}
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -141,7 +138,7 @@
   <!-- Config para el JS estático -->
   <script>
     window.PI_CFG = {
-      sandbox: true,  // pon false cuando pases a real
+      sandbox: true,
       approveUrl: "{% url 'pi:approve' %}",
       completeUrl: "{% url 'pi:complete' %}",
       cancelUrl: "{% url 'pi:cancel' %}",
@@ -149,7 +146,6 @@
     };
   </script>
 
-  <!-- Manejador -->
-  <script src="{% static 'js/pi_payments.js' %}" defer></script>
+  <!-- Lazy video (mismo script que en projects) -->
+  <script src="{% static 'js/project-previews.js' %}" defer></script>
 {% endblock %}
-
