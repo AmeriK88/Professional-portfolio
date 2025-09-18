@@ -135,7 +135,7 @@
   <!-- Pi SDK -->
   <script src="https://sdk.minepi.com/pi-sdk.js" defer></script>
 
-  <!-- Config para el JS estático -->
+  <!-- Config que lee pi_payments.js -->
   <script>
     window.PI_CFG = {
       sandbox: true,
@@ -146,6 +146,9 @@
     };
   </script>
 
-  <!-- Lazy video (mismo script que en projects) -->
+  <!-- Tu handler de pagos (¡este faltaba!) -->
+  <script src="{% static 'js/pi_payments.js' %}" defer></script>
+
+  <!-- Lazy video -->
   <script src="{% static 'js/project-previews.js' %}" defer></script>
 {% endblock %}

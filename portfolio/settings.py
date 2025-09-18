@@ -25,7 +25,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # --- Seguridad / entorno ---
 # Fallback: si no hay SECRET_KEY, intenta con DEAFAULT_SK (como lo tienes escrito en tus variables),
 # y si tampoco existe, usa "change-me".
-SECRET_KEY = env("SECRET_KEY", default=env("DEAFAULT_SK", default="change-me"))
+SECRET_KEY = env("SECRET_KEY", default=env("DEAFAULT_SK", default="DEAFAULT_SK"))
 DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
@@ -59,7 +59,7 @@ INSTALLED_APPS = [
 # --- Middleware ---
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # estáticos en prod
+    "whitenoise.middleware.WhiteNoiseMiddleware", 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -105,7 +105,7 @@ def _is_mysql_url(url: str | None) -> bool:
     return bool(url) and (url.startswith("mysql://") or url.startswith("mysql+pymysql://"))
 
 if DB_URL:
-    # Sólo forzar SSL en no-MySQL (por ejemplo PostgreSQL). MySQL no acepta 'sslmode'.
+    # Sólo forzar SSL en no-MySQL. MySQL no acepta 'sslmode'.
     db_default = dj_database_url.config(
         default=DB_URL,
         conn_max_age=600,
@@ -165,8 +165,8 @@ UNFOLD = {
     "SITE_SUBHEADER": "Developer Dashboard",
     "SITE_URL": "/",
     "SITE_ICON": {
-        "light": lambda request: static("img/admin/icon-light.svg"),
-        "dark": lambda request: static("img/admin/icon-dark.svg"),
+        "light": lambda request: static("img/admin/icon-dark.svg"),
+        "dark": lambda request: static("img/admin/icon-light.svg"),
     },
     "SITE_LOGO": {
         "light": lambda request: static("img/admin/logo-light.png"),
