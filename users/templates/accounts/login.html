@@ -1,12 +1,17 @@
+{# templates/accounts/login.html #}
 {% extends "base.html" %}
+{% load static %}  
 {% block title %}Iniciar sesión{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-6 col-lg-4">
     <h1 class="h3 mb-3">Iniciar sesión</h1>
-    <form method="post" novalidate>
+
+    <form id="login-form" method="post" novalidate>
       {% csrf_token %}
       {{ form.non_field_errors }}
+
       <div class="mb-3">
         <label class="form-label">Usuario</label>
         {{ form.username }}
@@ -15,8 +20,14 @@
         <label class="form-label">Contraseña</label>
         {{ form.password }}
       </div>
+
+      <!-- reCAPTCHA v3 -->
+      {{ form.recaptcha_token }}
+
+
       <button class="btn btn-primary w-100" type="submit">Entrar</button>
     </form>
+
     <div class="mt-3 small">
       ¿Sin cuenta?
       <a href="{% url 'users:register' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">Regístrate</a>
@@ -24,4 +35,9 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://www.google.com/recaptcha/api.js?render={{ RECAPTCHA_SITE_KEY }}"></script>
+  <script src="{% static 'js/recaptcha-login.js' %}"></script>
 {% endblock %}

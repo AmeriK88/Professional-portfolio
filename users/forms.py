@@ -1,4 +1,3 @@
-# users/forms.py
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import (
@@ -6,13 +5,36 @@ from django.contrib.auth.forms import (
     PasswordChangeForm,
     UserCreationForm,
 )
+
 from .models import AVATAR_CHOICES
+from .utils.recaptcha import verify_recaptcha 
 
 User = get_user_model()
 
 
-class StyledAuthenticationForm(AuthenticationForm):
-    """Login con estilos Bootstrap y autocompletado correcto."""
+# ---------- Mixin reutilizable para reCAPTCHA v3 ----------
+class RecaptchaV3Mixin(forms.Form):
+    """
+    Añade un campo hidden 'recaptcha_token' y valida reCAPTCHA v3 en clean().
+    Sobrescribe 'recaptcha_action' en cada form que lo use.
+    """
+    recaptcha_token = forms.CharField(widget=forms.HiddenInput, required=False)
+    recaptcha_action = "generic"
+
+    def clean(self):
+        cleaned = super().clean()
+        token = self.data.get("recaptcha_token", "")
+        ok, payload = verify_recaptcha(token, expected_action=self.recaptcha_action)
+        if not ok:
+            raise forms.ValidationError("Verificación reCAPTCHA fallida. Inténtalo de nuevo.")
+        return cleaned
+
+
+# ---------- Login ----------
+class StyledAuthenticationForm(RecaptchaV3Mixin, AuthenticationForm):
+    """Login con estilos Bootstrap, autocompletado y reCAPTCHA v3."""
+    recaptcha_action = "login"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].widget.attrs.setdefault("class", "form-control")
@@ -24,8 +46,11 @@ class StyledAuthenticationForm(AuthenticationForm):
         self.fields["password"].widget.attrs.setdefault("placeholder", "Tu contraseña")
 
 
-class CustomUserCreationForm(UserCreationForm):
-    """Registro con email obligatorio y estilos uniformes."""
+# ---------- Registro ----------
+class CustomUserCreationForm(RecaptchaV3Mixin, UserCreationForm):
+    """Registro con email obligatorio, estilos uniformes y reCAPTCHA v3."""
+    recaptcha_action = "register"
+
     email = forms.EmailField(
         required=True,
         help_text="Necesario para notificaciones.",
@@ -70,6 +95,7 @@ class CustomUserCreationForm(UserCreationForm):
         return email
 
 
+# ---------- Perfil ----------
 class ProfileUpdateForm(forms.ModelForm):
     """Edición de perfil con elección de avatar predefinido (sin subida)."""
     avatar_choice = forms.ChoiceField(
@@ -97,6 +123,7 @@ class ProfileUpdateForm(forms.ModelForm):
         return email
 
 
+# ---------- Cambio de contraseña ----------
 class StyledPasswordChangeForm(PasswordChangeForm):
     """Cambio de contraseña con estilos Bootstrap."""
     def __init__(self, *args, **kwargs):

@@ -1,34 +1,54 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Registro{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-12 col-md-6 col-lg-5">
     <h1 class="h3 mb-3">Crear cuenta</h1>
-    <form method="post" novalidate>
+    <form id="register-form" method="post" novalidate>
       {% csrf_token %}
       {{ form.non_field_errors }}
+
       <div class="mb-3">
         <label class="form-label">Usuario</label>
         {{ form.username }}
         {{ form.username.errors }}
       </div>
+
       <div class="mb-3">
         <label class="form-label">Email</label>
         {{ form.email }}
         {{ form.email.errors }}
       </div>
+
       <div class="mb-3">
         <label class="form-label">Contraseña</label>
         {{ form.password1 }}
         {{ form.password1.errors }}
       </div>
+
       <div class="mb-3">
         <label class="form-label">Repite contraseña</label>
         {{ form.password2 }}
         {{ form.password2.errors }}
       </div>
+
+      {{ form.recaptcha_token }} {# <- importantísimo #}
+
       <button class="btn btn-primary w-100" type="submit">Registrarme</button>
     </form>
+
+    <p class="text-muted small mt-2">
+      Esta página está protegida por reCAPTCHA y se aplican la
+      <a href="https://policies.google.com/privacy">Política de Privacidad</a> y los
+      <a href="https://policies.google.com/terms">Términos de Servicio</a> de Google.
+    </p>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  <script src="https://www.google.com/recaptcha/api.js?render={{ RECAPTCHA_SITE_KEY }}"></script>
+  <script src="{% static 'js/recaptcha-register.js' %}"></script>
 {% endblock %}

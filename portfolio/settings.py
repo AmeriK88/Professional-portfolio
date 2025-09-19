@@ -38,6 +38,7 @@ PI_API_KEY = env("PI_API_KEY", default="")
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+
 # --- Apps ---
 INSTALLED_APPS = [
     "unfold",
@@ -70,22 +71,27 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "portfolio.urls"
 
-# --- Templates ---
+# settings.py
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
-        "APP_DIRS": True,
+        "DIRS": [os.path.join(BASE_DIR, "templates")],  # tu carpeta global de plantillas
+        "APP_DIRS": True,  # busca plantillas dentro de cada app
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # Opcional: expone STATIC_URL en plantillas
+                "django.template.context_processors.static",
+                # >>> Tu context processor para la site key <<<
+                "users.context_processors.recaptcha_keys",
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = "portfolio.wsgi.application"
 
@@ -272,6 +278,11 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Opcional:
 # WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+
+# --- reCAPTCHA v3 ---
+RECAPTCHA_SITE_KEY = env("RECAPTCHA_SITE_KEY", default="")
+RECAPTCHA_SECRET_KEY = env("RECAPTCHA_SECRET_KEY", default="")
+RECAPTCHA_MIN_SCORE = env.float("RECAPTCHA_MIN_SCORE", default=0.5)
 
 # --- Default PK field ---
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
