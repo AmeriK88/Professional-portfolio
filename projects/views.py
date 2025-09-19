@@ -40,9 +40,9 @@ def home(request):
 
     # Stats como enteros (tu contador JS lo agradecerá)
     stats = [
-        (34, "Repos"),
-        (8,  "Clientes"),
-        (5,  "Años de experiencia"),
+        (35, "Repos"),
+        (+10,  "Clientes"),
+        (6,  "Años de experiencia"),
     ]
 
     context = {
