@@ -10,7 +10,7 @@ urlpatterns = [
     # Autenticación
     path(
         "login/",
-        auth_views.LoginView.as_view(
+        views.LoginView.as_view(
             template_name="accounts/login.html",
             redirect_authenticated_user=True,
             authentication_form=StyledAuthenticationForm,

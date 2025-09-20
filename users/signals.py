@@ -9,3 +9,4 @@ def greet_login(sender, user, request, **kwargs):
 @receiver(user_login_failed, dispatch_uid="users_warn_bad_login_once")
 def warn_bad_login(sender, credentials, request, **kwargs):
     messages.error(request, "Credenciales inválidas. Revisa usuario o contraseña.")
+
