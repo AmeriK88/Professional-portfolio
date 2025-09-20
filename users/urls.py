@@ -32,10 +32,14 @@ urlpatterns = [
         "password-reset/",
         auth_views.PasswordResetView.as_view(
             template_name="accounts/password_reset_form.html",
+            email_template_name="accounts/emails/password_reset_email.html",     # <- ruta única tuya
+            subject_template_name="accounts/emails/password_reset_subject.txt", # <- ruta única tuya
+            html_email_template_name=None,                                      # <- evita HTML del admin
             success_url=reverse_lazy("users:password_reset_done"),
         ),
         name="password_reset",
     ),
+
     path(
         "password-reset/done/",
         auth_views.PasswordResetDoneView.as_view(
@@ -48,6 +52,7 @@ urlpatterns = [
         auth_views.PasswordResetConfirmView.as_view(
             template_name="accounts/password_reset_confirm.html",
             success_url=reverse_lazy("users:password_reset_complete"),
+            
         ),
         name="password_reset_confirm",
     ),

@@ -154,7 +154,7 @@
                   <li>
                     <form action="{% url 'users:logout' %}" method="post" class="m-0 p-0">
                       {% csrf_token %}
-                      <input type="hidden" name="next" value="{{ request.path }}">
+                      <input type="hidden" name="next" value="/">
                       <button type="submit" class="dropdown-item">
                         <i class="fa-solid fa-right-from-bracket me-2"></i>Cerrar sesión
                       </button>

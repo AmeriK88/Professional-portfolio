@@ -276,6 +276,10 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+LOGIN_URL = reverse_lazy("users:login")
+LOGIN_REDIRECT_URL = reverse_lazy("users:profile")   # antes iba a /accounts/profile/
+LOGOUT_REDIRECT_URL = "/" 
+
 # Opcional:
 # WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
