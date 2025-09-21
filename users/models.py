@@ -9,6 +9,7 @@ AVATAR_CHOICES = [
     ("robot", "Robot"),
     ("wizard", "Wizard"),
     ("astro", "Astronauta"),
+    ("motorist", "Motorista"),
 ]
 
 def user_avatar_upload_to(instance, filename):
