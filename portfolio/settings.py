@@ -276,9 +276,28 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+WHITENOISE_MAX_AGE = 60 * 60 * 24 * 365 
+
 LOGIN_URL = reverse_lazy("users:login")
-LOGIN_REDIRECT_URL = reverse_lazy("users:profile")   # antes iba a /accounts/profile/
+LOGIN_REDIRECT_URL = reverse_lazy("users:profile")   
 LOGOUT_REDIRECT_URL = "/" 
+
+
+# Marcar como "immutable" los ficheros con hash en el nombre (los de Manifest)
+def whitenoise_immutable_test(path, url):
+    import re
+    filename = path.rsplit("/", 1)[-1]
+    return bool(re.search(r"\.[0-9a-f]{8,}\.", filename))
+
+WHITENOISE_IMMUTABLE_FILE_TEST = whitenoise_immutable_test
+
+# Añadir stale-while-revalidate para aún más suavidad en recargas
+def whitenoise_add_headers(headers, path, url):
+    # WhiteNoise ya pondrá max-age; aquí completamos con SWR si es immutable
+    if WHITENOISE_IMMUTABLE_FILE_TEST(path, url):
+        headers["Cache-Control"] = "public, max-age=31536000, immutable, stale-while-revalidate=86400"
+
+WHITENOISE_ADD_HEADERS_FUNCTION = whitenoise_add_headers
 
 # Opcional:
 # WHITENOISE_KEEP_ONLY_HASHED_FILES = True
