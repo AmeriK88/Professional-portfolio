@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Política de Privacidad · JFGC Dev{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-3">
+    <h1 class="mb-1">Política de Privacidad</h1>
+    <p class="text-muted small mb-0">
+      Última actualización: {{ last_updated|date:"d/m/Y" }}
+    </p>
+  </header>
+
+  {# Índice #}
+  <nav aria-label="Índice de la página" class="mb-4">
+    <ul class="list-inline small mb-0">
+      <li class="list-inline-item"><a href="#responsable">1. Responsable</a></li>
+      <li class="list-inline-item"><a href="#datos">2. Datos que tratamos</a></li>
+      <li class="list-inline-item"><a href="#finalidades">3. Finalidades</a></li>
+      <li class="list-inline-item"><a href="#base-legal">4. Base legal</a></li>
+      <li class="list-inline-item"><a href="#destinatarios">5. Destinatarios</a></li>
+      <li class="list-inline-item"><a href="#transferencias">6. Transferencias</a></li>
+      <li class="list-inline-item"><a href="#conservacion">7. Conservación</a></li>
+      <li class="list-inline-item"><a href="#derechos">8. Tus derechos</a></li>
+      <li class="list-inline-item"><a href="#menores">9. Menores</a></li>
+      <li class="list-inline-item"><a href="#automatizadas">10. Decisiones automatizadas</a></li>
+      <li class="list-inline-item"><a href="#cambios">11. Cambios</a></li>
+      <li class="list-inline-item"><a href="#contacto">12. Contacto</a></li>
+    </ul>
+  </nav>
+
+  <section id="responsable" class="mt-4">
+    <h2 class="h4">1. Responsable del tratamiento</h2>
+    <p class="mb-1"><strong>José Félix Gordo Castaño</strong></p>
+    <p class="mb-1">Correo: <a href="mailto:josefe59@hotmail.com">josefe59@hotmail.com</a></p>
+    <p class="small text-muted mb-0">En adelante, “JFGC · Dev”.</p>
+  </section>
+
+  <section id="datos" class="mt-4">
+    <h2 class="h4">2. Datos que tratamos</h2>
+    <ul>
+      <li><strong>Cuenta y autenticación:</strong> usuario, email, contraseña (hash) si te registras/inicias sesión.</li>
+      <li><strong>Uso técnico básico:</strong> páginas visitadas, errores del servidor/logs, IP y agente de usuario (solo para seguridad y diagnóstico).</li>
+      <li><strong>Preferencias locales:</strong> ajustes guardados en <code>localStorage</code> (p. ej., consentimiento). No son “cookies” pero las listamos por transparencia.</li>
+    </ul>
+    <p class="mb-0">
+      No utilizamos cookies de analítica ni seguimiento sin tu consentimiento. Consulta la
+      <a href="{% url 'core:legal_cookies' %}">Política de cookies</a>.
+    </p>
+  </section>
+
+  <section id="finalidades" class="mt-4">
+    <h2 class="h4">3. Finalidades del tratamiento</h2>
+    <ul>
+      <li><strong>Prestación del servicio:</strong> acceso a tu cuenta y funcionalidades del sitio.</li>
+      <li><strong>Seguridad:</strong> protección frente a abusos, limitación de intentos de login, prevención de fraude.</li>
+      <li><strong>Mejora y soporte:</strong> mantenimiento, resolución de incidencias y calidad del sitio.</li>
+      <li><strong>Comunicaciones:</strong> responder a tus consultas si nos escribes.</li>
+    </ul>
+  </section>
+
+  <section id="base-legal" class="mt-4">
+    <h2 class="h4">4. Base legal</h2>
+    <ul>
+      <li><strong>Ejecución de contrato</strong> (art. 6.1.b RGPD): gestión de tu cuenta y funciones asociadas.</li>
+      <li><strong>Interés legítimo</strong> (art. 6.1.f RGPD): seguridad, prevención de abusos y mejora técnica.</li>
+      <li><strong>Consentimiento</strong> (art. 6.1.a RGPD): cuando habilites opciones no necesarias (p. ej., “servicios externos”).</li>
+    </ul>
+  </section>
+
+  <section id="destinatarios" class="mt-4">
+    <h2 class="h4">5. Destinatarios</h2>
+    <p>
+      Compartimos datos solo con <strong>proveedores esenciales</strong> (p. ej., hosting/CDN) bajo contratos que
+      garantizan medidas adecuadas de seguridad y confidencialidad. No vendemos tus datos.
+    </p>
+  </section>
+
+  <section id="transferencias" class="mt-4">
+    <h2 class="h4">6. Transferencias internacionales</h2>
+    <p>
+      Si algún proveedor aloja fuera del EEE, se aplicarán garantías adecuadas (p. ej., Cláusulas Contractuales
+      Tipo). En caso de duda puedes escribirnos y te facilitamos el detalle vigente.
+    </p>
+  </section>
+
+  <section id="conservacion" class="mt-4">
+    <h2 class="h4">7. Conservación</h2>
+    <p>
+      Conservamos los datos durante el tiempo necesario para la finalidad y/o los plazos legales aplicables.
+      Las <em>logs</em> de seguridad se rotan periódicamente. Puedes solicitar la eliminación de tu cuenta.
+    </p>
+  </section>
+
+  <section id="derechos" class="mt-4">
+    <h2 class="h4">8. Tus derechos</h2>
+    <p>
+      Puedes ejercer acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a
+      <a href="mailto:josefe59@hotmail.com">josefe59@hotmail.com</a>. Si el tratamiento se basa en consentimiento,
+      puedes retirarlo en cualquier momento sin efectos retroactivos (p. ej., desde el panel de
+      <a href="{% url 'core:legal_cookies' %}">preferencias/cookies</a>).
+    </p>
+    <p class="mb-0">
+      Autoridad de control (España): <em>Agencia Española de Protección de Datos (AEPD)</em>.
+    </p>
+  </section>
+
+  <section id="menores" class="mt-4">
+    <h2 class="h4">9. Menores</h2>
+    <p>
+      El sitio no está dirigido a menores. Si detectamos registros de menores sin autorización,
+      procederemos a su eliminación.
+    </p>
+  </section>
+
+  <section id="automatizadas" class="mt-4">
+    <h2 class="h4">10. Decisiones automatizadas</h2>
+    <p>
+      No realizamos perfiles ni decisiones automatizadas con efectos jurídicos o similares.
+    </p>
+  </section>
+
+  <section id="cambios" class="mt-4">
+    <h2 class="h4">11. Cambios en esta política</h2>
+    <p>
+      Podremos actualizar esta política para reflejar mejoras o requisitos legales. Publicaremos las
+      versiones actualizadas en esta página.
+    </p>
+  </section>
+
+  <section id="contacto" class="mt-4">
+    <h2 class="h4">12. Contacto</h2>
+    <p class="mb-0">
+      Para cualquier duda o solicitud sobre privacidad, contáctanos en
+      <a href="mailto:josefe59@hotmail.com">josefe59@hotmail.com</a>.
+    </p>
+  </section>
+
+  <div class="text-end mt-4">
+    <a href="#top" class="btn btn-outline-secondary btn-sm">Volver arriba</a>
+  </div>
+</div>
+{% endblock %}

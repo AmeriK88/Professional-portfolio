@@ -50,12 +50,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "blog",
+    "core",
     "projects",
     "services.apps.ServicesConfig",
     "pi_payments",
     "users.apps.UsersConfig",
     "orders",
-    'axes'
+    "axes",
 ]
 
 # --- Middleware ---
@@ -77,7 +78,7 @@ ROOT_URLCONF = "portfolio.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],  # tu carpeta global de plantillas
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,  # busca plantillas dentro de cada app
         "OPTIONS": {
             "context_processors": [
