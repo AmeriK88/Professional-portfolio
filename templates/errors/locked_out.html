@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Acceso bloqueado{% endblock %}
+
+{% block content %}
+<meta name="robots" content="noindex,nofollow">
+<div class="row justify-content-center my-5">
+  <div class="col-12 col-md-8 col-lg-6">
+    <div class="card shadow-sm border-danger-subtle">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-3">
+          <i class="fa-solid fa-triangle-exclamation text-danger me-2" aria-hidden="true"></i>
+          <h1 class="h4 mb-0">Demasiados intentos fallidos</h1>
+        </div>
+
+        <p class="mb-3">
+          Por seguridad, hemos bloqueado temporalmente el acceso a esta cuenta o desde esta IP.
+          Inténtalo de nuevo más tarde.
+        </p>
+
+        {% if cooloff_time %}
+          <p class="small text-muted mb-3">
+            Tiempo de espera aproximado: <strong>{{ cooloff_time }}</strong>
+          </p>
+        {% endif %}
+
+        {% if username %}
+          <p class="small text-muted mb-4">
+            Usuario afectado: <code>{{ username }}</code>
+          </p>
+        {% endif %}
+
+        <div class="d-flex gap-2">
+          <a class="btn btn-primary" href="{% url 'users:login' %}">
+            <i class="fa-solid fa-right-to-bracket me-1"></i> Volver a iniciar sesión
+          </a>
+          <a class="btn btn-outline-secondary" href="/">
+            <i class="fa-solid fa-house me-1"></i> Ir al inicio
+          </a>
+        </div>
+
+        <hr class="my-4">
+        <p class="small text-muted mb-0">
+          ¿No fuiste tú? Te recomendamos cambiar tu contraseña.
+          Si necesitas asistencia, escríbenos a
+          <a href="mailto:josefe59@hotmail.com">josefe59@hotmail.com</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

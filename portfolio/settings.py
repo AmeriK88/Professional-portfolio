@@ -2,9 +2,9 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from pathlib import Path
-import os
 import environ
 import dj_database_url
+import os
 
 # Usar PyMySQL como drop-in de mysqlclient si está disponible
 try:
@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "pi_payments",
     "users.apps.UsersConfig",
     "orders",
+    'axes'
 ]
 
 # --- Middleware ---
@@ -65,6 +66,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -90,6 +92,11 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend", 
+    "django.contrib.auth.backends.ModelBackend",
 ]
 
 
@@ -247,6 +254,84 @@ UNFOLD = {
     "DASHBOARD_CALLBACK": "portfolio.admin_dashboard.dashboard_callback",
 }
 
+
+# --- Logging ---
+LOG_DIR = BASE_DIR / "logs"
+LOG_DIR.mkdir(exist_ok=True) 
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,  # conserva loggers de Django/terceros
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s [%(levelname)s] %(name)s %(clientip)s %(message)s",
+        },
+        "simple": {"format": "%(levelname)s: %(message)s"},
+    },
+    "filters": {
+        # añade IP del cliente si está en request (no siempre disponible)
+        "client_ip": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": lambda record: setattr(
+                record, "clientip", getattr(record, "clientip", "")
+            ) or True,
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "level": "INFO" if DEBUG else "WARNING",
+            "formatter": "simple",
+        },
+        "security_file": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "level": "INFO",
+            "filename": str(LOG_DIR / "security.log"),
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 5,
+            "formatter": "verbose",
+            "filters": ["client_ip"],
+        },
+        "mail_admins": {
+            "class": "django.utils.log.AdminEmailHandler",
+            "level": "ERROR",
+        },
+    },
+    "loggers": {
+        # Bloqueos e intentos que registra django-axes
+        "axes": {
+            "handlers": ["security_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # Alertas de seguridad de Django (CSRF, SuspiciousOperation, etc.)
+        "django.security": {
+            "handlers": ["security_file", "console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        # Errores de petición (500, tracebacks)
+        "django.request": {
+            "handlers": ["security_file", "console"] + ([] if DEBUG else ["mail_admins"]),
+            "level": "ERROR",
+            "propagate": False,
+        },
+        # Autenticación (logins/logout fallidos, cambios de password)
+        "django.contrib.auth": {
+            "handlers": ["security_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        # (Opcional) tu app users para registrar eventos propios
+        "users": {
+            "handlers": ["security_file", "console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}
+
+
 # --- Usuario custom ---
 AUTH_USER_MODEL = "users.User"
 
@@ -306,6 +391,12 @@ WHITENOISE_ADD_HEADERS_FUNCTION = whitenoise_add_headers
 RECAPTCHA_SITE_KEY = env("RECAPTCHA_SITE_KEY", default="")
 RECAPTCHA_SECRET_KEY = env("RECAPTCHA_SECRET_KEY", default="")
 RECAPTCHA_MIN_SCORE = env.float("RECAPTCHA_MIN_SCORE", default=0.5)
+
+
+# Configuración básica
+AXES_FAILURE_LIMIT = 5  # máximo de intentos
+AXES_COOLOFF_TIME = 1  # horas bloqueado
+AXES_LOCKOUT_TEMPLATE = 'errors/locked_out.html'
 
 # --- Default PK field ---
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
