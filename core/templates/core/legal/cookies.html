@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Política de cookies · JFGC Dev{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <header class="mb-3">
+    <h1 class="mb-1">Política de cookies</h1>
+    <p class="text-muted small mb-0">
+      Última actualización: {{ last_updated|date:"d/m/Y" }}
+    </p>
+  </header>
+
+  {# Índice #}
+  <nav aria-label="Índice de la página" class="mb-4">
+    <ul class="list-inline small mb-0">
+      <li class="list-inline-item"><a href="#que-es">1. ¿Qué es una cookie?</a></li>
+      <li class="list-inline-item"><a href="#que-usamos">2. Qué usamos aquí</a></li>
+      <li class="list-inline-item"><a href="#servicios-externos">3. Servicios externos</a></li>
+      <li class="list-inline-item"><a href="#gestionar">4. Gestionar preferencias</a></li>
+      <li class="list-inline-item"><a href="#bloquear">5. Bloquear/eliminar cookies</a></li>
+      <li class="list-inline-item"><a href="#contacto">6. Contacto</a></li>
+    </ul>
+  </nav>
+
+  <section id="que-es" class="mt-4">
+    <h2 class="h4">1. ¿Qué es una cookie?</h2>
+    <p>
+      Una cookie es un pequeño archivo que un sitio web guarda en tu dispositivo para recordar
+      información (por ejemplo, mantener tu sesión iniciada o tus preferencias).
+      Este sitio utiliza un enfoque de <em>privacidad primero</em>: solo almacenamiento necesario
+      para el funcionamiento básico y, opcionalmente, habilita la apertura directa de servicios
+      externos si así lo consientes.
+    </p>
+  </section>
+
+  <section id="que-usamos" class="mt-4">
+    <h2 class="h4">2. Qué usamos aquí</h2>
+    <p class="mb-2">
+      Estas son las cookies/almacenamientos que puede utilizar el sitio. Algunas son siempre
+      necesarias para el funcionamiento básico.
+    </p>
+
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>Nombre</th>
+            <th>Proveedor</th>
+            <th>Finalidad</th>
+            <th>Duración</th>
+            <th>Categoría</th>
+          </tr>
+        </thead>
+        <tbody>
+          {# Rellenado desde contexto para no duplicar texto en la vista #}
+          {% for c in cookies %}
+            <tr>
+              <td><code>{{ c.name }}</code></td>
+              <td>{{ c.vendor }}</td>
+              <td>{{ c.purpose }}</td>
+              <td>{{ c.duration }}</td>
+              <td>
+                <span class="badge {% if c.category == 'Necesaria' %}text-bg-secondary{% else %}text-bg-info{% endif %}">
+                  {{ c.category }}
+                </span>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="5" class="text-muted small">Sin elementos definidos.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small text-muted mb-0">
+      Nota: <code>localStorage</code> y <code>sessionStorage</code> no son cookies pero funcionan de forma similar
+      (se indican también por transparencia).
+    </p>
+  </section>
+
+  <section id="servicios-externos" class="mt-4">
+    <h2 class="h4">3. Servicios externos</h2>
+    <p>
+      Algunos enlaces abren servicios de terceros (p. ej., WhatsApp, LinkedIn, GitHub). Esos
+      servicios aplican sus propias políticas y cookies. En este sitio <strong>no se cargan
+      automáticamente recursos de terceros</strong>; solo se abrirán en una nueva pestaña cuando
+      hagas clic, o directamente si activas la preferencia de “Servicios externos”.
+    </p>
+  </section>
+
+  <section id="gestionar" class="mt-4">
+    <h2 class="h4">4. Gestionar preferencias</h2>
+    <p>
+      Puedes actualizar tu elección en cualquier momento desde el pie de página o
+      <a href="#" data-ck-open>abrir el panel de preferencias</a>.
+      Consulta también nuestra <a href="{% url 'core:legal_privacidad' %}">Política de privacidad</a>.
+    </p>
+  </section>
+
+  <section id="bloquear" class="mt-4">
+    <h2 class="h4">5. Bloquear/eliminar cookies</h2>
+    <p>
+      Puedes borrar o bloquear cookies desde la configuración de tu navegador (pestañas privadas,
+      bloqueo de terceros, eliminación de datos, etc.). Ten en cuenta que bloquear cookies necesarias
+      puede afectar al funcionamiento básico del sitio.
+    </p>
+  </section>
+
+  <section id="contacto" class="mt-4">
+    <h2 class="h4">6. Contacto</h2>
+    <p>
+      Si tienes dudas sobre esta política, escríbeme a
+      <a href="mailto:josefe59@hotmail.com">josefe59@hotmail.com</a>.
+    </p>
+  </section>
+
+  <div class="text-end mt-4">
+    <a href="#top" class="btn btn-outline-secondary btn-sm">Volver arriba</a>
+  </div>
+</div>
+{% endblock %}

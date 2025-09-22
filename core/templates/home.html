@@ -202,7 +202,7 @@
     <div class="row row-cols-1 row-cols-md-3 g-4">
       {% for post in latest_posts %}
       <div class="col">
-        <a href="{% url 'post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
+        <a href="{% url 'blog:post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
           {% if post.image %}
             <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}" loading="lazy" decoding="async">
           {% endif %}

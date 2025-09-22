@@ -78,7 +78,7 @@
 <body>
     <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
-        <a class="navbar-brand d-flex align-items-center" href="/" aria-label="Inicio">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}" aria-label="Inicio">
           <img src="{% static 'images/logo-nav.webp' %}"
               alt="José Félix · Dev"
               class="brand-logo align-text-top" fetchpriority="high">
@@ -221,6 +221,8 @@
               <li class="list-inline-item mx-2"><a href="/blog/">Blog</a></li>
               <li class="list-inline-item mx-2"><a href="/projects/">Proyectos</a></li>
               <li class="list-inline-item mx-2"><a href="/services/">Servicios</a></li>
+              <li class="list-inline-item mx-2"><a href="{% url 'core:legal_privacidad' %}">Privacidad</a></li>
+              <li class="list-inline-item mx-2"><a href="{% url 'core:legal_cookies' %}">Cookies</a></li>
               <li class="list-inline-item mx-2"><a href="#" data-ck-open>Preferences</a></li>
             </ul>
           </div>
@@ -283,6 +285,10 @@
                 como WhatsApp, LinkedIn o GitHub se abrirán en una pestaña nueva. 
                 Puedes gestionar tu elección en cualquier momento desde el panel de preferencias.
             </p>
+
+            <a href="{% url 'core:legal_privacidad' %}">Privacidad</a>
+            <a href="{% url 'core:legal_cookies' %}">Cookies</a>
+
             <small class="text-muted">Solo necesarias por defecto.</small>
           </div>
           <div class="modal-footer py-2">
