@@ -3,6 +3,7 @@ from django.core.cache import cache
 from projects.models import Project
 from blog.models import Post
 from django.utils import timezone
+from datetime import date
 
 def _order_by_first_available(qs, *candidates):
     """
@@ -54,8 +55,10 @@ def home(request):
     }
     return render(request, "home.html", context)
 
+
 def legal_privacidad(request):
     return render(request, "core/legal/privacidad.html", {"last_updated": timezone.now().date()})
+
 
 def cookies_policy(request):
     cookies = [
@@ -86,3 +89,6 @@ def cookies_policy(request):
         "cookies": cookies,
     }
     return render(request, "core/legal/cookies.html", context)
+
+def terms_of_service(request):
+    return render(request, "core/legal/terms_of_service.html", {"last_updated": date.today()})

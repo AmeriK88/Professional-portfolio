@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Términos de Servicio · JFGC Dev{% endblock %}
+
+{% block content %}
+<div class="container py-4" id="top">
+  <header class="mb-3">
+    <h1 class="mb-1">Términos de Servicio</h1>
+    <p class="text-muted small mb-0">
+      Última actualización: {{ last_updated|date:"d/m/Y" }}
+    </p>
+  </header>
+
+  {# Índice #}
+  <nav aria-label="Índice de la página" class="mb-4">
+    <ul class="list-inline small mb-0">
+      <li class="list-inline-item"><a href="#objeto">1. Objeto</a></li>
+      <li class="list-inline-item"><a href="#cuentas">2. Cuentas y acceso</a></li>
+      <li class="list-inline-item"><a href="#pagos">3. Pagos y transacciones</a></li>
+      <li class="list-inline-item"><a href="#uso-aceptable">4. Uso aceptable</a></li>
+      <li class="list-inline-item"><a href="#propiedad">5. Propiedad intelectual</a></li>
+      <li class="list-inline-item"><a href="#responsabilidad">6. Limitación de responsabilidad</a></li>
+      <li class="list-inline-item"><a href="#privacidad">7. Privacidad y datos</a></li>
+      <li class="list-inline-item"><a href="#modificaciones">8. Modificaciones</a></li>
+      <li class="list-inline-item"><a href="#terminacion">9. Suspensión/terminación</a></li>
+      <li class="list-inline-item"><a href="#ley">10. Ley aplicable</a></li>
+      <li class="list-inline-item"><a href="#contacto">11. Contacto</a></li>
+    </ul>
+  </nav>
+
+  <section id="objeto" class="mt-4">
+    <h2 class="h4">1. Objeto</h2>
+    <p>
+      <strong>JFGC · Dev</strong> ofrece una plataforma para contratar servicios de desarrollo de software,
+      gestionar proyectos y realizar pagos seguros a través de integraciones como <em>Pi Network</em>.
+      Al usar el sitio, aceptas estos Términos de Servicio.
+    </p>
+  </section>
+
+  <section id="cuentas" class="mt-4">
+    <h2 class="h4">2. Cuentas y acceso</h2>
+    <ul>
+      <li>Debes proporcionar información veraz y mantener la confidencialidad de tus credenciales.</li>
+      <li>Eres responsable de la actividad realizada desde tu cuenta.</li>
+      <li>Podemos aplicar medidas de seguridad (p. ej., límite de intentos de inicio de sesión) para prevenir abusos.</li>
+    </ul>
+  </section>
+
+  <section id="pagos" class="mt-4">
+    <h2 class="h4">3. Pagos y transacciones (Pi Network)</h2>
+    <ul>
+      <li>Los pagos se procesan a través de <strong>Pi Network</strong> siguiendo sus propias políticas y términos.</li>
+      <li>No almacenamos datos de pago sensibles fuera del entorno seguro del proveedor.</li>
+      <li>Las confirmaciones de pago son vinculantes. Reembolsos solo por errores técnicos comprobados o según lo exija la ley.</li>
+      <li>Los precios y condiciones de cada servicio se muestran antes de contratar.</li>
+    </ul>
+    <p class="small text-muted mb-0">
+      Nota: Al interactuar con Pi Network puedes estar sujeto a sus términos independientes.
+    </p>
+  </section>
+
+  <section id="uso-aceptable" class="mt-4">
+    <h2 class="h4">4. Uso aceptable</h2>
+    <p>Está prohibido usar la plataforma para:</p>
+    <ul>
+      <li>Actividades ilícitas, fraudulentas o que vulneren derechos de terceros.</li>
+      <li>Intentar acceder sin autorización, explotar fallos o interferir con el servicio.</li>
+      <li>Suplantar identidades o manipular transacciones.</li>
+    </ul>
+  </section>
+
+  <section id="propiedad" class="mt-4">
+    <h2 class="h4">5. Propiedad intelectual</h2>
+    <p>
+      El diseño, código y contenidos del sitio son propiedad de <strong>JFGC · Dev</strong> o de sus
+      respectivos titulares. No se permite copiar, modificar o redistribuir sin autorización previa,
+      salvo usos permitidos por ley.
+    </p>
+  </section>
+
+  <section id="responsabilidad" class="mt-4">
+    <h2 class="h4">6. Limitación de responsabilidad</h2>
+    <ul>
+      <li>El servicio se ofrece “tal cual”. Nos esforzamos por su disponibilidad, pero no garantizamos ausencia total de interrupciones.</li>
+      <li>No respondemos por daños indirectos, lucro cesante o pérdidas derivadas del uso o imposibilidad de uso.</li>
+      <li>En la medida permitida por ley, nuestra responsabilidad total se limita al importe pagado por el usuario en el periodo de 3 meses previos al incidente.</li>
+    </ul>
+  </section>
+
+  <section id="privacidad" class="mt-4">
+    <h2 class="h4">7. Privacidad y datos</h2>
+    <p>
+      El tratamiento de datos personales se rige por nuestra
+      <a href="{% url 'core:legal_privacidad' %}">Política de Privacidad</a> y el uso de almacenamiento/cookies por la
+      <a href="{% url 'core:legal_cookies' %}">Política de Cookies</a>.
+    </p>
+  </section>
+
+  <section id="modificaciones" class="mt-4">
+    <h2 class="h4">8. Modificaciones</h2>
+    <p>
+      Podremos actualizar estos términos para reflejar cambios legales o funcionales. Las versiones vigentes se publicarán en esta página y
+      serán aplicables desde su publicación.
+    </p>
+  </section>
+
+  <section id="terminacion" class="mt-4">
+    <h2 class="h4">9. Suspensión y terminación</h2>
+    <p>
+      Podemos suspender o cerrar cuentas que incumplan estos términos o comprometan la seguridad del servicio.
+      Puedes solicitar la desactivación/eliminación de tu cuenta según lo indicado en la Política de Privacidad.
+    </p>
+  </section>
+
+  <section id="ley" class="mt-4">
+    <h2 class="h4">10. Ley aplicable y jurisdicción</h2>
+    <p>
+      Estos términos se interpretan conforme a la legislación española. Para cualquier controversia, y salvo norma imperativa,
+      las partes se someten a los juzgados y tribunales de Las Palmas.
+    </p>
+  </section>
+
+  <section id="contacto" class="mt-4">
+    <h2 class="h4">11. Contacto</h2>
+    <p class="mb-0">
+      Dudas sobre estos términos: <a href="mailto:josefe59@hotmail.com">josefe59@hotmail.com</a>.
+    </p>
+  </section>
+
+  <div class="text-end mt-4">
+    <a href="#top" class="btn btn-outline-secondary btn-sm">Volver arriba</a>
+  </div>
+</div>
+{% endblock %}
