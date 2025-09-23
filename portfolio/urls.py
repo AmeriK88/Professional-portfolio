@@ -3,6 +3,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve as mediaserve
+from core.views import validation_key_view
 
 
 urlpatterns = [
@@ -14,6 +15,7 @@ urlpatterns = [
     path("pi/", include(("pi_payments.urls", "pi"), namespace="pi")),
     path("users/", include(("users.urls", "users"), namespace="users")),
     path("orders/", include(("orders.urls", "orders"), namespace="orders")),
+    path("validation-key.txt", validation_key_view, name="validation_key"),
 ]
 
 

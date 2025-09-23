@@ -4,6 +4,18 @@ from projects.models import Project
 from blog.models import Post
 from django.utils import timezone
 from datetime import date
+from django.http import HttpResponse
+from django.conf import settings
+import os
+
+def validation_key_view(request):
+    file_path = os.path.join(settings.BASE_DIR, "static", "validation-key.txt")
+    with open(file_path, "rb") as f:
+        content = f.read()
+    resp = HttpResponse(content, content_type="text/plain; charset=utf-8")
+    # Cache opcional 1h:
+    resp["Cache-Control"] = "public, max-age=3600"
+    return resp
 
 def _order_by_first_available(qs, *candidates):
     """
