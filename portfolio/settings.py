@@ -75,11 +75,14 @@ MIDDLEWARE = [
 # --- Pi Sandbox (solo para DEV/SANDBOX) ---
 PI_SANDBOX = env.bool("PI_SANDBOX", default=True)  
 
+# settings.py
 if PI_SANDBOX or DEBUG:
-    MIDDLEWARE.insert(
-        MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
-        "core.middleware.PiSandboxHeadersMiddleware",
-    )
+    # al final de MIDDLEWARE para que gane prioridad
+    MIDDLEWARE.append("core.middleware.PiSandboxHeadersMiddleware")
+
+    # (opcional, por claridad; ya lo pones en el middleware también)
+    X_FRAME_OPTIONS = "ALLOWALL"
+
 
 
 ROOT_URLCONF = "portfolio.urls"
