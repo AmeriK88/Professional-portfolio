@@ -346,6 +346,12 @@
     <script src="{% static 'js/cookiesConsent.portfolio.js' %}" defer></script>
     <script src="{% static 'js/pageLoader.js' %}" defer></script>
     <script src="{% static 'js/alerts.anim.js' %}" defer></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      }
+    </script>
+
 
 
     {% block extra_scripts %}{% endblock %}

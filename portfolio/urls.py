@@ -4,7 +4,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve as mediaserve
 from core.views import validation_key_view
+from django.http import HttpResponse 
 
+def service_worker(_request):
+    js = (
+        "self.addEventListener('install',()=>self.skipWaiting());"
+        "self.addEventListener('activate',()=>self.clients.claim());"
+        "self.addEventListener('fetch',()=>{});"
+    )
+    return HttpResponse(js, content_type="application/javascript")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -16,9 +24,10 @@ urlpatterns = [
     path("users/", include(("users.urls", "users"), namespace="users")),
     path("orders/", include(("orders.urls", "orders"), namespace="orders")),
     path("validation-key.txt", validation_key_view, name="validation_key"),
+
+
+    path("sw.js", service_worker, name="sw"),
 ]
-
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
