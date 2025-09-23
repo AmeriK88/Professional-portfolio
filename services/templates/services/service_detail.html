@@ -117,10 +117,10 @@
         {% for faq in service.faqs.all %}
         {
           "@type": "Question",
-          "name": {{ faq.question|escapejs }},
+          "name": "{{ faq.question|escapejs }}",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": {{ faq.answer|linebreaksbr|escapejs }}
+            "text": "{{ faq.answer|linebreaksbr|escapejs }}"
           }
         }{% if not forloop.last %},{% endif %}
         {% endfor %}

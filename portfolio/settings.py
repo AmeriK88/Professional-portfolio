@@ -38,6 +38,15 @@ PI_API_KEY = env("PI_API_KEY", default="")
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
+# --- Pi Sandbox (solo para DEV/SANDBOX) ---
+PI_SANDBOX = env.bool("PI_SANDBOX", default=True)  # o controla por DEBUG
+
+if PI_SANDBOX or DEBUG:
+    SESSION_COOKIE_SAMESITE = "None"
+    CSRF_COOKIE_SAMESITE   = "None"
+    SESSION_COOKIE_SECURE   = True
+    CSRF_COOKIE_SECURE      = True
+
 
 # --- Apps ---
 INSTALLED_APPS = [
@@ -398,6 +407,10 @@ RECAPTCHA_MIN_SCORE = env.float("RECAPTCHA_MIN_SCORE", default=0.5)
 AXES_FAILURE_LIMIT = 5  # máximo de intentos
 AXES_COOLOFF_TIME = 1  # horas bloqueado
 AXES_LOCKOUT_TEMPLATE = 'errors/locked_out.html'
+
+# si usas django-csp
+CSP_FRAME_ANCESTORS = ("'self'", "https://sandbox.minepi.com", "https://app.minepi.com")
+
 
 # --- Default PK field ---
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
