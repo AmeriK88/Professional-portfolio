@@ -15,13 +15,51 @@
   }
   const csrftoken = getCookie('csrftoken');
 
+  // ---- Detección de entorno seguro / Pi ----
+  function isSecurePublicContext() {
+    const isHttps = location.protocol === 'https:';
+    const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
+    return isHttps && !isLocal;
+  }
+
+  function isPiEnv() {
+    const ua = navigator.userAgent || '';
+    const inPiUA = /PiBrowser/i.test(ua);
+
+    // ¿Nos está enmarcando Pi (portal o app)?
+    let inPiFrame = false;
+    try {
+      if (window !== window.top && document.referrer) {
+        const ref = new URL(document.referrer);
+        inPiFrame =
+          ref.origin === 'https://sandbox.minepi.com' ||
+          ref.origin === 'https://app.minepi.com';
+      }
+    } catch (_) {}
+    return inPiUA || inPiFrame;
+  }
+
+  // ---- Inicialización del SDK (gateado) ----
   function ensurePiReady() {
     if (!window.Pi) {
       console.warn('[pi] SDK Pi no disponible en window');
       return false;
     }
+    // Solo inicializamos si estamos en Pi y en un contexto HTTPS público
+    if (!isPiEnv() || !isSecurePublicContext()) {
+      console.warn('[pi] Fuera de entorno Pi o sin HTTPS público; no inicializo SDK', {
+        piEnv: isPiEnv(),
+        httpsPublic: isSecurePublicContext(),
+        ua: navigator.userAgent,
+        href: location.href,
+        referrer: document.referrer
+      });
+      return false;
+    }
+    if (window.__PI_INIT_DONE__) return true;
     try {
       Pi.init({ version: '2.0', sandbox: !!cfg.sandbox });
+      window.__PI_INIT_DONE__ = true;
       console.debug('[pi] Pi.init OK, sandbox =', !!cfg.sandbox);
       return true;
     } catch (e) {
@@ -72,7 +110,7 @@
       const onIncompletePaymentFound = async (payment) => {
         try {
           console.debug('[pi] incomplete payment found', payment);
-          const pid = payment?.identifier || payment?.paymentId || payment?.id;
+          const pid  = payment?.identifier || payment?.paymentId || payment?.id;
           const txid = payment?.transaction?.txid;
 
           if (pid && txid) {
@@ -146,7 +184,7 @@
           onCancel: async (paymentId) => {
             console.debug('[pi] onCancel', paymentId);
             try { await postJSON(cancelUrl, { paymentId }); } catch {}
-            // no rechazamos: es cancelación de usuario
+            // No rechazamos: es cancelación de usuario
           },
           onError: (error, payment) => {
             console.error('[pi] onError', error, payment);
@@ -166,7 +204,7 @@
     });
   }
 
-  // ---- UI (sin variables fuera de scope) ----
+  // ---- UI (múltiples botones, sin variables fuera de scope) ----
   function attachHandlers() {
     const buttons = Array.from(document.querySelectorAll('#pi-pay-btn'));
     if (!buttons.length) {
@@ -177,8 +215,7 @@
     console.debug('[pi] Botones de pago listos:', buttons.length);
 
     buttons.forEach((btnEl) => {
-      // Evita duplicar listeners si re-ejecutas attachHandlers
-      if (btnEl.__piBound) return;
+      if (btnEl.__piBound) return; // evita duplicar listeners
       btnEl.__piBound = true;
 
       btnEl.addEventListener('click', async () => {

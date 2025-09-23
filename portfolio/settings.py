@@ -75,12 +75,9 @@ MIDDLEWARE = [
 # --- Pi Sandbox (solo para DEV/SANDBOX) ---
 PI_SANDBOX = env.bool("PI_SANDBOX", default=True)  
 
-# settings.py
 if PI_SANDBOX or DEBUG:
     MIDDLEWARE = [m for m in MIDDLEWARE if m != "django.middleware.clickjacking.XFrameOptionsMiddleware"]
-
-
-
+    MIDDLEWARE.append("core.middleware.PiSandboxHeadersMiddleware")  
 
 ROOT_URLCONF = "portfolio.urls"
 
@@ -89,7 +86,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [os.path.join(BASE_DIR, "templates")],
-        "APP_DIRS": True,  # busca plantillas dentro de cada app
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.debug",
@@ -98,7 +95,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 # Opcional: expone STATIC_URL en plantillas
                 "django.template.context_processors.static",
-                # >>> Tu context processor para la site key <<<
+                # >>> context processor para la site key <<<
                 "users.context_processors.recaptcha_keys",
             ],
         },
@@ -412,12 +409,9 @@ RECAPTCHA_MIN_SCORE = env.float("RECAPTCHA_MIN_SCORE", default=0.5)
 
 
 # Configuración básica
-AXES_FAILURE_LIMIT = 5  # máximo de intentos
-AXES_COOLOFF_TIME = 1  # horas bloqueado
+AXES_FAILURE_LIMIT = 5  
+AXES_COOLOFF_TIME = 1  
 AXES_LOCKOUT_TEMPLATE = 'errors/locked_out.html'
-
-# si usas django-csp
-CSP_FRAME_ANCESTORS = ("'self'", "https://sandbox.minepi.com", "https://app.minepi.com")
 
 
 # --- Default PK field ---

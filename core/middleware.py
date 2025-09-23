@@ -15,7 +15,7 @@ class PiSandboxHeadersMiddleware:
             # CSP correcta para permitir iframe desde Pi
             response["Content-Security-Policy"] = (
                 "frame-ancestors https://sandbox.minepi.com https://app.minepi.com"
-            )
+            ) 
 
             # Quitar cabeceras que rompen iframes cross-origin
             for h in (
