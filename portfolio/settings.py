@@ -38,15 +38,6 @@ PI_API_KEY = env("PI_API_KEY", default="")
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# --- Pi Sandbox (solo para DEV/SANDBOX) ---
-PI_SANDBOX = env.bool("PI_SANDBOX", default=True)  # o controla por DEBUG
-
-if PI_SANDBOX or DEBUG:
-    SESSION_COOKIE_SAMESITE = "None"
-    CSRF_COOKIE_SAMESITE   = "None"
-    SESSION_COOKIE_SECURE   = True
-    CSRF_COOKIE_SECURE      = True
-
 
 # --- Apps ---
 INSTALLED_APPS = [
@@ -80,6 +71,16 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# --- Pi Sandbox (solo para DEV/SANDBOX) ---
+PI_SANDBOX = env.bool("PI_SANDBOX", default=True)  
+
+if PI_SANDBOX or DEBUG:
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
+        "core.middleware.PiSandboxHeadersMiddleware",
+    )
+
 
 ROOT_URLCONF = "portfolio.urls"
 
