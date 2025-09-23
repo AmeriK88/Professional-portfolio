@@ -77,11 +77,8 @@ PI_SANDBOX = env.bool("PI_SANDBOX", default=True)
 
 # settings.py
 if PI_SANDBOX or DEBUG:
-    # al final de MIDDLEWARE para que gane prioridad
-    MIDDLEWARE.append("core.middleware.PiSandboxHeadersMiddleware")
+    MIDDLEWARE = [m for m in MIDDLEWARE if m != "django.middleware.clickjacking.XFrameOptionsMiddleware"]
 
-    # (opcional, por claridad; ya lo pones en el middleware también)
-    X_FRAME_OPTIONS = "ALLOWALL"
 
 
 
@@ -344,6 +341,13 @@ LOGGING = {
         },
     },
 }
+
+
+# --- Seguridad extra ---
+SESSION_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 # --- Usuario custom ---

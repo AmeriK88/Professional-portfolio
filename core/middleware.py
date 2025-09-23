@@ -8,17 +8,16 @@ class PiSandboxHeadersMiddleware:
         response = self.get_response(request)
 
         if getattr(settings, "PI_SANDBOX", False) or getattr(settings, "DEBUG", False):
-            # 1) Eliminar X-Frame-Options por completo (NO poner ALLOWALL)
+            # Eliminar cualquier X-Frame-Options que haya puesto Django/proxy
             if response.has_header("X-Frame-Options"):
                 del response["X-Frame-Options"]
 
-            # 2) Permitir ser embeído por Pi Browser con CSP moderna
-            #    (si ya tienes CSP previa, idealmente añade/mergea frame-ancestors)
+            # CSP correcta para permitir iframe desde Pi
             response["Content-Security-Policy"] = (
                 "frame-ancestors https://sandbox.minepi.com https://app.minepi.com"
             )
 
-            # 3) Quitar COOP/COEP/CORP que rompen iframes cross-origin
+            # Quitar cabeceras que rompen iframes cross-origin
             for h in (
                 "Cross-Origin-Opener-Policy",
                 "Cross-Origin-Embedder-Policy",
