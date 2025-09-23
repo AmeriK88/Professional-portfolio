@@ -3,7 +3,7 @@ from django.conf import settings
 import re
 
 class PiSandboxHeadersMiddleware:
-    FRAME_ANCESTORS = "frame-ancestors https://sandbox.minepi.com https://app.minepi.com"
+    FRAME_ANCESTORS = "frame-ancestors 'self' https://sandbox.minepi.com https://app.minepi.com"
 
     def __init__(self, get_response):
         self.get_response = get_response
