@@ -24,46 +24,83 @@
 
   function isPiEnv() {
     const ua = navigator.userAgent || '';
-    const inPiUA = /PiBrowser/i.test(ua);
 
-    // ¿Nos está enmarcando Pi (portal o app)?
-    let inPiFrame = false;
+    // UA robusto: con o sin espacio
+    const inPiUA = /\bPi\s*Browser\b/i.test(ua) || /\bPiBrowser\b/i.test(ua);
+
+    // ¿Nos enmarca Pi? Preferimos ancestorOrigins; fallback a referrer
+    let inPiAncestor = false;
     try {
-      if (window !== window.top && document.referrer) {
-        const ref = new URL(document.referrer);
-        inPiFrame =
-          ref.origin === 'https://sandbox.minepi.com' ||
-          ref.origin === 'https://app.minepi.com';
+      const ao = window.location.ancestorOrigins;
+      if (ao && ao.length) {
+        for (let i = 0; i < ao.length; i++) {
+          const origin = ao[i];
+          if (
+            origin === 'https://sandbox.minepi.com' ||
+            origin === 'https://app.minepi.com' ||
+            /\.minepi\.com$/i.test(new URL(origin).hostname)
+          ) {
+            inPiAncestor = true;
+            break;
+          }
+        }
+      } else if (window !== window.top) {
+        // Fallback: si estás en iframe y no hay ancestorOrigins
+        if (document.referrer) {
+          const ref = new URL(document.referrer);
+          inPiAncestor =
+            ref.origin === 'https://sandbox.minepi.com' ||
+            ref.origin === 'https://app.minepi.com' ||
+            /\.minepi\.com$/i.test(ref.hostname);
+        } else {
+          // Algunos navegadores no pasan referrer: asumimos enmarcado
+          inPiAncestor = true;
+        }
       }
-    } catch (_) {}
-    return inPiUA || inPiFrame;
+    } catch (_) {
+      // En caso de cross-origin strict, asumimos que está enmarcado
+      inPiAncestor = true;
+    }
+
+    return inPiUA || inPiAncestor;
   }
 
-  // ---- Inicialización del SDK (gateado) ----
+  // ---- Inicialización del SDK (gateado pero tolerante) ----
   function ensurePiReady() {
     if (!window.Pi) {
-      console.warn('[pi] SDK Pi no disponible en window');
+      console.warn('[pi] SDK Pi no disponible', { ua: navigator.userAgent });
       return false;
     }
-    // Solo inicializamos si estamos en Pi y en un contexto HTTPS público
-    if (!isPiEnv() || !isSecurePublicContext()) {
-      console.warn('[pi] Fuera de entorno Pi o sin HTTPS público; no inicializo SDK', {
-        piEnv: isPiEnv(),
-        httpsPublic: isSecurePublicContext(),
+
+    // HTTPS público obligatorio
+    if (!isSecurePublicContext()) {
+      console.warn('[pi] No es contexto HTTPS público');
+      return false;
+    }
+
+    // Señales razonables de entorno Pi
+    const piLikely =
+      isPiEnv() ||
+      !!(window.location.ancestorOrigins && window.location.ancestorOrigins.length);
+
+    if (!piLikely) {
+      console.warn('[pi] No parece entorno Pi (UA/iframe no coinciden)', {
         ua: navigator.userAgent,
         href: location.href,
-        referrer: document.referrer
+        ref: document.referrer
       });
       return false;
     }
+
     if (window.__PI_INIT_DONE__) return true;
+
     try {
       Pi.init({ version: '2.0', sandbox: !!cfg.sandbox });
       window.__PI_INIT_DONE__ = true;
       console.debug('[pi] Pi.init OK, sandbox =', !!cfg.sandbox);
       return true;
     } catch (e) {
-      console.error('[pi] Pi.init falló:', e);
+      console.error('[pi] Pi.init falló', e);
       return false;
     }
   }
