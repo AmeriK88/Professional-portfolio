@@ -5,6 +5,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from services.models import Service
+from django.urls import reverse
 
 def next_order_number():
     base = timezone.now().strftime("%Y%m%d%H%M%S")
@@ -43,6 +44,12 @@ class Order(models.Model):
         self.subtotal = s
         self.total = s
         self.save(update_fields=['subtotal', 'total'])
+
+    def get_absolute_url(self):
+        try:
+            return reverse("orders:detail", args=[self.number])
+        except Exception:
+            return f"/orders/{self.number}/"
 
 class OrderItem(models.Model):
     order      = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)

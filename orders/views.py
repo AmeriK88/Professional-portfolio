@@ -1,12 +1,14 @@
-# orders/views.py
 import secrets
 from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from services.models import Service
 from .models import Order, OrderItem, Payment
+from django.db.models import Prefetch
+from django.core.paginator import Paginator
+
 
 @login_required
 def checkout_service(request, slug):
@@ -56,7 +58,58 @@ def checkout_service(request, slug):
             "eur_per_pi": str(eur_per_pi),
             "amount_pi": str(amount_pi),
         },
-        # No pongas "currency" aquí: Pi cobra siempre en π y ese campo no aplica
+        # No poner "currency" aquí: Pi cobra siempre en π y ese campo no aplica
     }
 
     return JsonResponse({"ok": True, "order_number": order.number, "payment": payload})
+
+
+@login_required
+def my_orders(request):
+    orders = (
+        Order.objects
+        .filter(user=request.user)
+        .select_related("payment")
+        .prefetch_related(Prefetch("items", queryset=OrderItem.objects.select_related("service")))
+        .order_by("-id")
+    )
+    return render(request, "orders/list.html", {"orders": orders})
+
+@login_required
+def order_detail(request, number):
+    order = get_object_or_404(request.user.order_set, number=number)
+
+    eur_per_pi = None
+    try:
+        eur_per_pi = (
+            order.payment.raw_payload.get("pricing", {}).get("eur_per_pi")
+            if order.payment and order.payment.raw_payload
+            else None
+        )
+    except Exception:
+        eur_per_pi = None
+
+    if eur_per_pi is None:
+        eur_per_pi = getattr(settings, "DEFAULT_EUR_PER_PI", Decimal("1"))
+
+    return render(request, "orders/detail.html", {
+        "order": order,
+        "eur_per_pi": eur_per_pi,
+    })
+
+
+@login_required
+def order_list(request):
+    qs = Order.objects.filter(user=request.user).order_by('-id')
+
+    # Paginación opcional (10 por página)
+    paginator = Paginator(qs, 10)
+    page = request.GET.get('page')
+    orders = paginator.get_page(page)
+
+    return render(request, "orders/list.html", {
+        "orders": orders,
+        "is_paginated": orders.has_other_pages(),
+        "page_obj": orders,
+        "eur_per_pi": getattr(settings, "DEFAULT_EUR_PER_PI", None),  # ej: Decimal("0.10")
+    })

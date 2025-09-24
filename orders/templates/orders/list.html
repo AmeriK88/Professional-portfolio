@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static pi_extras %}
+{% block title %}Mis pedidos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h4 mb-0">Mis pedidos</h1>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary d-none d-sm-inline">← Volver</a>
+  </div>
+
+  {% if orders %}
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Número</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th class="text-end">Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for o in orders %}
+            {% url 'orders:detail' o.number as resolved_detail %}
+            {% with default_url="/orders/"|add:o.number|add:"/" %}
+            {% with detail_url=resolved_detail|default:default_url %}
+            <tr>
+              <td>
+                <a href="{{ detail_url }}" class="text-decoration-none">{{ o.number }}</a>
+              </td>
+              <td>{{ o.created_at|date:"d M Y, H:i" }}</td>
+              <td>
+                {% with s=o.status %}
+                <span class="badge
+                  {% if s == 'paid' %} bg-success
+                  {% elif s == 'awaiting_payment' %} bg-warning text-dark
+                  {% elif s == 'cancelled' %} bg-danger
+                  {% elif s == 'refunded' %} bg-info text-dark
+                  {% else %} bg-secondary
+                  {% endif %}">
+                  {% if s == 'paid' %}Pagado
+                  {% elif s == 'awaiting_payment' %}Pendiente de pago
+                  {% elif s == 'cancelled' %}Cancelado
+                  {% elif s == 'refunded' %}Reembolsado
+                  {% else %}{{ s|capfirst }}
+                  {% endif %}
+                </span>
+                {% endwith %}
+              </td>
+              <td class="text-end">
+                {{ o.total|floatformat:2 }} {{ o.currency }}
+                {% if o.currency == "EUR" and eur_per_pi %}
+                  <div class="small text-muted">≈ {{ o.total|to_pi:eur_per_pi|floatformat:2 }} π</div>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{{ detail_url }}">Ver</a>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endwith %}
+          {% empty %}
+            <tr><td colspan="5" class="text-center text-muted py-4">Aún no tienes pedidos.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer bg-white">
+      <nav aria-label="Paginación">
+        <ul class="pagination justify-content-center mb-0">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+    <div class="text-center text-muted py-5">
+      <div class="mb-2">Aún no tienes pedidos.</div>
+      <a href="{% url 'services:service_list' %}" class="btn btn-primary">Explorar servicios</a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
