@@ -7,6 +7,9 @@ from .forms import StyledAuthenticationForm, StyledPasswordChangeForm
 app_name = "users"
 
 urlpatterns = [
+    # --- Pi auth ---
+    path("pi/login/", views.pi_login, name="pi_login"),
+    
     # Autenticación
     path(
         "login/",
@@ -81,4 +84,5 @@ urlpatterns = [
         ),
         name="password_change_done",
     ),
+    
 ]
