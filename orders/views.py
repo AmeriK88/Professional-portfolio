@@ -1,4 +1,7 @@
+# orders/views.py
 import secrets
+from decimal import Decimal, ROUND_HALF_UP
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -9,25 +12,51 @@ from .models import Order, OrderItem, Payment
 def checkout_service(request, slug):
     service = get_object_or_404(Service, slug=slug, is_active=True)
 
-    # 1) crea pedido
+    # 1) crea pedido en EUR como ya haces
     order = Order.objects.create(user=request.user, status=Order.AWAITING, currency="EUR")
     OrderItem.objects.create(order=order, service=service, unit_price=service.price, quantity=1)
-    order.recalc()
+    order.recalc()  # deja total/subtotal en €
 
-    # 2) crea pago "initiated" con nonce (idempotencia)
+    # 2) ratio EUR por π
+    eur_per_pi = getattr(settings, "PI_EUR_PER_PI", Decimal("0"))
+    if eur_per_pi <= 0:
+        return JsonResponse({"ok": False, "error": "PI_EUR_PER_PI not configured"}, status=500)
+
+    # 3) calcula amount en π con 4 decimales
+    amount_eur = Decimal(str(order.total))
+    amount_pi  = (amount_eur / eur_per_pi).quantize(Decimal("0.0001"), rounding=ROUND_HALF_UP)
+
+    # 4) pago "initiated" con nonce
     nonce = secrets.token_hex(16)
-    payment = Payment.objects.create(order=order, nonce=nonce, amount=order.total, currency=order.currency)
+    payment = Payment.objects.create(
+        order=order,
+        nonce=nonce,
+        amount=amount_eur,     # seguimos guardando el € aquí (tu modelo actual)
+        currency=order.currency # "EUR"
+    )
+    # Guarda también la conversión para auditoría
+    payment.raw_payload = {
+        "pricing": {
+            "price_eur": str(amount_eur),
+            "eur_per_pi": str(eur_per_pi),
+            "amount_pi": str(amount_pi),
+        }
+    }
+    payment.save(update_fields=["raw_payload"])
 
-    # 3) Devolvemos datos que usarás en el Pi SDK del frontend
-    #    IMPORTANTE: metadata es clave para atar el pid → order.number y nuestro nonce
+    # 5) payload para Pi SDK: ¡IMPORTANTE! 'amount' es en π
     payload = {
-        "amount": str(order.total),
-        "currency": order.currency,
+        "amount": float(amount_pi),  # π, no €
         "memo": f"Pedido {order.number} - {service.title}",
         "metadata": {
             "order_number": order.number,
             "service_slug": service.slug,
             "nonce": nonce,
+            "price_eur": str(amount_eur),
+            "eur_per_pi": str(eur_per_pi),
+            "amount_pi": str(amount_pi),
         },
+        # No pongas "currency" aquí: Pi cobra siempre en π y ese campo no aplica
     }
+
     return JsonResponse({"ok": True, "order_number": order.number, "payment": payload})

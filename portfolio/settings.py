@@ -2,6 +2,7 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from pathlib import Path
+from decimal import Decimal
 import environ
 import dj_database_url
 import os
@@ -37,6 +38,9 @@ PI_API_KEY = env("PI_API_KEY", default="")
 # Detrás de proxy (Railway / proxies)
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# Conversión Pi-EUR 
+PI_EUR_PER_PI = Decimal(str(env("PI_EUR_PER_PI", default="0.30")))
 
 
 # --- Apps ---
@@ -96,6 +100,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 # >>> context processor para la site key <<<
                 "users.context_processors.recaptcha_keys",
+                "pi_payments.context_processors.pi_pricing",
             ],
         },
     },

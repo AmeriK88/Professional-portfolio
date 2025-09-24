@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db import models
+from django.db.models import F, Sum, DecimalField, ExpressionWrapper
 from django.conf import settings
 from django.utils import timezone
 from django.utils.crypto import get_random_string
@@ -33,10 +34,15 @@ class Order(models.Model):
     paid_at   = models.DateTimeField(null=True, blank=True)
 
     def recalc(self):
-        s = sum((i.unit_price * i.quantity for i in self.items.all()), Decimal("0"))
+        from .models import OrderItem  # evita import circular si lo hay
+        expr = ExpressionWrapper(
+            F('unit_price') * F('quantity'),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        )
+        s = OrderItem.objects.filter(order=self).aggregate(total=Sum(expr))['total'] or Decimal('0')
         self.subtotal = s
-        self.total = s  # aquí luego aplicas impuestos/descuentos si quieres
-        self.save(update_fields=["subtotal", "total"])
+        self.total = s
+        self.save(update_fields=['subtotal', 'total'])
 
 class OrderItem(models.Model):
     order      = models.ForeignKey(Order, related_name="items", on_delete=models.CASCADE)
@@ -56,11 +62,11 @@ class Payment(models.Model):
 
     order                = models.OneToOneField(Order, related_name="payment", on_delete=models.CASCADE)
     provider             = models.CharField(max_length=30, default="pi")
-    provider_payment_id  = models.CharField(max_length=100, unique=True, null=True, blank=True)  # pid
+    provider_payment_id  = models.CharField(max_length=100, unique=True, null=True, blank=True)
     status               = models.CharField(max_length=20, choices=STATUS_CHOICES, default=INITIATED)
     amount               = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     currency             = models.CharField(max_length=10, default="EUR")
-    nonce                = models.CharField(max_length=64, unique=True)  # idempotencia
+    nonce                = models.CharField(max_length=64, unique=True)
     raw_payload          = models.JSONField(default=dict, blank=True)
     created_at           = models.DateTimeField(auto_now_add=True)
     completed_at         = models.DateTimeField(null=True, blank=True)
