@@ -347,15 +347,15 @@
     <script src="{% static 'js/cookiesConsent.portfolio.js' %}" defer></script>
     <script src="{% static 'js/pageLoader.js' %}" defer></script>
     <script src="{% static 'js/alerts.anim.js' %}" defer></script>
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+
+    {% block extra_scripts %}{% endblock %}
+
     <script>
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(()=>{});
       }
     </script>
-
-
-
-    {% block extra_scripts %}{% endblock %}
 
       <!-- Page Loader Overlay -->
     <div id="page-loader" class="page-loader" aria-hidden="true">

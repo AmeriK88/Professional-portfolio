@@ -42,6 +42,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Conversión Pi-EUR 
 PI_EUR_PER_PI = Decimal(str(env("PI_EUR_PER_PI", default="0.30")))
 
+PI_ONLY_LOGIN = env("PI_ONLY_LOGIN", default=False) 
 
 # --- Apps ---
 INSTALLED_APPS = [
