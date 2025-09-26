@@ -1,4 +1,3 @@
-# services/models.py
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
