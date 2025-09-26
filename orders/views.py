@@ -5,9 +5,10 @@ from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from services.models import Service
-from .models import Order, OrderItem, Payment
 from django.db.models import Prefetch
 from django.core.paginator import Paginator
+from .models import Order, OrderItem
+from pi_payments.models import Payment
 
 
 @login_required
