@@ -1,7 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
 import json, requests
-
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout, get_user_model
@@ -60,7 +59,6 @@ def pi_login(request):
     if not token:
         return HttpResponseBadRequest("Falta accessToken")
 
-    # Verifica token con /me
     r = requests.get(f"{PI_API_BASE}/me", headers={"Authorization": f"Bearer {token}"})
     if not r.ok:
         return JsonResponse({"ok": False, "reason": "token inválido"}, status=401)
@@ -69,19 +67,21 @@ def pi_login(request):
     pi_uid = (me.get("uid") or "").strip()
     pi_username = (me.get("username") or "pi_user").strip() or "pi_user"
 
-    # Usuario local asociado al uid de Pi
     username = f"pi_{pi_uid}"
     user, created = User.objects.get_or_create(
         username=username,
         defaults={"email": f"{pi_username}@pi.local"}
     )
-    # Evita login por password en cuentas creadas desde Pi (opcional pero sensato)
     if created:
         user.set_unusable_password()
         user.save(update_fields=["password"])
 
-    # Importante: con múltiples AUTHENTICATION_BACKENDS, hay que indicar el backend
     login(request, user, backend=_pick_backend())
+    if created:
+        messages.success(request, "Cuenta Pi creada. ¡Bienvenido!")
+    else:
+        messages.success(request, "Has iniciado sesión. ¡Bienvenido de nuevo!")
+
     return JsonResponse({"ok": True})
 
 
