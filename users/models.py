@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.templatetags.static import static
 
-# Avatares predefinidos (pon las imágenes en /static/avatars/presets/)
+# Avatares predefinidos 
 AVATAR_CHOICES = [
     ("dev", "Dev"),
     ("ninja", "Ninja"),

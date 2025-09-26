@@ -1,4 +1,3 @@
-# projects/admin.py
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin
 from unfold.contrib.filters.admin import FieldTextFilter, RangeDateTimeFilter
