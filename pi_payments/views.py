@@ -1,4 +1,3 @@
-# pi_payments/views.py
 import os, json, requests
 from decimal import Decimal
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
@@ -6,8 +5,8 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 
-# 👇 añade estos imports para actualizar tu BD
-from orders.models import Order, Payment
+from orders.models import Order
+from pi_payments.models import Payment
 
 PI_API_BASE = "https://api.minepi.com"
 PI_API_KEY  = os.environ.get("PI_API_KEY")

@@ -1,4 +1,3 @@
-# core/middleware.py
 from django.conf import settings
 import re
 
