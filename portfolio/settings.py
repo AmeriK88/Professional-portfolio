@@ -23,9 +23,12 @@ env = environ.Env(
 )
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
+# --- Comandos externos ---
+FFMPEG_CMD = os.getenv("FFMPEG_CMD", "ffmpeg")
+
+
 # --- Seguridad / entorno ---
-# Fallback: si no hay SECRET_KEY, intenta con DEAFAULT_SK (como lo tienes escrito en tus variables),
-# y si tampoco existe, usa "change-me".
+# Fallback: si no hay SECRET_KEY, intenta con DEAFAULT_SK 
 SECRET_KEY = env("SECRET_KEY", default=env("DEAFAULT_SK", default="DEAFAULT_SK"))
 DEBUG = env.bool("DEBUG", default=False)
 

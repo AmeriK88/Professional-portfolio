@@ -8,39 +8,61 @@ from django.conf import settings
 from .models import Service
 
 log = logging.getLogger(__name__)
+FFMPEG = getattr(settings, "FFMPEG_CMD", "ffmpeg")
+
 
 def _compress_mp4(src_abs: str, dst_abs: str) -> bool:
     """
-    Compresión muy ligera para previews: 3s, 240px ancho, 12fps, CRF 32,
-    ~300 kbps máx, sin audio. Escribe a archivo temporal y hace replace atómico.
-    Devuelve True si fue OK (no lanza excepciones).
+    Comprime a un clip muy ligero (3s, 240px, 12fps, CRF 32 ~300kbps, sin audio).
+    Escribe a un archivo temporal y luego hace replace atómico.
+    Devuelve True si fue OK; False en cualquier problema.
     """
-    ffmpeg = shutil.which("ffmpeg")
+    ffmpeg = shutil.which(FFMPEG)
     if not ffmpeg:
-        log.error("ffmpeg no encontrado en PATH; se omite compresión para %s", src_abs)
+        log.warning("FFmpeg no encontrado en PATH (%s); omito %s", FFMPEG, src_abs)
         return False
 
+    # sanity preflight
+    if not (os.path.exists(src_abs) and os.path.getsize(src_abs) > 0):
+        log.warning("Input inexistente o vacío: %s", src_abs)
+        return False
+
+    # normaliza rutas
+    src_abs = os.path.normpath(src_abs)
+    dst_abs = os.path.normpath(dst_abs)
+
     os.makedirs(os.path.dirname(dst_abs), exist_ok=True)
-    tmp_abs = dst_abs + ".tmp"
+    # ⚠️ IMPORTANTE: termina en .mp4 para que FFmpeg detecte el muxer
+    # usamos sufijo '.tmp.mp4' en lugar de '.mp4.tmp'
+    tmp_abs = dst_abs[:-4] + ".tmp.mp4" if dst_abs.lower().endswith(".mp4") else dst_abs + ".tmp.mp4"
 
     cmd = [
-        ffmpeg, "-y",
+        ffmpeg,
+        "-nostdin",
+        "-hide_banner",
+        "-loglevel", "error",
+        "-y",
         "-i", src_abs,
-        "-t", "3",                        # 3 segundos
-        "-r", "12",                       # 12 fps
-        "-vf", "scale=240:trunc(ow/a/2)*2",  # ancho 240px; alto par manteniendo aspect
+        "-t", "3",
+        "-r", "12",
+        "-vf", "scale=240:-2",
+        "-pix_fmt", "yuv420p",
         "-c:v", "libx264",
         "-crf", "32",
         "-maxrate", "300k", "-bufsize", "600k",
         "-preset", "faster",
         "-movflags", "+faststart",
-        "-an",                            # sin audio
+        "-an",
+        "-f", "mp4",             # 👈 fuerza formato salida por si la extensión no bastara
         tmp_abs,
     ]
+
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=30)
         if res.stderr:
             log.info("ffmpeg: %s", res.stderr[:2000])
+
+        # valida salida temporal
         if not (os.path.exists(tmp_abs) and os.path.getsize(tmp_abs) > 0):
             try:
                 if os.path.exists(tmp_abs):
@@ -48,24 +70,37 @@ def _compress_mp4(src_abs: str, dst_abs: str) -> bool:
             except OSError:
                 pass
             return False
+
         os.replace(tmp_abs, dst_abs)
         return True
+
+    except subprocess.TimeoutExpired:
+        log.error("FFmpeg timeout para %s", src_abs)
+        try:
+            if os.path.exists(tmp_abs):
+                os.remove(tmp_abs)
+        except OSError:
+            pass
+        return False
+
     except subprocess.CalledProcessError as e:
-        log.exception("ffmpeg falló (%s): %s", e.returncode, (e.stderr or "")[:2000])
+        log.exception("FFmpeg falló (%s). stderr: %s", e.returncode, (e.stderr or "")[:2000])
         try:
             if os.path.exists(tmp_abs):
                 os.remove(tmp_abs)
         except OSError:
             pass
         return False
+
     except Exception:
+        log.exception("Error inesperado comprimiendo %s", src_abs)
         try:
             if os.path.exists(tmp_abs):
                 os.remove(tmp_abs)
         except OSError:
             pass
-        log.exception("Error inesperado comprimiendo %s", src_abs)
         return False
+
 
 @receiver(post_save, sender=Service)
 def compress_and_clean_service_preview(sender, instance, **kwargs):
@@ -90,12 +125,11 @@ def compress_and_clean_service_preview(sender, instance, **kwargs):
     try:
         src_abs = field.path  # requiere FileSystemStorage local
     except Exception:
-        log.warning("Storage no expone .path; se omite compresión para %s", field.name)
+        log.info("Storage sin .path; omito compresión para %s", field.name)
         return
 
     base, _ = os.path.splitext(os.path.basename(src_abs))
     small_name = f"{base}_s.mp4"
-    # Mantengo tu convención previa de carpeta:
     small_rel = os.path.join("service_previews", small_name).replace("\\", "/")
     small_abs = os.path.join(settings.MEDIA_ROOT, small_rel)
 

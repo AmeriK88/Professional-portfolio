@@ -1,4 +1,3 @@
-# projects/signals.py
 import os
 import shutil
 import subprocess
@@ -10,67 +9,99 @@ from .models import Project
 
 log = logging.getLogger(__name__)
 
+# Binario configurable
+FFMPEG = getattr(settings, "FFMPEG_CMD", "ffmpeg")
+
+
 def _compress_mp4(src_abs: str, dst_abs: str) -> bool:
     """
-    Comprime a un clip muy ligero (3s, 240px ancho, 12fps, CRF 32, ~300kbps).
+    Comprime a un clip muy ligero (3s, 240px ancho, 12fps, CRF 32, ~300kbps, sin audio).
     Escribe a un archivo temporal y luego hace replace atómico.
-    Devuelve True si fue OK; no lanza excepciones.
+    Devuelve True si fue OK; False en cualquier problema.
     """
-    ffmpeg = shutil.which("ffmpeg")
+    ffmpeg = shutil.which(FFMPEG)
     if not ffmpeg:
-        log.error("ffmpeg no encontrado en PATH; se omite compresión para %s", src_abs)
+        log.warning("FFmpeg no encontrado en PATH (%s); omito %s", FFMPEG, src_abs)
         return False
 
+    # Preflight
+    if not (os.path.exists(src_abs) and os.path.getsize(src_abs) > 0):
+        log.warning("Input inexistente o vacío: %s", src_abs)
+        return False
+
+    # Normaliza rutas
+    src_abs = os.path.normpath(src_abs)
+    dst_abs = os.path.normpath(dst_abs)
+
     os.makedirs(os.path.dirname(dst_abs), exist_ok=True)
-    tmp_abs = dst_abs + ".tmp"
+    # Importante: termina en .mp4 (no .mp4.tmp) para que FFmpeg detecte el muxer
+    tmp_abs = dst_abs[:-4] + ".tmp.mp4" if dst_abs.lower().endswith(".mp4") else dst_abs + ".tmp.mp4"
 
     cmd = [
-        ffmpeg, "-y",
+        ffmpeg,
+        "-nostdin",
+        "-hide_banner",
+        "-loglevel", "error",
+        "-y",
         "-i", src_abs,
-        "-t", "3",   
-        "-r", "12",    
-        "-vf", "scale=240:trunc(ow/a/2)*2",  
+        "-t", "3",
+        "-r", "12",
+        "-vf", "scale=240:-2",   # robusto; mantiene aspect y altura par
+        "-pix_fmt", "yuv420p",   # compatibilidad amplia
         "-c:v", "libx264",
-        "-crf", "32",             
+        "-crf", "32",
         "-maxrate", "300k", "-bufsize", "600k",
         "-preset", "faster",
         "-movflags", "+faststart",
-        "-an",          
+        "-an",
+        "-f", "mp4",             # fuerza formato de salida
         tmp_abs,
     ]
+
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True, timeout=30)
         if res.stderr:
             log.info("ffmpeg: %s", res.stderr[:2000])
-        # valida salida
+
+        # valida salida temporal
         if not (os.path.exists(tmp_abs) and os.path.getsize(tmp_abs) > 0):
-            # limpia si quedó vacío
             try:
                 if os.path.exists(tmp_abs):
                     os.remove(tmp_abs)
             except OSError:
                 pass
             return False
-        # replace atómico
+
         os.replace(tmp_abs, dst_abs)
         return True
+
+    except subprocess.TimeoutExpired:
+        log.error("FFmpeg timeout para %s", src_abs)
+        try:
+            if os.path.exists(tmp_abs):
+                os.remove(tmp_abs)
+        except OSError:
+            pass
+        return False
+
     except subprocess.CalledProcessError as e:
-        log.exception("ffmpeg falló (%s): %s", e.returncode, (e.stderr or "")[:2000])
+        log.exception("FFmpeg falló (%s). stderr: %s", e.returncode, (e.stderr or "")[:2000])
         try:
             if os.path.exists(tmp_abs):
                 os.remove(tmp_abs)
         except OSError:
             pass
         return False
+
     except Exception:
-        # fallback de seguridad
+        log.exception("Error inesperado comprimiendo %s", src_abs)
         try:
             if os.path.exists(tmp_abs):
                 os.remove(tmp_abs)
         except OSError:
             pass
-        log.exception("Error inesperado comprimiendo %s", src_abs)
         return False
+
 
 @receiver(post_save, sender=Project)
 def compress_preview(sender, instance, created, **kwargs):
@@ -78,7 +109,6 @@ def compress_preview(sender, instance, created, **kwargs):
     Comprime un preview MP4 a *_s.mp4 una vez y elimina el original.
     Nunca lanza excepción (evita 500 en admin).
     """
-    # Evita re-entradas si guardamos el propio objeto
     if getattr(instance, "_compressing_preview", False):
         return
 
@@ -87,15 +117,13 @@ def compress_preview(sender, instance, created, **kwargs):
         return
 
     name_lower = field.name.lower()
-    # Solo .mp4 y que no sea ya _s.mp4
     if not name_lower.endswith(".mp4") or name_lower.endswith("_s.mp4"):
         return
 
-    # Paths
     try:
         src_abs = field.path  # requiere FileSystemStorage local
     except Exception:
-        log.warning("Storage no expone .path; se omite compresión para %s", field.name)
+        log.info("Storage sin .path; omito compresión para %s", field.name)
         return
 
     base, _ = os.path.splitext(os.path.basename(src_abs))
