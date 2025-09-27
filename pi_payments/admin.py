@@ -10,7 +10,7 @@ from unfold.contrib.filters.admin import RangeDateTimeFilter
 from unfold.decorators import action
 from unfold.enums import ActionVariant
 
-from .models import Payment  # ✅ importa desde tu app, no desde orders
+from .models import Payment
 
 
 def _pi_headers():
