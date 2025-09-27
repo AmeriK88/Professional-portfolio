@@ -1,4 +1,3 @@
-# orders/models.py
 from decimal import Decimal
 from django.db import models
 from django.db.models import F, Sum, DecimalField, ExpressionWrapper
