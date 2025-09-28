@@ -3,8 +3,6 @@ from django.utils import timezone
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-
-
 class Payment(models.Model):
     INITIATED = "initiated"
     CONFIRMED = "confirmed"
@@ -15,9 +13,7 @@ class Payment(models.Model):
         (FAILED,    "Failed"),
     ]
 
-    # referencia directa por string para evitar import circular
     order               = models.OneToOneField("orders.Order", related_name="payment", on_delete=models.CASCADE)
-
     provider            = models.CharField(max_length=30, default="pi")
     provider_payment_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
 
@@ -33,7 +29,6 @@ class Payment(models.Model):
     def __str__(self) -> str:
         return f"Payment({self.provider} · {self.provider_payment_id or '-'})"
 
-    # helper opcional
     def mark_confirmed(self, tx_time=None, save_order=True):
         self.status = self.CONFIRMED
         self.completed_at = tx_time or timezone.now()
@@ -45,6 +40,24 @@ class Payment(models.Model):
                 o.paid_at = o.paid_at or self.completed_at
                 o.save(update_fields=["status", "paid_at"])
 
+    def mark_failed(self, reason: str | None = None, save_order: bool = True):
+        raw = self.raw_payload or {}
+        if reason:
+            raw.setdefault("fail_reasons", []).append(
+                {"reason": reason, "at": timezone.now().isoformat()}
+            )
+        self.raw_payload = raw
+        self.status = self.FAILED
+        self.completed_at = None
+        self.save(update_fields=["status", "raw_payload", "completed_at"])
+
+        if save_order:
+            o = self.order
+            # Solo cancela si aún no está pagado
+            if o.status not in (getattr(o, "PAID", "paid"),):
+                o.status = getattr(o, "CANCELLED", "cancelled")
+                o.paid_at = None
+                o.save(update_fields=["status", "paid_at"])
 
 
 @receiver(post_save, sender=Payment)
