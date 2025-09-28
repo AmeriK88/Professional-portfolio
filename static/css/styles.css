@@ -119,8 +119,14 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 
 .profile-card:hover { transform: translateY(-10px); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);}
 
-/* Iconos habilidades */
-.d-flex img { max-width: 25px; margin: 0 10px; transition: transform 0.3s ease, filter 0.3s ease; animation: scaleUp var(--animation-duration) var(--animation-ease); transition: transform 0.3s ease, filter 0.3s ease;}
+/* Después: limita el estilo solo a tu sección de skills */
+.skills-icons img {width: 40px; height: auto; margin: 0 10px; transition: transform .3s ease, filter .3s ease; animation: scaleUp var(--animation-duration, .6s) var(--animation-ease, ease);}
+
+/* Tamaño mayor para algunos */
+.skills-icons img.tech-icon-lg { width: 60px; }
+
+/* Hover opcional */
+.skills-icons img:hover { transform: translateY(-2px) scale(1.05); filter: saturate(1.1);}
 
 .d-flex img:hover { transform: scale(1.5);}
 
