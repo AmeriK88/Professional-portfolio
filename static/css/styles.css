@@ -120,9 +120,10 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 .profile-card:hover { transform: translateY(-10px); box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);}
 
 /* Iconos habilidades */
-.d-flex img { max-width: 50px; margin: 0 10px; transition: transform 0.3s ease, filter 0.3s ease; animation: scaleUp var(--animation-duration) var(--animation-ease); transition: transform 0.3s ease, filter 0.3s ease;}
+.d-flex img { max-width: 30px; margin: 0 10px; transition: transform 0.3s ease, filter 0.3s ease; animation: scaleUp var(--animation-duration) var(--animation-ease); transition: transform 0.3s ease, filter 0.3s ease;}
 
 .d-flex img:hover { transform: scale(1.5);}
+
 
 .profile-card .card-title { font-size: 1.5rem; color: var(--primary-color); font-weight: bold;}
 
