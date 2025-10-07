@@ -132,13 +132,13 @@
             </li>
 
             {% if request.user.is_authenticated %}
+
               <!-- Menú de usuario con avatar -->
               <li class="nav-item dropdown ms-lg-2">
                 <a class="nav-link dropdown-toggle p-0 d-flex align-items-center gap-2"
                   href="#" id="userMenu" role="button" data-bs-toggle="dropdown"
                   aria-expanded="false" aria-label="Menú de usuario"
                   title="{{ request.user.display_name|default:request.user.username }}">
-                  <!-- Anillo alrededor del avatar con utilidades Bootstrap -->
                   <span class="avatar-ring d-inline-flex rounded-circle p-1 bg-white bg-opacity-25 shadow-sm">
                     <img
                       src="{{ request.user.avatar_url|default:'/static/images/default-avatar.png' }}"
@@ -153,6 +153,17 @@
                   <span class="visually-hidden">Cuenta</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+                  <li>
+                    <a class="dropdown-item {% if request.path|slice:':7' == '/inbox/' %}active{% endif %}"
+                      href="{% url 'inbox:thread_list' %}">
+                      <i class="fa-regular fa-envelope me-2"></i>
+                      Bandeja de entrada
+                      {% if inbox_unread_count|default:0|add:0 > 0 %}
+                        <span class="badge rounded-pill text-bg-danger ms-2">{{ inbox_unread_count }}</span>
+                      {% endif %}
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
                   <li><a class="dropdown-item" href="{% url 'users:profile' %}">
                     <i class="fa-regular fa-user me-2"></i>Mi perfil</a></li>
                   <li><a class="dropdown-item" href="{% url 'users:password_change' %}">
@@ -171,6 +182,7 @@
                   </li>
                 </ul>
               </li>
+
             {% else %}
               <!-- Botón único de acceso -->
               <li class="nav-item ms-lg-2">
@@ -185,6 +197,7 @@
       </div>
     </nav>
 
+    <!-- Mensajes flash -->
     {% if messages %}
       <div class="container mt-3">
         {% for message in messages %}

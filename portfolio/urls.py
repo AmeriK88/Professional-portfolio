@@ -24,7 +24,7 @@ urlpatterns = [
     path("users/", include(("users.urls", "users"), namespace="users")),
     path("orders/", include(("orders.urls", "orders"), namespace="orders")),
     path("validation-key.txt", validation_key_view, name="validation_key"),
-
+    path("inbox/", include("inbox.urls", namespace="inbox")),
 
     path("sw.js", service_worker, name="sw"),
 ]

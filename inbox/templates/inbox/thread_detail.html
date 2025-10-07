@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Conversación{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a href="{% url 'inbox:thread_list' %}" class="btn btn-sm btn-outline-secondary mb-3">← Volver al inbox</a>
+
+  <div class="card shadow-sm position-relative" style="z-index:3;">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <div class="h5 mb-0">{{ thread.subject }}</div>
+          <div class="small text-muted">Pedido {{ thread.order.number }}</div>
+        </div>
+      </div>
+      <hr>
+
+      <div class="mb-3" style="max-height: 50vh; overflow:auto;">
+        {% for m in thread_messages %}
+          <div class="mb-3">
+            <div class="small text-muted">
+              {% if m.sender_type == 'system' %}Sistema{% elif m.sender_type == 'admin' %}Admin{% else %}Tú{% endif %}
+              · {{ m.created_at|date:"d M Y H:i" }}
+            </div>
+            <div>{{ m.body|linebreaksbr }}</div>
+          </div>
+        {% empty %}
+          <div class="text-muted">Sin mensajes todavía.</div>
+        {% endfor %}
+      </div>
+
+
+      <form method="post"
+            action="{% url 'inbox:thread_detail' thread.id %}"
+            class="d-flex flex-column flex-sm-row gap-2 align-items-stretch">
+        {% csrf_token %}
+        <textarea class="form-control" name="body" rows="2"
+                  placeholder="Escribe un mensaje…" required></textarea>
+        <button class="btn btn-primary" type="submit">Enviar</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
