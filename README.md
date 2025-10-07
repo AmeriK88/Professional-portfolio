@@ -260,4 +260,4 @@ Choose your preferred license (e.g., **MIT**) and place it as `LICENSE` in the r
 
 ## 🙌 Credits
 
-- Built with ❤️ using **Django**, **Bootstrap**, **django‑unfold**, and the **Pi Network SDK**.
+- Built by José Félix using **Django**, **Bootstrap**, **django‑unfold**, and the **Pi Network SDK**.
