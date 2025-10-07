@@ -72,6 +72,7 @@ INSTALLED_APPS = [
     "pi_payments",
     "users.apps.UsersConfig",
     "orders",
+    "inbox.apps.InboxConfig",
     "axes",
 ]
 
@@ -114,6 +115,7 @@ TEMPLATES = [
                 "users.context_processors.recaptcha_keys",
                 # Pi pricing (EUR/π) in templates
                 "pi_payments.context_processors.pi_pricing",
+                "inbox.context_processors.inbox_unread",
             ],
         },
     },

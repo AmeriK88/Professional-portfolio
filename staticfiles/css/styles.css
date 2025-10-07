@@ -187,6 +187,16 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 
 .page-loader-content { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); text-align: center; color: #fff;}
 
+/* Si está marcado como aria-hidden, quítalo del flujo por completo */
+#page-loader[aria-hidden="true"] {
+  display: none !important;
+}
+
+/* Oculto por defecto si NO está activo */
+#page-loader:not(.active) {
+  display: none !important;
+}
+
 #userMenu.dropdown-toggle::after { display: none; }
 
 .navbar-brand .brand-logo { height: 62px; width: auto !important; max-width: none !important; object-fit: contain; display: block;}
