@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h1 class="h3 mb-3">Inbox</h1>
+
+  {% if threads %}
+    <div class="list-group">
+      {% for t in threads %}
+        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+           href="{% url 'inbox:thread_detail' t.id %}">
+          <div>
+            <div class="fw-semibold">{{ t.subject }}</div>
+            <div class="small text-muted">Pedido {{ t.order.number }}</div>
+          </div>
+          <small class="text-muted">{{ t.last_message_at|date:"d M Y H:i" }}</small>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-muted">No tienes conversaciones aún.</div>
+  {% endif %}
+</div>
+{% endblock %}
