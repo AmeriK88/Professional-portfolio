@@ -191,13 +191,13 @@
 
             {% else %}
               <!-- Botón único de acceso -->
-              <li class="nav-item ms-lg-2 mt-2">
+              <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                 <a class="btn btn-light btn-sm" href="{% url 'users:login' %}?next={{ request.path }}">
                   Acceder
                 </a>
               </li>
             {% endif %}
-              <li class="nav-item ms-lg-2 mt-3">
+              <li class="nav-item ms-lg-2 mt-3 mt-lg-0">
                 <button id="theme-toggle" class="btn btn-outline-secondary btn-sm" type="button" aria-label="Toggle theme">
                   <i class="fa-regular fa-moon" id="theme-toggle-icon"></i>
                 </button>
@@ -321,8 +321,8 @@
             <small class="text-muted">Solo necesarias por defecto.</small>
           </div>
           <div class="modal-footer py-2">
-            <button id="ck-reject" class="btn btn-outline-secondary">Solo necesarias</button>
-            <button id="ck-accept" class="btn btn-primary">Permitir servicios externos</button>
+            <button id="ck-reject" class="btn btn-outline-cta rounded-pill px-4 py-2">Solo necesarias</button>
+            <button id="ck-accept" class="cta-button px-4 py-2">Permitir servicios externos</button>
             <button class="btn btn-ghost" data-ck-open type="button">Preferencias</button>
           </div>
         </div>
@@ -360,8 +360,8 @@
             </ul>
           </div>
           <div class="modal-footer py-2">
-            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button id="ck-save" class="btn btn-primary">Guardar</button>
+            <button class="btn btn-outline-cta rounded-pill px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
+            <button id="ck-save" class="cta-button px-4 py-2">Guardar</button>
           </div>
         </div>
       </div>

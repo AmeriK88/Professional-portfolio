@@ -362,7 +362,7 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 
 .card-text { font-size: 0.95rem; color: #cccccc; text-align: justify;}
 
-.pi-icon{ width:1.4em; height:1.4em; flex-shrink:0;        }
+.pi-icon{ width:1.5em; height:auto; flex-shrink:0; margin-left: 0.5rem;}
 
 .blog-container .card { border-radius: 12px; transition: transform 0.3s ease, box-shadow 0.3s ease; background-color: var(--card-background);}
 
