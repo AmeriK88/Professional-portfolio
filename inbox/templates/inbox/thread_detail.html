@@ -2,7 +2,7 @@
 {% block title %}Conversación{% endblock %}
 {% block content %}
 <div class="container py-4">
-  <a href="{% url 'inbox:thread_list' %}" class="btn btn-sm btn-outline-secondary mb-3">← Volver al inbox</a>
+  <a href="{% url 'inbox:thread_list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2 mb-3">← Volver al inbox</a>
 
   <div class="card shadow-sm position-relative" style="z-index:3;">
     <div class="card-body">
@@ -35,7 +35,7 @@
         {% csrf_token %}
         <textarea class="form-control" name="body" rows="2"
                   placeholder="Escribe un mensaje…" required></textarea>
-        <button class="btn btn-primary" type="submit">Enviar</button>
+        <button class="cta-button cta-section px-4 py-2 w-100" type="submit">Enviar</button>
       </form>
     </div>
   </div>

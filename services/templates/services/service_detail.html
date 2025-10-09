@@ -72,21 +72,21 @@
   {% endif %}
 
   <div class="d-flex gap-2 mb-5">
-    <a href="{% url 'services:service_list' %}" class="btn btn-outline-secondary">
+    <a href="{% url 'services:service_list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2">
       ← Volver
     </a>
 
     {% if request.user.is_authenticated %}
       <button
         id="pi-pay-btn"
-        class="btn btn-primary"
+        class="cta-button cta-section"
         data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
         Pagar con
-        <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon" width="18" height="18">
+        <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon">
       </button>
     {% else %}
-      <a class="btn btn-primary" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
-        Iniciar sesión para pagar
+      <a class="cta-button" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
+        Inicia sesión
       </a>
     {% endif %}
   </div>

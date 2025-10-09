@@ -49,15 +49,12 @@
           </p>
 
           <button
-            class="btn btn-primary"
-            style="position:relative; z-index:1;"
-            onclick="payWithPi('{{ service.title|escapejs }}', {{ service.price }})">
+            class="btn btn-outline-cta rounded-pill px-4 py-2">
             Paga con
             <img
               src="{% static 'images/pi-icon.svg' %}"
               alt="Pi"
-              class="pi-icon"
-              width="20" height="20">
+              class="pi-icon">
           </button>
 
           <a href="{{ service.get_absolute_url }}"

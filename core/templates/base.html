@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-bs-theme="light">
 <head>
   <meta charset="UTF-8">
 
@@ -84,10 +84,17 @@
     <nav class="navbar navbar-expand-lg">
       <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center" href="{% url 'core:home' %}" aria-label="Inicio">
-          <img src="{% static 'images/logo-nav.webp' %}"
-              alt="José Félix · Dev"
-              class="brand-logo align-text-top" fetchpriority="high">
+          <img
+            id="brand-logo"
+            src="{% static 'images/logo-nav.webp' %}"              
+            data-light="{% static 'images/logo-nav.webp' %}"
+            data-dark="{% static 'images/logo-jfgc-dark.webp' %}" 
+            alt="José Félix · Dev"
+            class="brand-logo align-text-top"
+            fetchpriority="high"
+          >
         </a>
+
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#mainNav" aria-controls="mainNav"
@@ -97,7 +104,6 @@
 
         <div class="collapse navbar-collapse" id="mainNav">
           <ul class="navbar-nav ms-auto align-items-lg-center">
-
             <!-- Menú compacto -->
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="exploreMenu" role="button"
@@ -185,13 +191,17 @@
 
             {% else %}
               <!-- Botón único de acceso -->
-              <li class="nav-item ms-lg-2">
+              <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                 <a class="btn btn-light btn-sm" href="{% url 'users:login' %}?next={{ request.path }}">
                   Acceder
                 </a>
               </li>
             {% endif %}
-
+              <li class="nav-item ms-lg-2 mt-3 mt-lg-0">
+                <button id="theme-toggle" class="btn btn-outline-secondary btn-sm" type="button" aria-label="Toggle theme">
+                  <i class="fa-regular fa-moon" id="theme-toggle-icon"></i>
+                </button>
+              </li>
           </ul>
         </div>
       </div>
@@ -311,8 +321,8 @@
             <small class="text-muted">Solo necesarias por defecto.</small>
           </div>
           <div class="modal-footer py-2">
-            <button id="ck-reject" class="btn btn-outline-secondary">Solo necesarias</button>
-            <button id="ck-accept" class="btn btn-primary">Permitir servicios externos</button>
+            <button id="ck-reject" class="btn btn-outline-cta rounded-pill px-4 py-2">Solo necesarias</button>
+            <button id="ck-accept" class="cta-button px-4 py-2">Permitir servicios externos</button>
             <button class="btn btn-ghost" data-ck-open type="button">Preferencias</button>
           </div>
         </div>
@@ -350,8 +360,8 @@
             </ul>
           </div>
           <div class="modal-footer py-2">
-            <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button id="ck-save" class="btn btn-primary">Guardar</button>
+            <button class="btn btn-outline-cta rounded-pill px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
+            <button id="ck-save" class="cta-button px-4 py-2">Guardar</button>
           </div>
         </div>
       </div>
@@ -374,11 +384,10 @@
     <script src="{% static 'js/cookiesConsent.portfolio.js' %}" defer></script>
     <script src="{% static 'js/pageLoader.js' %}" defer></script>
     <script src="{% static 'js/alerts.anim.js' %}" defer></script>
-
+    <script src="{% static 'js/theme.js' %}" defer></script>
     <script src="{% static 'js/pi-init.js' %}" defer></script>
 
     {% block extra_scripts %}{% endblock %}
-
 
     <script>
       if ('serviceWorker' in navigator && location.hostname.endsWith('up.railway.app')) {
