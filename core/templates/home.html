@@ -15,7 +15,7 @@
         Plataforma para contratar, pagar y gestionar servicios de desarrollo de software con total transparencia.
       </p>
       <div class="d-flex gap-2 justify-content-center justify-content-lg-start mt-3">
-        <a href="{% url 'services:service_list' %}" class="btn btn-primary">Ver servicios</a>
+        <a href="{% url 'services:service_list' %}" class="cta-button cta-section">Ver servicios</a>
 
         <a href="https://wa.me/+34639949187"
           class="btn btn-outline-success  d-inline-flex align-items-center"
@@ -58,8 +58,8 @@
             </ul>
           </div>
 
-          <div class="pb-3">
-            <a href="{% url 'services:service_list' %}" class="btn btn-primary mt-2">Explorar servicios</a>
+          <div class="pb-3 mt-5">
+            <a href="{% url 'services:service_list' %}" class="cta-button cta-section">Explorar servicios</a>
           </div>
         </div>
       </div>
@@ -92,9 +92,11 @@
       3) Seguimiento ágil y entregas iterativas.<br>
       4) Soporte post-entrega y mejoras continuas.
     </p>
-    <a href="{% url 'services:service_list' %}" class="cta-button cta-section text-nowrap" aria-label="Ver servicios">
-      Ver servicios
-    </a>
+    <div class="d-flex justify-content-center mt-4">
+      <a href="{% url 'services:service_list' %}" class="cta-button cta-section" aria-label="Ver servicios">
+        Ver servicios
+      </a>
+    </div>
   </div>
 
   {# Servicios destacados (vídeo lazy, sin autoplay) #}
@@ -131,7 +133,7 @@
               <p class="card-text text-muted small mb-3">{{ s.description|striptags|truncatechars:120 }}</p>
             {% endif %}
             <div class="mt-auto text-center">
-              <span class="btn btn-outline-primary">Ver detalles</span>
+              <span class="btn btn-outline-cta rounded-pill px-4 py-2">Ver detalles</span>
             </div>
           </div>
           <span class="stretched-link"></span>

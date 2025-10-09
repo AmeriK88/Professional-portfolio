@@ -12,11 +12,11 @@
 
     <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
       {% url 'orders:list' as orders_list_url %}
-      <a class="btn btn-outline-secondary"
+      <a class="btn btn-outline-cta rounded-pill px-4 py-2"
          href="{% if orders_list_url %}{{ orders_list_url }}{% else %}javascript:history.back(){% endif %}">
         ← Volver
       </a>
-      <button class="btn btn-outline-primary" onclick="window.print()">
+      <button class="cta-button cta-section" onclick="window.print()">
         <i class="fa-solid fa-print me-1"></i> Imprimir
       </button>
     </div>
@@ -176,7 +176,7 @@
 
       {# Botón volver extra solo en móvil #}
       {% if orders_list_url %}
-        <a class="btn btn-outline-secondary w-100 d-sm-none mt-3" href="{{ orders_list_url }}">← Volver</a>
+        <a class="btn btn-outline-cta rounded-pill w-100 d-sm-none mt-3" href="{{ orders_list_url }}">← Volver</a>
       {% endif %}
     </div>
   </div>

@@ -7,7 +7,7 @@
 
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h1 class="h4 mb-0">Mis pedidos</h1>
-    <a href="javascript:history.back()" class="btn btn-outline-secondary d-none d-sm-inline">← Volver</a>
+    <a href="javascript:history.back()" class="btn btn-outline-cta rounded-pill d-none d-sm-inline">← Volver</a>
   </div>
 
   {% if orders %}
@@ -59,7 +59,7 @@
                 {% endif %}
               </td>
               <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" href="{{ detail_url }}">Ver</a>
+                <a class="btn btn-outline-cta rounded-pill d-sm-none" href="{{ detail_url }}">Ver</a>
               </td>
             </tr>
             {% endwith %}

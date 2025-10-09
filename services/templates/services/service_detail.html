@@ -85,7 +85,7 @@
         <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon" width="18" height="18">
       </button>
     {% else %}
-      <a class="btn btn-primary" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
+      <a class="cta-button cta-section" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
         Iniciar sesión para pagar
       </a>
     {% endif %}
