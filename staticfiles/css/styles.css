@@ -54,7 +54,7 @@
    SUPERFICIES / NAV / FOOTER
    ========================================================= */
 :root[data-bs-theme="dark"] .card {
-  background-color: #111722;
+  background-color: var(--bs-dropdown-bg);
   border-color: rgba(255, 255, 255, .06);
 }
 :root[data-bs-theme="dark"] .navbar,
@@ -62,7 +62,7 @@
   background-color: #0e141d;
 }
 :root[data-bs-theme="dark"] .footer-links a {
-  color: #c7d3df;
+  color: var(--bs-dropdown-link-color);
 }
 
 /* Subrayado animado de nav también claro en dark */
@@ -114,6 +114,19 @@
 :root[data-bs-theme="dark"] .about-text {
   color: #e7e2ff;
 }
+
+:root[data-bs-theme="dark"] .bg-light{
+  background-color: #111722 !important;
+  border: 1px solid rgba(168,85,247,.14);
+  box-shadow: var(--neon-glow);
+}
+
+/* Mejora general del contraste de “text-muted” en dark (opcional) */
+:root[data-bs-theme="dark"] .text-muted{
+  color: #9fb2c7 !important;
+  opacity: .9;
+}
+
 
 /* =========================================================
    BOTÓN OUTLINE CTA (funciona en claro y en oscuro)
@@ -431,9 +444,16 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 
 .avatar-option input[type="radio"]:checked + .avatar-img { transform: scale(1.06); box-shadow: 0 0 0 3px rgba(79,195,247,.35); outline: 2px solid var(--primary-color); outline-offset: 2px;}
 
-.avatar-option:hover .avatar-img {
-  transform: scale(1.03);
-}
+.avatar-option:hover .avatar-img { transform: scale(1.03);}
+
+
+/* =========================================================
+   HEADER ORDER DETAILS
+   ========================================================= */
+.order-header h1{ word-break: break-word; }
+
+.code{ word-break: break-all; }
+
 
 /* =========================================================
    FOOTER + LINKS + SOCIAL ICONS + CONTACT BUTTON
@@ -526,6 +546,11 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
     font-size:.95rem;
   }
 }
+
+  @media (max-width: 576px){
+    .order-header .btn{ width: 100%; }
+    .order-header h1{ font-size: 1.15rem; }
+  }
 
 @media (max-width: 450px) {.animated-text { font-size: 1rem;} 
 }

@@ -27,11 +27,11 @@
 
       {# -- Artículos -- #}
       <div class="card shadow-sm mb-3">
-        <div class="card-header bg-light">
+        <div class="card-header">
           <strong>Artículos</strong>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
+          <div class="card table-responsive">
             <table class="table table-sm align-middle">
               <thead class="table-light">
                 <tr>
@@ -77,38 +77,38 @@
 
       {# -- Estado del pedido -- #}
       <div class="card shadow-sm mb-3">
-        <div class="card-header bg-light">
+        <div class="card-header">
           <strong>Estado del pedido</strong>
         </div>
         <div class="card-body">
-          {% with s=order.status %}
+          {% with status=order.status %}
             <div class="mb-2">
               <span class="me-2 fw-semibold">Estado:</span>
               <span class="badge
-                {% if s == 'paid' %} bg-success
-                {% elif s == 'awaiting_payment' %} bg-warning text-dark
-                {% elif s == 'cancelled' %} bg-danger
-                {% elif s == 'refunded' %} bg-info text-dark
+                {% if status == 'paid' %} bg-success
+                {% elif status == 'awaiting_payment' %} bg-warning text-dark
+                {% elif status == 'cancelled' %} bg-danger
+                {% elif status == 'refunded' %} bg-info text-dark
                 {% else %} bg-secondary
                 {% endif %}">
-                {{ s|capfirst }}
+                {{ status|capfirst }}
               </span>
             </div>
 
             <div class="progress" style="height:6px;">
               <div class="progress-bar
-                {% if s == 'paid' %} bg-success
-                {% elif s == 'awaiting_payment' %} bg-warning
-                {% elif s == 'cancelled' %} bg-danger
-                {% elif s == 'refunded' %} bg-info
+                {% if status == 'paid' %} bg-success
+                {% elif status == 'awaiting_payment' %} bg-warning
+                {% elif status == 'cancelled' %} bg-danger
+                {% elif status == 'refunded' %} bg-info
                 {% else %} bg-secondary
                 {% endif %}"
                 role="progressbar"
                 style="width:
-                  {% if s == 'paid' %}100%
-                  {% elif s == 'awaiting_payment' %}50%
-                  {% elif s == 'refunded' %}100%
-                  {% elif s == 'cancelled' %}100%
+                  {% if status == 'paid' %}100%
+                  {% elif status == 'awaiting_payment' %}50%
+                  {% elif status == 'refunded' %}100%
+                  {% elif status == 'cancelled' %}100%
                   {% else %}25%
                   {% endif %};">
               </div>
@@ -128,7 +128,7 @@
 
       {# -- Pago -- #}
       <div class="card shadow-sm">
-        <div class="card-header bg-light">
+        <div class="card-header">
           <strong>Pago</strong>
         </div>
         <div class="card-body">
@@ -153,14 +153,14 @@
               <div class="small">
                 <div class="text-muted">Pi payment id</div>
                 <code id="pid-text">{{ order.payment.provider_payment_id }}</code>
-                <button class="btn btn-outline-cta rounded-pill" type="button"
+                <button class="btn btn-outline-cta rounded-pill btn-sm" type="button"
                         onclick="navigator.clipboard.writeText(document.getElementById('pid-text').innerText)">
                   Copiar
                 </button>
               </div>
             {% endif %}
 
-            {% if order.payment.raw_payload.pricing %}
+            {% if order.payment.raw_payload and order.payment.raw_payload.pricing %}
               <hr>
               <div class="small">
                 <div>EUR: {{ order.payment.raw_payload.pricing.price_eur|floatformat:2 }}</div>

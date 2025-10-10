@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const typingElement = document.getElementById('typing-effect');
-  if (!typingElement) return;        // aborta si no existe
+  if (!typingElement) return;     
 
   const text = '¡Hola! ¿Desarrollamos el futuro?';
   let i = 0;

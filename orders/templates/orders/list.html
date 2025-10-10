@@ -15,7 +15,7 @@
     <div class="card-body p-0">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+          <thead class="table-light ">
             <tr>
               <th>Número</th>
               <th>Fecha</th>
@@ -25,41 +25,41 @@
             </tr>
           </thead>
           <tbody>
-          {% for o in orders %}
-            {% url 'orders:detail' o.number as resolved_detail %}
-            {% with default_url="/orders/"|add:o.number|add:"/" %}
+          {% for order in orders %}
+            {% url 'orders:detail' order.number as resolved_detail %}
+            {% with default_url="/orders/"|add:order.number|add:"/" %}
             {% with detail_url=resolved_detail|default:default_url %}
             <tr>
               <td>
-                <a href="{{ detail_url }}" class="text-decoration-none">{{ o.number }}</a>
+                <a href="{{ detail_url }}" class="text-decoration-none">{{ order.number }}</a>
               </td>
-              <td>{{ o.created_at|date:"d M Y, H:i" }}</td>
-              <td>
-                {% with s=o.status %}
-                <span class="badge
-                  {% if s == 'paid' %} bg-success
-                  {% elif s == 'awaiting_payment' %} bg-warning text-dark
-                  {% elif s == 'cancelled' %} bg-danger
-                  {% elif s == 'refunded' %} bg-info text-dark
-                  {% else %} bg-secondary
-                  {% endif %}">
-                  {% if s == 'paid' %}Pagado
-                  {% elif s == 'awaiting_payment' %}Pendiente de pago
-                  {% elif s == 'cancelled' %}Cancelado
-                  {% elif s == 'refunded' %}Reembolsado
-                  {% else %}{{ s|capfirst }}
-                  {% endif %}
-                </span>
-                {% endwith %}
-              </td>
+              <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+                <td>
+                  {% with status=order.status %}
+                  <span class="badge
+                    {% if status == 'paid' %} text-bg-success
+                    {% elif status == 'awaiting_payment' %} text-bg-warning
+                    {% elif status == 'cancelled' %} text-bg-danger
+                    {% elif status == 'refunded' %} text-bg-info
+                    {% else %} text-bg-secondary
+                    {% endif %}
+                    {% if status == 'paid' %}Pagado
+                    {% elif status == 'awaiting_payment' %}Pendiente de pago
+                    {% elif status == 'cancelled' %}Cancelado
+                    {% elif status == 'refunded' %}Reembolsado
+                    {% else %}{{ s|capfirst }}
+                    {% endif %}">
+                  </span>
+                  {% endwith %}
+                </td>
               <td class="text-end">
-                {{ o.total|floatformat:2 }} {{ o.currency }}
-                {% if o.currency == "EUR" and eur_per_pi %}
-                  <div class="small text-muted">≈ {{ o.total|to_pi:eur_per_pi|floatformat:2 }} π</div>
+                {{ order.total|floatformat:2 }} {{ order.currency }}
+                {% if order.currency == "EUR" and eur_per_pi %}
+                  <div class="small text-muted">≈ {{ order.total|to_pi:eur_per_pi|floatformat:2 }} π</div>
                 {% endif %}
               </td>
               <td class="text-end">
-                <a class="btn btn-outline-cta rounded-pill d-sm-none" href="{{ detail_url }}">Ver</a>
+                <a class="btn btn-outline-cta rounded-pill btn-sm" href="{{ detail_url }}">Ver</a>
               </td>
             </tr>
             {% endwith %}

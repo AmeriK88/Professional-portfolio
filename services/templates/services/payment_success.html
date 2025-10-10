@@ -65,7 +65,7 @@
                 <div class="small text-muted">ID de pago (Pi)</div>
                 <div class="d-flex align-items-center gap-2">
                   <code id="pid-val" class="text-break">{{ payment_id }}</code>
-                  <button class="btn btn-sm btn-outline-secondary" type="button" data-copy="#pid-val" aria-label="Copiar ID de pago">Copiar</button>
+                  <button class="btn btn-sm btn-outline-cta rounded-pill" type="button" data-copy="#pid-val" aria-label="Copiar ID de pago">Copiar</button>
                 </div>
               </div>
             {% elif payment and payment.provider_payment_id %}
@@ -91,14 +91,14 @@
                 <div class="small text-muted">TXID</div>
                 <div class="d-flex align-items-center gap-2">
                   <code id="txid-val" class="text-break">{{ payment.raw_payload.txid }}</code>
-                  <button class="btn btn-sm btn-outline-secondary" type="button" data-copy="#txid-val" aria-label="Copiar TXID">Copiar</button>
+                  <button class="btn btn-outline-cta rounded-pill" type="button" data-copy="#txid-val" aria-label="Copiar TXID">Copiar</button>
                 </div>
               </div>
             {% endif %}
           </div>
 
           {% if payment and payment.raw_payload and payment.raw_payload.pricing %}
-            <div class="bg-light rounded-3 p-3 mt-3">
+            <div class="rounded-3 p-3 mt-3">
               <div class="small text-muted mb-2">Resumen de conversión</div>
               <div class="d-flex flex-wrap gap-4">
                 <div><div class="small text-muted">Precio EUR</div><div class="fw-semibold">{{ payment.raw_payload.pricing.price_eur }} €</div></div>
@@ -111,7 +111,7 @@
           <div class="mt-4">
             <div class="h6 fw-semibold mb-2">¿Y ahora qué sigue?</div>
             <ul class="text-muted mb-0">
-              <li>📩 Revisa tu correo: te enviaremos la confirmación del pedido junto con los detalles de tu compra.</li>
+              <li>📩 Revisa tu bandeja de entrada: te enviaremos la confirmación del pedido junto con los detalles de tu compra.</li>
               <li>💬 En caso de necesitarlo, podrás comunicarte con nosotros para indicar tus preferencias o comentarios.</li>
               <li>🧾 Puedes consultar el estado del pago y el historial en <strong>“Mis pedidos”</strong>.</li>
               <li>🆔 Si contactas con soporte, menciona tu <strong>número de pedido</strong> para una atención más rápida.</li>
@@ -119,9 +119,9 @@
           </div>
 
           <div class="d-flex flex-wrap gap-2 mt-4">
-            {% if order %}<a href="{{ order.get_absolute_url }}" class="cta-button cta-section">Ver pedido</a>{% endif %}
+            {% if order %}<a href="{{ order.get_absolute_url }}" class="cta-button cta-section px-4 py-2">Ver pedido</a>{% endif %}
             <a href="{% url 'orders:list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2">Mis pedidos</a>
-            <a href="{% url 'services:service_list' %}" class="btn btn-light">Seguir explorando servicios</a>
+            <a href="{% url 'services:service_list' %}" class="btn btn-ghost">Seguir explorando servicios</a>
           </div>
 
         </div>
