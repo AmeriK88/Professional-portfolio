@@ -16,7 +16,7 @@
          href="{% if orders_list_url %}{{ orders_list_url }}{% else %}javascript:history.back(){% endif %}">
         ← Volver
       </a>
-      <button class="cta-button cta-section" onclick="window.print()">
+      <button class="cta-button cta-section px-4 py-2 w-100" onclick="window.print()">
         <i class="fa-solid fa-print me-1"></i> Imprimir
       </button>
     </div>
@@ -153,7 +153,7 @@
               <div class="small">
                 <div class="text-muted">Pi payment id</div>
                 <code id="pid-text">{{ order.payment.provider_payment_id }}</code>
-                <button class="btn btn-sm btn-outline-secondary ms-2" type="button"
+                <button class="btn btn-outline-cta rounded-pill" type="button"
                         onclick="navigator.clipboard.writeText(document.getElementById('pid-text').innerText)">
                   Copiar
                 </button>
@@ -182,14 +182,4 @@
   </div>
 
 </div>
-
-{# ===== Ajustes de estilo mínimos para móvil ===== #}
-<style>
-  .order-header h1{ word-break: break-word; }
-  code{ word-break: break-all; }
-  @media (max-width: 576px){
-    .order-header .btn{ width: 100%; }
-    .order-header h1{ font-size: 1.15rem; }
-  }
-</style>
 {% endblock %}

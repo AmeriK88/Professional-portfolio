@@ -68,9 +68,9 @@
 {% block extra_scripts %}
   {% if not PI_ONLY_LOGIN %}
     <script src="https://www.google.com/recaptcha/api.js?render={{ RECAPTCHA_SITE_KEY }}"></script>
-    <script src="{% static 'js/recaptcha-login.js' %}"></script>
+    <script src="{% static 'js/users/recaptcha-login.js' %}"></script>
   {% endif %}
 
   {# lógica de login con Pi (sin inline) #}
-  <script src="{% static 'js/pi-login.js' %}"></script>
+  <script src="{% static 'js/users/pi-login.js' %}"></script>
 {% endblock %}
