@@ -79,13 +79,13 @@
     {% if request.user.is_authenticated %}
       <button
         id="pi-pay-btn"
-        class="cta-button cta-section"
+        class="btn btn-outline-cta rounded-pill px-4 py-2"
         data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
         Pagar con
         <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon">
       </button>
     {% else %}
-      <a class="cta-button" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
+      <a class="cta-button cta-section" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
         Inicia sesión
       </a>
     {% endif %}
@@ -154,8 +154,8 @@
   </script>
 
   <!-- Handler de pagos -->
-  <script src="{% static 'js/pi_payments.js' %}" defer></script>
+  <script src="{% static 'js/pi_payments/pi_payments.js' %}" defer></script>
 
   <!-- Lazy video -->
-  <script src="{% static 'js/project-previews.js' %}" defer></script>
+  <script src="{% static 'js/previews/project-previews.js' %}" defer></script>
 {% endblock %}

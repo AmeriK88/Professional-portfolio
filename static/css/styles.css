@@ -431,9 +431,16 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
 
 .avatar-option input[type="radio"]:checked + .avatar-img { transform: scale(1.06); box-shadow: 0 0 0 3px rgba(79,195,247,.35); outline: 2px solid var(--primary-color); outline-offset: 2px;}
 
-.avatar-option:hover .avatar-img {
-  transform: scale(1.03);
-}
+.avatar-option:hover .avatar-img { transform: scale(1.03);}
+
+
+/* =========================================================
+   HEADER ORDER DETAILS
+   ========================================================= */
+.order-header h1{ word-break: break-word; }
+
+.code{ word-break: break-all; }
+
 
 /* =========================================================
    FOOTER + LINKS + SOCIAL ICONS + CONTACT BUTTON
@@ -526,6 +533,11 @@ h1:hover { color: var(--secondary-color); transform: scale(1.05); transition: tr
     font-size:.95rem;
   }
 }
+
+  @media (max-width: 576px){
+    .order-header .btn{ width: 100%; }
+    .order-header h1{ font-size: 1.15rem; }
+  }
 
 @media (max-width: 450px) {.animated-text { font-size: 1rem;} 
 }
