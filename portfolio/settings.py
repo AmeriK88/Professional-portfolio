@@ -385,7 +385,7 @@ def whitenoise_add_headers(headers, path, url):
 
 STORAGES = {
     "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        "BACKEND": "portfolio.storage.PortfolioMediaStorage",
     },
     "staticfiles": {
         "BACKEND": (
