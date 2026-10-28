@@ -120,11 +120,8 @@
 
   async function startCheckout(checkoutUrl) {
     if (!checkoutUrl) throw new Error('No se definió data-checkout-url en el botón.');
-    const res = await fetch(checkoutUrl, {
-      credentials: 'same-origin',
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-
+    const res = await postJSON(checkoutUrl, {});
+    
     // Si el backend te redirige a login, seguimos esa redirección
     if (res.redirected || (res.url && res.url.includes('/login'))) {
       window.location.href = res.url || ('/login/?next=' + window.location.pathname);

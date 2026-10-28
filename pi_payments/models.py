@@ -41,6 +41,8 @@ class Payment(models.Model):
                 o.save(update_fields=["status", "paid_at"])
 
     def mark_failed(self, reason: str | None = None, save_order: bool = True):
+        if self.status == self.CONFIRMED:
+            return
         raw = self.raw_payload or {}
         if reason:
             raw.setdefault("fail_reasons", []).append(

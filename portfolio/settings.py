@@ -91,10 +91,11 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "axes.middleware.AxesMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 # --- Pi Sandbox (DEV/SANDBOX only) ---
-PI_SANDBOX = env.bool("PI_SANDBOX", default=True)
+PI_SANDBOX = env.bool("PI_SANDBOX", default=False)
 if PI_SANDBOX or DEBUG:
     # Asegura que no esté XFrameOptionsMiddleware y añade el tuyo
     MIDDLEWARE = [m for m in MIDDLEWARE if m != "django.middleware.clickjacking.XFrameOptionsMiddleware"]

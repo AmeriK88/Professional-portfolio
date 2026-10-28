@@ -3,27 +3,30 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from services.models import Service
 from django.db.models import Prefetch
 from django.core.paginator import Paginator
 from .models import Order, OrderItem
 from pi_payments.models import Payment
+from django.db import transaction
 
 
 @login_required
+@require_POST
+@transaction.atomic
 def checkout_service(request, slug):
     service = get_object_or_404(Service, slug=slug, is_active=True)
+    # 2) ratio EUR por π
+    eur_per_pi = getattr(settings, "PI_EUR_PER_PI", Decimal("0"))
+    if eur_per_pi <= 0:
+        return JsonResponse({"ok": False, "error": "PI_EUR_PER_PI not configured"}, status=500)
 
     # 1) crea pedido en EUR como ya haces
     order = Order.objects.create(user=request.user, status=Order.AWAITING, currency="EUR")
     OrderItem.objects.create(order=order, service=service, unit_price=service.price, quantity=1)
     order.recalc()  # deja total/subtotal en €
-
-    # 2) ratio EUR por π
-    eur_per_pi = getattr(settings, "PI_EUR_PER_PI", Decimal("0"))
-    if eur_per_pi <= 0:
-        return JsonResponse({"ok": False, "error": "PI_EUR_PER_PI not configured"}, status=500)
 
     # 3) calcula amount en π con 4 decimales
     amount_eur = Decimal(str(order.total))
