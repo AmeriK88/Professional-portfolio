@@ -32,7 +32,7 @@ FFMPEG_CMD = os.getenv("FFMPEG_CMD", "ffmpeg")
 # --- Security / environment ---
 # Fallback: if SECRET_KEY is missing, try DEAFAULT_SK (as spelled in your env),
 # otherwise use a placeholder.
-SECRET_KEY = env("SECRET_KEY", default=env("DEAFAULT_SK", default="DEAFAULT_SK"))
+SECRET_KEY = env("SECRET_KEY")
 DEBUG = env.bool("DEBUG", default=False)
 
 # NOTE: Put hostnames only in ALLOWED_HOSTS. Wildcards like ".devtunnels.ms" are allowed.
@@ -65,6 +65,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+
+    # Cloudinary
+    "cloudinary_storage",
+    "cloudinary",
+
     "blog",
     "core",
     "projects",
@@ -335,44 +340,75 @@ USE_I18N = True
 USE_L10N = True
 
 # --- Static & media ---
+# Legacy local media directory.
+# Existing local files are not automatically migrated to Cloudinary.
 USE_VOLUME_MEDIA = env.bool("USE_VOLUME_MEDIA", default=False)
 
 MEDIA_URL = "/media/"
+
 if USE_VOLUME_MEDIA:
     MEDIA_ROOT = "/data/media"
 else:
     MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
 os.makedirs(MEDIA_ROOT, exist_ok=True)
 
+# Static files remain local and are served by WhiteNoise.
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# --- WhiteNoise helpers (used in PROD) ---
-def whitenoise_immutable_test(path, url):
 
+# --- Cloudinary ---
+# CLOUDINARY_URL is loaded from .env by django-environ.
+# The Cloudinary SDK reads this environment variable.
+CLOUDINARY_STORAGE = {
+    "PREFIX": "portfolio/",
+    "MEDIA_TAG": "portfolio",
+}
+
+# --- WhiteNoise helpers ---
+def whitenoise_immutable_test(path, url):
     filename = path.rsplit("/", 1)[-1]
     return bool(re.search(r"\.[0-9a-f]{8,}\.", filename))
 
-def whitenoise_add_headers(headers, path, url):
-    # WhiteNoise already sets max-age; complement with SWR if immutable
-    if whitenoise_immutable_test(path, url):
-        headers["Cache-Control"] = "public, max-age=31536000, immutable, stale-while-revalidate=86400"
 
-# ---- WhiteNoise per environment ----
+def whitenoise_add_headers(headers, path, url):
+    if whitenoise_immutable_test(path, url):
+        headers["Cache-Control"] = (
+            "public, max-age=31536000, immutable, "
+            "stale-while-revalidate=86400"
+        )
+
+
+# --- Django 5.1 storage configuration ---
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
+    },
+}
+
+
+# --- WhiteNoise per environment ---
+
 if DEBUG:
-    # DEV: sin manifest, sin caché, recarga al vuelo y finders
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
     WHITENOISE_AUTOREFRESH = True
     WHITENOISE_USE_FINDERS = True
     WHITENOISE_MAX_AGE = 0
     WHITENOISE_ADD_HEADERS_FUNCTION = None
 else:
-    # PROD: manifest + caché larga solo para archivos con hash
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    WHITENOISE_MAX_AGE = 60 * 60 * 24 * 365  # 1 año
+    WHITENOISE_MAX_AGE = 60 * 60 * 24 * 365
     WHITENOISE_IMMUTABLE_FILE_TEST = whitenoise_immutable_test
     WHITENOISE_ADD_HEADERS_FUNCTION = whitenoise_add_headers
+
 
 LOGIN_URL = reverse_lazy("users:login")
 LOGIN_REDIRECT_URL = reverse_lazy("users:profile")

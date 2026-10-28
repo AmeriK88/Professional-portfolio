@@ -8,7 +8,7 @@
 
   {# ===== Header responsive ===== #}
   <div class="order-header d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
-    <h1 class="h4 mb-0 flex-grow-1 text-break">Pedido {{ order.number }}</h1>
+    <h1 class="h4 mb-0 grow text-break">Pedido {{ order.number }}</h1>
 
     <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
       {% url 'orders:list' as orders_list_url %}
@@ -33,7 +33,7 @@
         <div class="card-body">
           <div class="card table-responsive">
             <table class="table table-sm align-middle">
-              <thead class="table-light">
+              <thead class="table">
                 <tr>
                   <th>Servicio</th>
                   <th class="text-end">Precio</th>
