@@ -13,6 +13,8 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
+from django.db import IntegrityError, transaction
+import uuid
 
 from .forms import (
     CustomUserCreationForm,
@@ -54,35 +56,182 @@ def _pick_backend() -> str:
 @require_POST
 @csrf_protect
 def pi_login(request):
-    data = json.loads(request.body or "{}")
+    # 1. Validar JSON recibido.
+    try:
+        data = json.loads(request.body or "{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse(
+            {"ok": False, "reason": "JSON inválido"},
+            status=400,
+        )
+
+    if not isinstance(data, dict):
+        return JsonResponse(
+            {"ok": False, "reason": "Formato inválido"},
+            status=400,
+        )
+
     token = data.get("accessToken")
-    if not token:
-        return HttpResponseBadRequest("Falta accessToken")
 
-    r = requests.get(f"{PI_API_BASE}/me", headers={"Authorization": f"Bearer {token}"})
-    if not r.ok:
-        return JsonResponse({"ok": False, "reason": "token inválido"}, status=401)
+    if not isinstance(token, str) or not token.strip():
+        return JsonResponse(
+            {"ok": False, "reason": "Falta accessToken"},
+            status=400,
+        )
 
-    me = r.json()
-    pi_uid = (me.get("uid") or "").strip()
-    pi_username = (me.get("username") or "pi_user").strip() or "pi_user"
+    token = token.strip()
 
-    username = f"pi_{pi_uid}"
-    user, created = User.objects.get_or_create(
-        username=username,
-        defaults={"email": f"{pi_username}@pi.local"}
+    # 2. Verificar token directamente con Pi Network.
+    try:
+        response = requests.get(
+            f"{PI_API_BASE}/me",
+            headers={
+                "Authorization": f"Bearer {token}",
+            },
+            timeout=10,
+        )
+    except requests.RequestException:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "No se pudo contactar con Pi Network",
+            },
+            status=502,
+        )
+
+    if not response.ok:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Token de Pi inválido",
+            },
+            status=401,
+        )
+
+    try:
+        me = response.json()
+    except ValueError:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Respuesta inválida de Pi Network",
+            },
+            status=502,
+        )
+
+    if not isinstance(me, dict):
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Datos de usuario inválidos",
+            },
+            status=502,
+        )
+
+    # 3. Validar identificador de Pi.
+    pi_uid = me.get("uid")
+    pi_username = me.get("username")
+
+    if not isinstance(pi_uid, str) or not pi_uid.strip():
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Pi no devolvió un UID válido",
+            },
+            status=502,
+        )
+
+    pi_uid = pi_uid.strip()
+
+    if not isinstance(pi_username, str):
+        pi_username = "pi_user"
+
+    pi_username = pi_username.strip() or "pi_user"
+
+
+    # 4. Buscar usuario mediante su identidad verificada de Pi.
+    if len(pi_uid) > 128:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Identificador de Pi demasiado largo",
+            },
+            status=502,
+        )
+
+    user = User.objects.filter(pi_uid=pi_uid).first()
+    created = False
+
+    # Protección temporal durante la migración de cuentas Pi.
+    if user is None and getattr(settings, "PI_ACCOUNT_MIGRATION_LOCK", False):
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Migración de cuentas Pi en curso",
+            },
+            status=409,
+        )
+
+    if user is None:
+        # Identificador interno aleatorio: no depende del UID
+        # ni puede reservarse prediciendo el nombre de usuario.
+        username = f"pi_{uuid.uuid4().hex}"
+
+        try:
+            with transaction.atomic():
+                user = User(
+                    username=username,
+                    pi_uid=pi_uid,
+                    email="",
+                )
+                user.set_unusable_password()
+                user.save(force_insert=True)
+                created = True
+
+        except IntegrityError:
+            # Otra solicitud pudo crear la misma identidad
+            # simultáneamente. Recuperamos únicamente por pi_uid.
+            user = User.objects.filter(pi_uid=pi_uid).first()
+
+            if user is None:
+                return JsonResponse(
+                    {
+                        "ok": False,
+                        "reason": "No se pudo crear la cuenta",
+                    },
+                    status=409,
+                )
+
+    if not user.is_active:
+        return JsonResponse(
+            {
+                "ok": False,
+                "reason": "Cuenta desactivada",
+            },
+            status=403,
+        )
+
+
+    # 5. Crear sesión autenticada.
+    login(
+        request,
+        user,
+        backend=_pick_backend(),
     )
-    if created:
-        user.set_unusable_password()
-        user.save(update_fields=["password"])
 
-    login(request, user, backend=_pick_backend())
     if created:
-        messages.success(request, "Cuenta Pi creada. ¡Bienvenido!")
+        messages.success(
+            request,
+            "Cuenta Pi creada. ¡Bienvenido!",
+        )
     else:
-        messages.success(request, "Has iniciado sesión. ¡Bienvenido de nuevo!")
+        messages.success(
+            request,
+            "Has iniciado sesión. ¡Bienvenido de nuevo!",
+        )
 
     return JsonResponse({"ok": True})
+
 
 
 @ensure_csrf_cookie

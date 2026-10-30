@@ -1,8 +1,10 @@
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.templatetags.static import static
 
-# Avatares predefinidos 
+
+# Avatares predefinidos
 AVATAR_CHOICES = [
     ("dev", "Dev"),
     ("ninja", "Ninja"),
@@ -12,18 +14,40 @@ AVATAR_CHOICES = [
     ("motorist", "Motorista"),
 ]
 
+
 def user_avatar_upload_to(instance, filename):
     # Si algún día quieres permitir subida desde admin:
     return f"avatars/{instance.pk}/{filename}"
 
+
 class User(AbstractUser):
     """
-    User con:
-      - avatar (subida opcional; útil para admin o futuro)
-      - avatar_choice (selección de preset estático)
+    Usuario personalizado con:
+      - pi_uid: identificador único de Pi Network
+      - avatar: imagen personalizada opcional
+      - avatar_choice: selección de avatar predefinido
     """
-    avatar = models.ImageField(upload_to=user_avatar_upload_to, blank=True, null=True)
-    avatar_choice = models.CharField(max_length=16, blank=True, default="", choices=AVATAR_CHOICES)
+
+    pi_uid = models.CharField(
+        max_length=128,
+        unique=True,
+        null=True,
+        blank=True,
+        editable=False,
+    )
+
+    avatar = models.ImageField(
+        upload_to=user_avatar_upload_to,
+        blank=True,
+        null=True,
+    )
+
+    avatar_choice = models.CharField(
+        max_length=16,
+        blank=True,
+        default="",
+        choices=AVATAR_CHOICES,
+    )
 
     @property
     def display_name(self) -> str:
@@ -33,17 +57,21 @@ class User(AbstractUser):
     @property
     def avatar_url(self) -> str:
         """
-        1) avatar subido
-        2) avatar_choice => /static/avatars/presets/<choice>.png
-        3) default => /static/images/default-avatar.png
+        1) Avatar subido
+        2) Avatar predefinido
+        3) Avatar por defecto
         """
         if self.avatar:
             try:
                 return self.avatar.url
             except Exception:
                 pass
+
         if self.avatar_choice:
-            return static(f"avatars/presets/{self.avatar_choice}.png")
+            return static(
+                f"avatars/presets/{self.avatar_choice}.png"
+            )
+
         return static("images/default-avatar.png")
 
     def __str__(self) -> str:

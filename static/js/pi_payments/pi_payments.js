@@ -1,109 +1,74 @@
+
 (function () {
   'use strict';
 
-  // Evita doble init si el script se incluye dos veces
+  // Evita registrar los eventos dos veces.
   if (window.__PI_PAY_INIT__) return;
   window.__PI_PAY_INIT__ = true;
 
   const cfg = window.PI_CFG || {};
+
   console.debug('[pi] pi_payments.js cargado');
 
-  // ---- Helpers ----
+  // --------------------------------------------------
+  // Helpers
+  // --------------------------------------------------
+
   function getCookie(name) {
-    const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    const m = document.cookie.match(
+      '(^|;)\\s*' + name + '\\s*=\\s*([^;]+)'
+    );
+
     return m ? m.pop() : '';
   }
+
   const csrftoken = getCookie('csrftoken');
 
-  // ---- Detección de entorno seguro / Pi ----
+  // --------------------------------------------------
+  // Entorno seguro y disponibilidad del SDK
+  // --------------------------------------------------
+
   function isSecurePublicContext() {
     const isHttps = location.protocol === 'https:';
-    const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(location.hostname);
+
+    const isLocal = /^(localhost|127\.0\.0\.1)$/i.test(
+      location.hostname
+    );
+
     return isHttps && !isLocal;
   }
 
-  function isPiEnv() {
-    const ua = navigator.userAgent || '';
+  // Pi.init() se ejecuta exclusivamente en pi-init.js.
+  // Aquí esperamos a que termine su inicialización.
 
-    // UA robusto: con o sin espacio
-    const inPiUA = /\bPi\s*Browser\b/i.test(ua) || /\bPiBrowser\b/i.test(ua);
-
-    // ¿Nos enmarca Pi? Preferimos ancestorOrigins; fallback a referrer
-    let inPiAncestor = false;
-    try {
-      const ao = window.location.ancestorOrigins;
-      if (ao && ao.length) {
-        for (let i = 0; i < ao.length; i++) {
-          const origin = ao[i];
-          if (
-            origin === 'https://sandbox.minepi.com' ||
-            origin === 'https://app.minepi.com' ||
-            /\.minepi\.com$/i.test(new URL(origin).hostname)
-          ) {
-            inPiAncestor = true;
-            break;
-          }
-        }
-      } else if (window !== window.top) {
-        // Fallback: si estás en iframe y no hay ancestorOrigins
-        if (document.referrer) {
-          const ref = new URL(document.referrer);
-          inPiAncestor =
-            ref.origin === 'https://sandbox.minepi.com' ||
-            ref.origin === 'https://app.minepi.com' ||
-            /\.minepi\.com$/i.test(ref.hostname);
-        } else {
-          // Algunos navegadores no pasan referrer: asumimos enmarcado
-          inPiAncestor = true;
-        }
-      }
-    } catch (_) {
-      // En caso de cross-origin strict, asumimos que está enmarcado
-      inPiAncestor = true;
-    }
-
-    return inPiUA || inPiAncestor;
-  }
-
-  // ---- Inicialización del SDK (gateado pero tolerante) ----
-  function ensurePiReady() {
-    if (!window.Pi) {
-      console.warn('[pi] SDK Pi no disponible', { ua: navigator.userAgent });
-      return false;
-    }
-
-    // HTTPS público obligatorio
+  async function ensurePiReady() {
     if (!isSecurePublicContext()) {
-      console.warn('[pi] No es contexto HTTPS público');
+      console.warn('[pi] Se requiere HTTPS público');
       return false;
     }
 
-    // Señales razonables de entorno Pi
-    const piLikely =
-      isPiEnv() ||
-      !!(window.location.ancestorOrigins && window.location.ancestorOrigins.length);
-
-    if (!piLikely) {
-      console.warn('[pi] No parece entorno Pi (UA/iframe no coinciden)', {
-        ua: navigator.userAgent,
-        href: location.href,
-        ref: document.referrer
-      });
+    if (!window.__piInitPromise) {
+      console.error('[pi] No se ha cargado pi-init.js');
       return false;
     }
-
-    if (window.__PI_INIT_DONE__) return true;
 
     try {
-      Pi.init({ version: '2.0', sandbox: !!cfg.sandbox });
-      window.__PI_INIT_DONE__ = true;
-      console.debug('[pi] Pi.init OK, sandbox =', !!cfg.sandbox);
-      return true;
-    } catch (e) {
-      console.error('[pi] Pi.init falló', e);
+      const ready = await window.__piInitPromise;
+
+      return ready === true && !!window.Pi;
+    } catch (error) {
+      console.error(
+        '[pi] Falló la inicialización',
+        error
+      );
+
       return false;
     }
   }
+
+  // --------------------------------------------------
+  // Comunicación con Django
+  // --------------------------------------------------
 
   async function postJSON(url, body) {
     return fetch(url, {
@@ -112,57 +77,114 @@
       headers: {
         'Content-Type': 'application/json',
         'X-CSRFToken': csrftoken || '',
-        'X-Requested-With': 'XMLHttpRequest',
+        'X-Requested-With': 'XMLHttpRequest'
       },
       body: JSON.stringify(body || {})
     });
   }
 
+  // --------------------------------------------------
+  // Checkout
+  // --------------------------------------------------
+
   async function startCheckout(checkoutUrl) {
-    if (!checkoutUrl) throw new Error('No se definió data-checkout-url en el botón.');
+    if (!checkoutUrl) {
+      throw new Error(
+        'No se definió data-checkout-url en el botón.'
+      );
+    }
+
     const res = await postJSON(checkoutUrl, {});
-    
-    // Si el backend te redirige a login, seguimos esa redirección
-    if (res.redirected || (res.url && res.url.includes('/login'))) {
-      window.location.href = res.url || ('/login/?next=' + window.location.pathname);
+
+    // Si Django redirige al login, seguimos la redirección.
+    if (
+      res.redirected ||
+      (res.url && res.url.includes('/login'))
+    ) {
+      window.location.href =
+        res.url ||
+        ('/login/?next=' + window.location.pathname);
+
       return null;
     }
 
-    if (!res.ok) throw new Error('No se pudo iniciar el pedido.');
+    if (!res.ok) {
+      throw new Error('No se pudo iniciar el pedido.');
+    }
+
     const data = await res.json();
-    if (!data.ok || !data.payment) throw new Error('Respuesta de checkout inválida.');
-    return data; // { ok, order_number, payment }
+
+    if (!data.ok || !data.payment) {
+      throw new Error(
+        'Respuesta de checkout inválida.'
+      );
+    }
+
+    return data;
   }
 
-  // ---- Scope payments ----
+  // --------------------------------------------------
+  // Autenticación y permiso de pagos
+  // --------------------------------------------------
+
   let paymentsAuthPromise = null;
 
   async function ensurePaymentsScope() {
-    if (!ensurePiReady()) return false;
+    if (!(await ensurePiReady())) {
+      return false;
+    }
 
     if (!paymentsAuthPromise) {
       const onIncompletePaymentFound = async (payment) => {
         try {
-          console.debug('[pi] incomplete payment found', payment);
-          const pid  = payment?.identifier || payment?.paymentId || payment?.id;
+          console.debug(
+            '[pi] incomplete payment found',
+            payment
+          );
+
+          const pid =
+            payment?.identifier ||
+            payment?.paymentId ||
+            payment?.id;
+
           const txid = payment?.transaction?.txid;
 
           if (pid && txid) {
-            if (cfg.completeUrl) await postJSON(cfg.completeUrl, { paymentId: pid, txid });
+            if (cfg.completeUrl) {
+              await postJSON(cfg.completeUrl, {
+                paymentId: pid,
+                txid
+              });
+            }
           } else if (pid) {
-            if (cfg.approveUrl) await postJSON(cfg.approveUrl, { paymentId: pid });
+            if (cfg.approveUrl) {
+              await postJSON(cfg.approveUrl, {
+                paymentId: pid
+              });
+            }
           }
-        } catch (e) {
-          console.error('[pi] onIncompletePaymentFound error', e);
+        } catch (error) {
+          console.error(
+            '[pi] onIncompletePaymentFound error',
+            error
+          );
         }
       };
 
       paymentsAuthPromise = window.Pi
-        .authenticate(['payments'], onIncompletePaymentFound)
+        .authenticate(
+          ['payments'],
+          onIncompletePaymentFound
+        )
         .then(() => true)
-        .catch(err => {
-          console.error('[pi] authenticate error', err);
+        .catch(error => {
+          console.error(
+            '[pi] authenticate error',
+            error
+          );
+
           paymentsAuthPromise = null;
+
           return false;
         });
     }
@@ -170,139 +192,323 @@
     return paymentsAuthPromise;
   }
 
-  // ---- Crear pago ----
+  // --------------------------------------------------
+  // Crear pago
+  // --------------------------------------------------
+
   async function createPayment(paymentPayload) {
-    const { approveUrl, completeUrl, cancelUrl, successUrl } = cfg;
+    const {
+      approveUrl,
+      completeUrl,
+      cancelUrl,
+      successUrl
+    } = cfg;
+
     if (!approveUrl || !completeUrl || !cancelUrl) {
-      throw new Error('Faltan URLs de callbacks de Pi en PI_CFG.');
+      throw new Error(
+        'Faltan URLs de callbacks de Pi en PI_CFG.'
+      );
     }
 
     const authed = await ensurePaymentsScope();
+
     if (!authed) {
-      throw new Error('Debes autorizar el permiso de pagos de Pi para continuar.');
+      throw new Error(
+        'Debes autorizar el permiso de pagos de Pi para continuar.'
+      );
     }
 
     return new Promise((resolve, reject) => {
       try {
         window.Pi.createPayment(paymentPayload, {
           onReadyForServerApproval: async (paymentId) => {
-            console.debug('[pi] onReadyForServerApproval', paymentId);
+            console.debug(
+              '[pi] onReadyForServerApproval',
+              paymentId
+            );
+
             try {
-              const r = await postJSON(approveUrl, { paymentId });
-              if (!r.ok) throw new Error('Fallo aprobando en servidor');
-            } catch (e) {
-              console.error(e);
-              alert('Error aprobando el pago. Intenta de nuevo.');
+              const response = await postJSON(
+                approveUrl,
+                { paymentId }
+              );
+
+              if (!response.ok) {
+                throw new Error(
+                  'Fallo aprobando en servidor'
+                );
+              }
+            } catch (error) {
+              console.error(error);
+
+              alert(
+                'Error aprobando el pago. Intenta de nuevo.'
+              );
             }
           },
-          onReadyForServerCompletion: async (paymentId, txid) => {
-            console.debug('[pi] onReadyForServerCompletion', paymentId, txid);
+
+          onReadyForServerCompletion: async (
+            paymentId,
+            txid
+          ) => {
+            console.debug(
+              '[pi] onReadyForServerCompletion',
+              paymentId,
+              txid
+            );
+
             try {
-              const r = await postJSON(completeUrl, { paymentId, txid });
-              if (r.ok) {
+              const response = await postJSON(
+                completeUrl,
+                { paymentId, txid }
+              );
+
+              if (response.ok) {
                 const base = successUrl || '/';
-                const url = new URL(base, window.location.origin);
-                url.searchParams.set('pid', paymentId);
-                window.location.assign(url.toString());
+
+                const url = new URL(
+                  base,
+                  window.location.origin
+                );
+
+                url.searchParams.set(
+                  'pid',
+                  paymentId
+                );
+
+                window.location.assign(
+                  url.toString()
+                );
+
                 resolve({ paymentId, txid });
               } else {
-                alert('No se pudo completar el pago en el servidor.');
-                reject(new Error('complete failed'));
+                alert(
+                  'No se pudo completar el pago en el servidor.'
+                );
+
+                reject(
+                  new Error('complete failed')
+                );
               }
-            } catch (e) {
-              console.error(e);
-              alert('Error completando el pago.');
-              reject(e);
+            } catch (error) {
+              console.error(error);
+
+              alert(
+                'Error completando el pago.'
+              );
+
+              reject(error);
             }
           },
+
           onCancel: async (paymentId) => {
-            console.debug('[pi] onCancel', paymentId);
-            try { await postJSON(cancelUrl, { paymentId }); } catch {}
-            // No rechazamos: es cancelación de usuario
+            console.debug(
+              '[pi] onCancel',
+              paymentId
+            );
+
+            try {
+              await postJSON(
+                cancelUrl,
+                { paymentId }
+              );
+            } catch (error) {
+              console.error(
+                '[pi] Error notificando cancelación',
+                error
+              );
+            }
+
+            // La cancelación es una acción del usuario.
           },
+
           onError: (error, payment) => {
-            console.error('[pi] onError', error, payment);
-            alert('Ha ocurrido un error con Pi. Reintenta en unos segundos.');
+            console.error(
+              '[pi] onError',
+              error,
+              payment
+            );
+
+            alert(
+              'Ha ocurrido un error con Pi. Reintenta en unos segundos.'
+            );
+
             reject(error);
           }
         });
-      } catch (err) {
-        console.error('[pi] createPayment falló', err);
-        if (String(err?.message || err).includes('payments')) {
-          alert('No se pudo crear el pago porque falta el permiso de pagos. Autorízalo y reintenta.');
+      } catch (error) {
+        console.error(
+          '[pi] createPayment falló',
+          error
+        );
+
+        if (
+          String(error?.message || error)
+            .includes('payments')
+        ) {
+          alert(
+            'No se pudo crear el pago porque falta el permiso de pagos. Autorízalo y reintenta.'
+          );
         } else {
-          alert('No se pudo crear el pago. Intenta de nuevo.');
+          alert(
+            'No se pudo crear el pago. Intenta de nuevo.'
+          );
         }
-        reject(err);
+
+        reject(error);
       }
     });
   }
 
-  // ---- UI (múltiples botones, sin variables fuera de scope) ----
+  // --------------------------------------------------
+  // Eventos de los botones de pago
+  // --------------------------------------------------
+
   function attachHandlers() {
-    const buttons = Array.from(document.querySelectorAll('#pi-pay-btn'));
+    const buttons = Array.from(
+      document.querySelectorAll('#pi-pay-btn')
+    );
+
     if (!buttons.length) {
-      console.warn('[pi] No encontré #pi-pay-btn');
+      console.warn(
+        '[pi] No encontré #pi-pay-btn'
+      );
+
       return;
     }
 
-    console.debug('[pi] Botones de pago listos:', buttons.length);
+    console.debug(
+      '[pi] Botones de pago listos:',
+      buttons.length
+    );
 
     buttons.forEach((btnEl) => {
-      if (btnEl.__piBound) return; // evita duplicar listeners
+      if (btnEl.__piBound) {
+        return;
+      }
+
       btnEl.__piBound = true;
 
-      btnEl.addEventListener('click', async () => {
-        console.debug('[pi] CLICK en botón');
-        if (!ensurePiReady()) {
-          alert('Abre esta página dentro de Pi Browser para pagar con Pi.');
-          return;
-        }
+      btnEl.addEventListener(
+        'click',
+        async () => {
+          console.debug(
+            '[pi] CLICK en botón'
+          );
 
-        // 1) Scope payments
-        const ok = await ensurePaymentsScope();
-        console.debug('[pi] scope payments =>', ok);
-        if (!ok) {
-          alert('Debes autorizar el permiso de pagos de Pi para continuar.');
-          return;
-        }
+          if (!(await ensurePiReady())) {
+            alert(
+              'Abre esta página dentro de Pi Browser para pagar con Pi.'
+            );
 
-        // 2) Checkout desde backend
-        try {
-          const checkoutUrl = btnEl.getAttribute('data-checkout-url');
-          console.debug('[pi] startCheckout =>', checkoutUrl);
-          const data = await startCheckout(checkoutUrl);
-          console.debug('[pi] checkout data =>', data);
-          if (!data) return; // redirigido a login
-          // 3) Inicia pago
-          await createPayment(data.payment);
-        } catch (e) {
-          console.error('[pi] error en click handler', e);
-          alert(e.message || 'No se pudo iniciar el pago.');
+            return;
+          }
+
+          // 1. Solicitar permiso de pagos.
+          const ok = await ensurePaymentsScope();
+
+          console.debug(
+            '[pi] scope payments =>',
+            ok
+          );
+
+          if (!ok) {
+            alert(
+              'Debes autorizar el permiso de pagos de Pi para continuar.'
+            );
+
+            return;
+          }
+
+          // 2. Crear pedido en Django.
+          try {
+            const checkoutUrl =
+              btnEl.getAttribute(
+                'data-checkout-url'
+              );
+
+            console.debug(
+              '[pi] startCheckout =>',
+              checkoutUrl
+            );
+
+            const data = await startCheckout(
+              checkoutUrl
+            );
+
+            console.debug(
+              '[pi] checkout data =>',
+              data
+            );
+
+            if (!data) {
+              return;
+            }
+
+            // 3. Iniciar el pago en Pi.
+            await createPayment(
+              data.payment
+            );
+          } catch (error) {
+            console.error(
+              '[pi] error en click handler',
+              error
+            );
+
+            alert(
+              error.message ||
+              'No se pudo iniciar el pago.'
+            );
+          }
         }
-      });
+      );
     });
   }
 
-  // Carga segura
+  // --------------------------------------------------
+  // Registrar eventos cuando el DOM esté preparado
+  // --------------------------------------------------
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', attachHandlers);
+    document.addEventListener(
+      'DOMContentLoaded',
+      attachHandlers
+    );
   } else {
     attachHandlers();
   }
 
-  // API opcional
+  // --------------------------------------------------
+  // API pública opcional
+  // --------------------------------------------------
+
   window.payWithPi = async (checkoutUrl) => {
-    if (!ensurePiReady()) {
-      alert('Abre esta página dentro de Pi Browser para pagar con Pi.');
+    if (!(await ensurePiReady())) {
+      alert(
+        'Abre esta página dentro de Pi Browser para pagar con Pi.'
+      );
+
       return;
     }
+
     const ok = await ensurePaymentsScope();
+
     if (!ok) {
-      alert('Debes autorizar el permiso de pagos de Pi para continuar.');
+      alert(
+        'Debes autorizar el permiso de pagos de Pi para continuar.'
+      );
+
       return;
     }
-    const data = await startCheckout(checkoutUrl);
-    if (data) await createPayment(data.payment);
+
+    const data = await startCheckout(
+      checkoutUrl
+    );
+
+    if (data) {
+      await createPayment(
+        data.payment
+      );
+    }
   };
 })();

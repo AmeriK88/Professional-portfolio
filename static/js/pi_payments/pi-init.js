@@ -1,46 +1,158 @@
+
 (function initPi() {
-  if (window.__piInitDone) return;
-  window.__piInitDone = true;
+  'use strict';
+
+  // Evitar inicializaciones duplicadas.
+  if (window.__piInitPromise) {
+    return;
+  }
+
+  // --------------------------------------------------
+  // 1. Detectar entorno Pi Browser / Sandbox
+  // --------------------------------------------------
 
   const ua = (navigator.userAgent || '').toLowerCase();
   const isPiBrowserUA = ua.includes('pibrowser');
-  const ref = document.referrer || '';
-  const fromSandboxRef = /sandbox\.minepi\.com/i.test(ref);
-  const ancestorSandbox = (() => {
-    try {
-      const ao = (location.ancestorOrigins || []);
-      for (let i = 0; i < ao.length; i++) if (/sandbox\.minepi\.com/i.test(ao[i])) return true;
-    } catch (_) {}
-    return false;
-  })();
 
-  const qs = new URLSearchParams(location.search);
-  const forceInit = qs.has('pi_force_init') || localStorage.getItem('pi.forceInit') === '1';
-  const isPiEnv = forceInit || isPiBrowserUA || fromSandboxRef || ancestorSandbox;
+  const referrer = document.referrer || '';
+
+  const fromSandboxRef =
+    /sandbox\.minepi\.com/i.test(referrer);
+
+  let ancestorSandbox = false;
+
+  try {
+    const origins = window.location.ancestorOrigins || [];
+
+    ancestorSandbox = Array.from(origins).some(origin =>
+      /sandbox\.minepi\.com/i.test(origin)
+    );
+  } catch (error) {
+    // Algunos navegadores no exponen ancestorOrigins.
+  }
+
+  // Permitir forzar la detección para pruebas.
+  const qs = new URLSearchParams(window.location.search);
+
+  let forceInit = qs.has('pi_force_init');
+
+  try {
+    forceInit =
+      forceInit ||
+      localStorage.getItem('pi.forceInit') === '1';
+  } catch (error) {
+    // localStorage puede estar restringido.
+  }
+
+  const isPiEnv =
+    isPiBrowserUA ||
+    fromSandboxRef ||
+    ancestorSandbox ||
+    forceInit;
+
   window.__isPiEnv = isPiEnv;
 
-  const fireReady = () => document.dispatchEvent(new Event('pi:ready'));
+  // --------------------------------------------------
+  // 2. Estado global de inicialización
+  // --------------------------------------------------
 
-  // Si no es entorno Pi, no intentes init; pero permite que el resto sepa que "ya terminó"
-  if (!isPiEnv) { console.warn('Pi SDK: non-Pi env; skipping Pi.init'); fireReady(); return; }
+  window.__piInitDone = false;
+  window.__PI_INIT_DONE__ = false;
 
-  // Espera activa a que el SDK esté presente antes de inicializar
-  let tries = 0, maxTries = 60; // ~6s si interval=100ms
-  const interval = setInterval(() => {
-    tries++;
-    if (window.Pi && typeof window.Pi.init === 'function') {
-      clearInterval(interval);
-      try {
-        window.Pi.init({ version: '2.0', sandbox: true }); // clave en sandbox
-      } catch (e) {
-        console.warn('Pi.init failed (continuing)', e);
-      } finally {
-        fireReady();
-      }
-    } else if (tries >= maxTries) {
-      clearInterval(interval);
-      console.warn('Pi SDK not loaded in time');
-      fireReady(); // permite que UI muestre instrucciones
+  const fireReady = () => {
+    document.dispatchEvent(new Event('pi:ready'));
+  };
+
+  // --------------------------------------------------
+  // 3. Crear promesa compartida de inicialización
+  // --------------------------------------------------
+
+  window.__piInitPromise = new Promise(resolve => {
+
+    if (!isPiEnv) {
+      console.warn(
+        '[Pi SDK] Entorno Pi no detectado. ' +
+        'No se inicializará el SDK.'
+      );
+
+      fireReady();
+      resolve(false);
+      return;
     }
-  }, 100);
+
+    let attempts = 0;
+    const maxAttempts = 60;
+    const intervalMs = 100;
+
+    const interval = setInterval(() => {
+      attempts++;
+
+      // Esperar a que el SDK oficial esté disponible.
+      if (
+        window.Pi &&
+        typeof window.Pi.init === 'function'
+      ) {
+        clearInterval(interval);
+
+        try {
+          // Inicializar SDK una sola vez.
+          window.Pi.init({
+            version: '2.0',
+          });
+
+          // Verificar que la API de autenticación existe.
+          if (
+            typeof window.Pi.authenticate !== 'function'
+          ) {
+            throw new Error(
+              'Pi.authenticate no está disponible'
+            );
+          }
+
+          // Inicialización completada.
+          window.__piInitDone = true;
+          window.__PI_INIT_DONE__ = true;
+
+          console.info(
+            '[Pi SDK] Inicialización completada correctamente.'
+          );
+
+          fireReady();
+          resolve(true);
+
+        } catch (error) {
+          console.error(
+            '[Pi SDK] Error durante Pi.init():',
+            error
+          );
+
+          window.__piInitDone = false;
+          window.__PI_INIT_DONE__ = false;
+
+          fireReady();
+          resolve(false);
+        }
+
+        return;
+      }
+
+      // SDK no disponible después de 6 segundos.
+      if (attempts >= maxAttempts) {
+        clearInterval(interval);
+
+        console.error(
+          '[Pi SDK] No se pudo cargar el SDK ' +
+          'después de 6 segundos.'
+        );
+
+        window.__piInitDone = false;
+        window.__PI_INIT_DONE__ = false;
+
+        fireReady();
+        resolve(false);
+      }
+
+    }, intervalMs);
+  });
+
 })();

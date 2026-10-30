@@ -95,6 +95,11 @@ MIDDLEWARE = [
 ]
 
 # --- Pi Sandbox (DEV/SANDBOX only) ---
+PI_ACCOUNT_MIGRATION_LOCK = env.bool(
+    "PI_ACCOUNT_MIGRATION_LOCK",
+    default=False,
+)
+
 PI_SANDBOX = env.bool("PI_SANDBOX", default=False)
 
 # Permitir incrustación únicamente cuando se configure explícitamente.
@@ -131,6 +136,7 @@ TEMPLATES = [
                 # Pi pricing (EUR/π) in templates
                 "pi_payments.context_processors.pi_pricing",
                 "inbox.context_processors.inbox_unread",
+                "core.context_processors.pi_settings",
             ],
         },
     },

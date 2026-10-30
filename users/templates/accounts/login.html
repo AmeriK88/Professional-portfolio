@@ -71,6 +71,6 @@
     <script src="{% static 'js/users/recaptcha-login.js' %}"></script>
   {% endif %}
 
-  {# lógica de login con Pi (sin inline) #}
-  <script src="{% static 'js/users/pi-login.js' %}"></script>
+  {# Login con Pi: espera a pi-init.js #}
+  <script src="{% static 'js/users/pi-login.js' %}" defer></script>
 {% endblock %}
