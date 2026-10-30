@@ -7,6 +7,7 @@ from django.utils.timezone import now
 
 from orders.models import Order
 from pi_payments.models import Payment
+from django.contrib.auth.decorators import login_required
 
 PI_API_BASE = "https://api.minepi.com"
 PI_API_KEY  = os.environ.get("PI_API_KEY")
@@ -66,122 +67,621 @@ def _attach_local_payment_from_info(pid: str, info: dict) -> Payment | None:
 
     return pay
 
+
+@login_required
 @require_POST
 def pi_approve(request):
     data = _json(request.body)
-    pid  = data.get("paymentId")
-    if not pid:
+    pid = data.get("paymentId")
+
+    if not isinstance(pid, str) or not pid.strip():
         return HttpResponseBadRequest("paymentId required")
 
-    # 1) Lee info del pago para vincular a nuestro Payment
-    r_info, info = _fetch_pi_payment(pid)
-    if not r_info.ok:
-        _log("approve.fetch_fail", {"pid": pid, "status": r_info.status_code, "body": r_info.text})
+    # 1) Consulta el pago directamente en Pi Network.
+    # Nunca utilizamos los metadatos enviados por el navegador
+    # para identificar o autorizar un pedido.
+    try:
+        r_info, info = _fetch_pi_payment(pid)
+    except requests.RequestException:
+        _log("approve.fetch_error", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment verification unavailable"},
+            status=502,
+        )
 
-    pay = _attach_local_payment_from_info(pid, info)
+    if not r_info.ok or not isinstance(info, dict):
+        _log(
+            "approve.fetch_fail",
+            {"pid": pid, "status": r_info.status_code},
+        )
+        return JsonResponse(
+            {"ok": False, "error": "cannot verify payment"},
+            status=502,
+        )
 
-    # 2) Aprueba en Pi
-    r = requests.post(f"{PI_API_BASE}/v2/payments/{pid}/approve", headers=_auth_headers(), timeout=20)
-    _log("approve.api", {"pid": pid, "status": r.status_code, "body": r.text})
+    # 2) Comprueba que Pi devuelve el identificador solicitado.
+    if str(info.get("identifier", "")) != pid:
+        _log("approve.identifier_mismatch", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment identifier mismatch"},
+            status=400,
+        )
+
+    # 3) Obtiene los metadatos verificados desde Pi Network.
+    metadata = info.get("metadata")
+
+    if not isinstance(metadata, dict):
+        return JsonResponse(
+            {"ok": False, "error": "invalid payment metadata"},
+            status=400,
+        )
+
+    order_number = metadata.get("order_number")
+    nonce = metadata.get("nonce")
+
+    if not order_number or not nonce:
+        return JsonResponse(
+            {"ok": False, "error": "missing payment metadata"},
+            status=400,
+        )
+
+    # 4) Busca exclusivamente un pago perteneciente al usuario.
+    # También exige que el nonce coincida con el generado en checkout.
+    pay = (
+        Payment.objects
+        .select_related("order")
+        .filter(
+            order__number=order_number,
+            order__user=request.user,
+            nonce=nonce,
+            provider="pi",
+        )
+        .first()
+    )
+
+    if not pay:
+        return JsonResponse(
+            {"ok": False, "error": "payment not found"},
+            status=404,
+        )
+
+    # 5) Evita asociar un pago externo diferente al mismo pedido.
+    if pay.provider_payment_id and pay.provider_payment_id != pid:
+        _log("approve.provider_mismatch", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment already linked"},
+            status=409,
+        )
+
+    # Nunca reiniciamos un pago confirmado.
+    if pay.status == Payment.CONFIRMED:
+        return JsonResponse(
+            {"ok": True, "already_confirmed": True},
+        )
+
+    # Solo aprobamos pedidos que siguen esperando el pago.
+    if pay.order.status != Order.AWAITING:
+        return JsonResponse(
+            {"ok": False, "error": "order is not awaiting payment"},
+            status=409,
+        )
+
+    if pay.status != Payment.INITIATED:
+        return JsonResponse(
+            {"ok": False, "error": "payment is not initiated"},
+            status=409,
+        )
+
+    # 6) Valida obligatoriamente el importe contra el snapshot
+    # generado por Django durante el checkout.
+    try:
+        amount_pi = Decimal(str(info["amount"]))
+        pricing = (pay.raw_payload or {})["pricing"]
+        expected_pi = Decimal(str(pricing["amount_pi"]))
+
+        if (
+            not amount_pi.is_finite()
+            or not expected_pi.is_finite()
+            or amount_pi <= 0
+            or expected_pi <= 0
+            or amount_pi != expected_pi
+        ):
+            raise ValueError("Invalid or mismatched amount")
+
+    except (KeyError, TypeError, ValueError, ArithmeticError):
+        _log("approve.amount_mismatch", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment amount mismatch"},
+            status=400,
+        )
+
+    # 7) Solicita la aprobación a Pi Network únicamente después
+    # de superar las comprobaciones de identidad y precio.
+    try:
+        r = requests.post(
+            f"{PI_API_BASE}/v2/payments/{pid}/approve",
+            headers=_auth_headers(),
+            timeout=20,
+        )
+    except requests.RequestException:
+        _log("approve.api_error", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment approval unavailable"},
+            status=502,
+        )
+
+    _log(
+        "approve.api",
+        {"pid": pid, "status": r.status_code},
+    )
 
     if not r.ok:
-        # Si Pi rechaza la aprobación, marcamos el pago como fallido y cancelamos la orden
-        if pay:
-            pay.mark_failed("approve rejected by Pi")
-        return JsonResponse({"ok": False}, status=400)
+        # No cancelamos automáticamente el pedido ante un error.
+        # Una respuesta fallida no demuestra que el pago sea inválido.
+        return JsonResponse(
+            {"ok": False, "error": "payment approval failed"},
+            status=502,
+        )
 
-    if pay:
-        # Marca como iniciado si no lo estaba
-        if pay.status != Payment.INITIATED:
-            pay.status = Payment.INITIATED
-            pay.save(update_fields=["status"])
-        _log("approve.local_linked", {"pid": pid, "order": pay.order.number})
+    # 8) Vincula el identificador externo solo tras la aprobación.
+    # Conserva los metadatos de pricing y el historial existente.
+    raw = dict(pay.raw_payload or {})
+    raw["pi_info_at_approve"] = info
+
+    # La actualización condicional evita sobrescribir otro
+    # identificador de Pi que se haya vinculado entretanto.
+    updated = (
+        Payment.objects
+        .filter(
+            pk=pay.pk,
+            provider_payment_id__isnull=True,
+            status=Payment.INITIATED,
+        )
+        .update(
+            provider_payment_id=pid,
+            raw_payload=raw,
+        )
+    )
+
+    if not updated:
+        # Una repetición del callback puede encontrar el mismo
+        # identificador ya vinculado. No lo tratamos como otro pago.
+        already_linked = Payment.objects.filter(
+            pk=pay.pk,
+            provider_payment_id=pid,
+            status=Payment.INITIATED,
+        ).exists()
+
+        if not already_linked:
+            return JsonResponse(
+                {"ok": False, "error": "payment link conflict"},
+                status=409,
+            )
+
+    _log(
+        "approve.local_linked",
+        {"pid": pid, "order": pay.order.number},
+    )
 
     return JsonResponse({"ok": True})
 
+
+
+@login_required
 @require_POST
 def pi_complete(request):
     data = _json(request.body)
-    pid  = data.get("paymentId")
+    pid = data.get("paymentId")
     txid = data.get("txid")
+
     if not pid or not txid:
         return HttpResponseBadRequest("paymentId and txid required")
 
-    # 1) Lee info del pago y vincula con nuestro Payment
-    r_info, info = _fetch_pi_payment(pid)
-    if not r_info.ok:
-        _log("complete.fetch_fail", {"pid": pid, "status": r_info.status_code, "body": r_info.text})
-        # Si ni siquiera podemos leer la info, intenta marcar fallido si existe el Payment
-        pay = Payment.objects.filter(provider_payment_id=pid).first()
-        if pay:
-            pay.mark_failed("cannot fetch payment before complete")
-        return JsonResponse({"ok": False, "error": "cannot fetch payment"}, status=400)
-
-    pay = _attach_local_payment_from_info(pid, info)
-    if not pay:
-        # Si no encontramos el pago local, no seguimos (preferible a marcar sin orden)
-        return JsonResponse({"ok": False, "error": "local payment not found"}, status=404)
-
-    # (Opcional) Validación de importe en π contra snapshot guardado en el checkout
-    try:
-        amount_pi = Decimal(str(info.get("amount", "0")))
-        snap = (pay.raw_payload or {}).get("pricing", {})
-        snap_amount_pi = Decimal(str(snap.get("amount_pi") or "0"))
-        if snap_amount_pi and amount_pi and snap_amount_pi != amount_pi:
-            _log("complete.amount_mismatch", {"pid": pid, "snap": str(snap_amount_pi), "pi": str(amount_pi)})
-            # Marca como fallido y corta
-            pay.mark_failed("amount mismatch")
-            return JsonResponse({"ok": False, "error": "amount mismatch"}, status=400)
-    except Exception:
-        pass  # si no hubiera snapshot/decimal, no bloqueamos
-
-    # 2) Completa en Pi
-    r = requests.post(
-        f"{PI_API_BASE}/v2/payments/{pid}/complete",
-        headers=_auth_headers(),
-        json={"txid": txid},
-        timeout=20
+    # 1) Busca el pago local y comprueba que pertenece al usuario autenticado.
+    # No modificamos ningún registro antes de verificar la autorización.
+    pay = (
+        Payment.objects
+        .select_related("order")
+        .filter(
+            provider_payment_id=pid,
+            order__user=request.user,
+        )
+        .first()
     )
-    _log("complete.api", {"pid": pid, "status": r.status_code, "body": r.text})
+
+    if not pay:
+        return JsonResponse(
+            {"ok": False, "error": "payment not found"},
+            status=404,
+        )
+
+    # Idempotencia: un pago confirmado no debe procesarse de nuevo.
+    if pay.status == Payment.CONFIRMED:
+        return JsonResponse({"ok": True, "already_confirmed": True})
+
+    # 2) Consulta la información del pago directamente en Pi Network.
+    # Nunca debemos confiar únicamente en los datos enviados por el navegador.
+    try:
+        r_info, info = _fetch_pi_payment(pid)
+    except requests.RequestException:
+        _log("complete.fetch_error", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment verification unavailable"},
+            status=502,
+        )
+
+    if not r_info.ok or not isinstance(info, dict):
+        _log(
+            "complete.fetch_fail",
+            {"pid": pid, "status": r_info.status_code},
+        )
+        # Un error de comunicación no implica que el pago haya fallado.
+        return JsonResponse(
+            {"ok": False, "error": "cannot verify payment"},
+            status=502,
+        )
+
+    # 3) Comprueba que Pi Network devuelve el mismo identificador.
+    if str(info.get("identifier", "")) != str(pid):
+        _log("complete.identifier_mismatch", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment identifier mismatch"},
+            status=400,
+        )
+
+    # 4) Validación obligatoria del importe en Pi contra el snapshot
+    # generado durante el checkout. Si falta información, bloqueamos.
+    try:
+        amount_pi = Decimal(str(info["amount"]))
+        snap = (pay.raw_payload or {})["pricing"]
+        snap_amount_pi = Decimal(str(snap["amount_pi"]))
+
+        if (
+            not amount_pi.is_finite()
+            or not snap_amount_pi.is_finite()
+            or amount_pi <= 0
+            or snap_amount_pi <= 0
+            or amount_pi != snap_amount_pi
+        ):
+            raise ValueError("Invalid or mismatched amount")
+
+    except (KeyError, TypeError, ValueError, ArithmeticError):
+        _log("complete.amount_invalid", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment amount mismatch"},
+            status=400,
+        )
+
+    # 5) Comprueba que los metadatos corresponden al pedido local.
+    metadata = info.get("metadata") or {}
+
+    if (
+        not isinstance(metadata, dict)
+        or str(metadata.get("order_number", "")) != pay.order.number
+    ):
+        _log("complete.order_mismatch", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment order mismatch"},
+            status=400,
+        )
+
+    # 6) Solicita a Pi Network que complete la transacción.
+    try:
+        r = requests.post(
+            f"{PI_API_BASE}/v2/payments/{pid}/complete",
+            headers=_auth_headers(),
+            json={"txid": txid},
+            timeout=20,
+        )
+    except requests.RequestException:
+        _log("complete.api_error", {"pid": pid})
+        return JsonResponse(
+            {"ok": False, "error": "payment completion unavailable"},
+            status=502,
+        )
+
+    _log(
+        "complete.api",
+        {"pid": pid, "status": r.status_code},
+    )
+
     if not r.ok:
-        # Si Pi rechaza el complete, fallido
-        pay.mark_failed("complete rejected by Pi")
-        return JsonResponse({"ok": False}, status=400)
+        # No marcamos el pago como fallido automáticamente.
+        # Podría haberse completado y haberse perdido la respuesta.
+        return JsonResponse(
+            {"ok": False, "error": "payment completion not verified"},
+            status=502,
+        )
 
-    # 3) Marca como pagado en tu BD
-    raw = pay.raw_payload or {}
-    raw["pi_info_at_complete"] = info
-    raw["txid"] = txid
-    pay.raw_payload = raw
-    # usa helper para sincronizar orden
-    pay.mark_confirmed(save_order=True)
+    # 7) Vuelve a consultar Pi Network para verificar el estado final.
+    try:
+        r_final, final_info = _fetch_pi_payment(pid)
+    except requests.RequestException:
+        return JsonResponse(
+            {"ok": False, "error": "final verification unavailable"},
+            status=502,
+        )
 
-    # Asegura provider_payment_id por si faltaba
-    if not pay.provider_payment_id:
-        pay.provider_payment_id = pid
-        pay.save(update_fields=["provider_payment_id"])
+    if not r_final.ok or not isinstance(final_info, dict):
+        return JsonResponse(
+            {"ok": False, "error": "final verification failed"},
+            status=502,
+        )
+
+    # La respuesta debe identificar el mismo pago y la misma transacción.
+    transaction = final_info.get("transaction") or {}
+    final_txid = (
+        transaction.get("txid")
+        if isinstance(transaction, dict)
+        else None
+    )
+
+    if (
+        str(final_info.get("identifier", "")) != str(pid)
+        or str(final_txid or "") != str(txid)
+    ):
+        return JsonResponse(
+            {"ok": False, "error": "transaction verification failed"},
+            status=400,
+        )
+
+    # Pi debe confirmar explícitamente la finalización.
+    if final_info.get("status", {}).get("developer_completed") is not True:
+        return JsonResponse(
+            {"ok": False, "error": "payment not confirmed by Pi"},
+            status=409,
+        )
+
+    
+    # 8) Confirma el pago y el pedido dentro de una transacción.
+    # Adquirimos los bloqueos en el mismo orden que pi_cancel():
+    # primero Order y después Payment.
+    from django.db import transaction
+
+    with transaction.atomic():
+        order = (
+            Order.objects
+            .select_for_update()
+            .get(pk=pay.order_id)
+        )
+
+        locked_pay = (
+            Payment.objects
+            .select_for_update()
+            .get(pk=pay.pk)
+        )
+
+        # Si otro proceso ya confirmó el pago, no repetimos la operación.
+        if locked_pay.status == Payment.CONFIRMED:
+            return JsonResponse({
+                "ok": True,
+                "already_confirmed": True,
+            })
+
+        # No confirmamos automáticamente un pago marcado como fallido.
+        # Requiere reconciliación antes de cambiar su estado.
+        if locked_pay.status != Payment.INITIATED:
+            return JsonResponse(
+                {"ok": False, "error": "payment is not initiated"},
+                status=409,
+            )
+
+        # El pedido debe seguir esperando el pago.
+        if order.status != Order.AWAITING:
+            return JsonResponse(
+                {"ok": False, "error": "order is not awaiting payment"},
+                status=409,
+            )
+
+        # Comprueba que el identificador externo no haya cambiado
+        # mientras verificábamos la operación con Pi.
+        if locked_pay.provider_payment_id != pid:
+            return JsonResponse(
+                {"ok": False, "error": "payment identifier conflict"},
+                status=409,
+            )
+
+        # Conserva el historial y registra la respuesta final de Pi.
+        raw = dict(locked_pay.raw_payload or {})
+        raw["pi_info_at_complete"] = final_info
+        raw["txid"] = txid
+
+        locked_pay.raw_payload = raw
+        locked_pay.save(update_fields=["raw_payload"])
+
+        # mark_confirmed() actualiza Payment y sincroniza Order.
+        # Ambos cambios quedan protegidos por la transacción.
+        locked_pay.mark_confirmed(save_order=True)
+
+
+    _log(
+        "complete.confirmed",
+        {"pid": pid, "order": pay.order.number},
+    )
 
     return JsonResponse({"ok": True})
 
+
+
+@login_required
 @require_POST
 def pi_cancel(request):
-    # Endpoint para cuando el usuario cancela o no hay saldo suficiente
-    # body: { "paymentId": "<pid>", "reason": "user_cancelled | insufficient_balance | ..." }
+    """
+    Cancela un pago Pi perteneciente al usuario autenticado.
+
+    La petición del navegador no es suficiente para demostrar
+    que Pi ha cancelado realmente la operación.
+    """
+
     data = _json(request.body)
-    pid    = data.get("paymentId")
-    reason = (data.get("reason") or "user_cancelled")
-    if not pid:
+    pid = data.get("paymentId")
+
+    if not isinstance(pid, str) or not pid.strip():
         return HttpResponseBadRequest("paymentId required")
 
-    # Intenta leer info para vincular y guardar motivo
-    r_info, info = _fetch_pi_payment(pid)
-    pay = _attach_local_payment_from_info(pid, info) or Payment.objects.filter(provider_payment_id=pid).first()
-    if not pay:
-        return JsonResponse({"ok": False, "error": "local payment not found"}, status=404)
+    # 1. Consulta el estado del pago en Pi Network.
+    try:
+        r_info, info = _fetch_pi_payment(pid)
+    except requests.RequestException:
+        return JsonResponse(
+            {"ok": False, "error": "payment verification unavailable"},
+            status=502,
+        )
 
-    pay.mark_failed(reason)
-    _log("cancel.mark_failed", {"pid": pid, "reason": reason})
+    if not r_info.ok or not isinstance(info, dict):
+        return JsonResponse(
+            {"ok": False, "error": "cannot verify payment"},
+            status=502,
+        )
+
+    if str(info.get("identifier", "")) != pid:
+        return JsonResponse(
+            {"ok": False, "error": "payment identifier mismatch"},
+            status=400,
+        )
+
+    # 2. Obtiene los metadatos desde Pi, no desde el navegador.
+    metadata = info.get("metadata")
+
+    if not isinstance(metadata, dict):
+        return JsonResponse(
+            {"ok": False, "error": "invalid payment metadata"},
+            status=400,
+        )
+
+    order_number = metadata.get("order_number")
+    nonce = metadata.get("nonce")
+
+    if not order_number or not nonce:
+        return JsonResponse(
+            {"ok": False, "error": "missing payment metadata"},
+            status=400,
+        )
+
+    # 3. Verifica que el pedido pertenece al usuario.
+    pay = (
+        Payment.objects
+        .select_related("order")
+        .filter(
+            order__number=order_number,
+            order__user=request.user,
+            nonce=nonce,
+        )
+        .first()
+    )
+
+    if not pay:
+        return JsonResponse(
+            {"ok": False, "error": "payment not found"},
+            status=404,
+        )
+
+    # No permitimos asociar otro pago externo al pedido.
+    if pay.provider_payment_id not in (None, "", pid):
+        return JsonResponse(
+            {"ok": False, "error": "payment identifier conflict"},
+            status=409,
+        )
+
+    # 4. Comprueba que el importe coincide con el checkout.
+    try:
+        amount_pi = Decimal(str(info["amount"]))
+        pricing = (pay.raw_payload or {})["pricing"]
+        expected_pi = Decimal(str(pricing["amount_pi"]))
+
+        if (
+            not amount_pi.is_finite()
+            or not expected_pi.is_finite()
+            or amount_pi <= 0
+            or amount_pi != expected_pi
+        ):
+            raise ValueError("Invalid payment amount")
+
+    except (KeyError, TypeError, ValueError, ArithmeticError):
+        return JsonResponse(
+            {"ok": False, "error": "payment amount mismatch"},
+            status=400,
+        )
+
+    # 5. Nunca cancelamos una transacción completada.
+    status_info = info.get("status")
+
+    if not isinstance(status_info, dict):
+        return JsonResponse(
+            {"ok": False, "error": "invalid payment status"},
+            status=400,
+        )
+
+    if status_info.get("developer_completed") is True:
+        return JsonResponse(
+            {"ok": False, "error": "payment already completed"},
+            status=409,
+        )
+
+    # El callback onCancel del navegador no demuestra por sí solo
+    # que el pago haya sido cancelado por Pi.
+    if status_info.get("cancelled") is not True:
+        return JsonResponse(
+            {"ok": False, "error": "payment cancellation not verified"},
+            status=409,
+        )
+
+    # 6. Bloquea el pedido y el pago durante la modificación.
+    from django.db import transaction
+
+    with transaction.atomic():
+        order = (
+            Order.objects
+            .select_for_update()
+            .get(pk=pay.order_id)
+        )
+
+        locked_pay = (
+            Payment.objects
+            .select_for_update()
+            .get(pk=pay.pk)
+        )
+
+        # Revalidación tras adquirir los bloqueos.
+        if (
+            locked_pay.status == Payment.CONFIRMED
+            or order.status == Order.PAID
+        ):
+            return JsonResponse(
+                {"ok": False, "error": "payment already confirmed"},
+                status=409,
+            )
+
+        if locked_pay.provider_payment_id not in (None, "", pid):
+            return JsonResponse(
+                {"ok": False, "error": "payment identifier conflict"},
+                status=409,
+            )
+
+        if locked_pay.status == Payment.FAILED:
+            return JsonResponse(
+                {"ok": True, "already_cancelled": True}
+            )
+
+        # Conserva la información existente para auditoría.
+        raw = dict(locked_pay.raw_payload or {})
+        raw["pi_info_at_cancel"] = info
+        locked_pay.raw_payload = raw
+        locked_pay.save(update_fields=["raw_payload"])
+
+        # mark_failed() actualiza el pago y cancela el pedido.
+        locked_pay.mark_failed(
+            reason="pi_cancel_verified",
+            save_order=True,
+        )
+
+    _log(
+        "cancel.verified",
+        {"pid": pid, "order": order.number},
+    )
+
     return JsonResponse({"ok": True})
+
 
 @csrf_exempt
 @require_POST

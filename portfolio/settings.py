@@ -53,7 +53,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 PI_EUR_PER_PI = Decimal(str(env("PI_EUR_PER_PI", default="0.30")))
 
 # Optional: force Pi-only login flows in your app if you use it
-PI_ONLY_LOGIN = env("PI_ONLY_LOGIN", default=False)
+PI_ONLY_LOGIN = env.bool("PI_ONLY_LOGIN", default=False)
 
 # --- Apps ---
 INSTALLED_APPS = [

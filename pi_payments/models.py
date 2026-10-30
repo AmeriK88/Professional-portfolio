@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+from django.db import transaction
+
 
 class Payment(models.Model):
     INITIATED = "initiated"
@@ -29,16 +29,45 @@ class Payment(models.Model):
     def __str__(self) -> str:
         return f"Payment({self.provider} · {self.provider_payment_id or '-'})"
 
+    @transaction.atomic
     def mark_confirmed(self, tx_time=None, save_order=True):
+        """
+        Confirma un pago únicamente si su estado y el del pedido
+        permiten la transición.
+
+        Debe llamarse dentro de una transacción que bloquee
+        primero Order y después Payment.
+        """
+        from orders.models import Order
+
+        if self.status == self.CONFIRMED:
+            return
+
+        if self.status != self.INITIATED:
+            raise ValueError(
+                "Cannot confirm a payment that is not initiated"
+            )
+
+        if not save_order:
+            raise ValueError(
+                "Payment confirmation requires order synchronization"
+            )
+
+        order = self.order
+
+        if order.status != Order.AWAITING:
+            raise ValueError(
+                "Cannot confirm payment: order is not awaiting payment"
+            )
+
         self.status = self.CONFIRMED
         self.completed_at = tx_time or timezone.now()
         self.save(update_fields=["status", "completed_at"])
-        if save_order:
-            o = self.order
-            if getattr(o, "status", None) != getattr(o, "PAID", "paid"):
-                o.status = getattr(o, "PAID", "paid")
-                o.paid_at = o.paid_at or self.completed_at
-                o.save(update_fields=["status", "paid_at"])
+
+        order.status = Order.PAID
+        order.paid_at = order.paid_at or self.completed_at
+        order.save(update_fields=["status", "paid_at"])
+
 
     def mark_failed(self, reason: str | None = None, save_order: bool = True):
         if self.status == self.CONFIRMED:
@@ -60,13 +89,3 @@ class Payment(models.Model):
                 o.status = getattr(o, "CANCELLED", "cancelled")
                 o.paid_at = None
                 o.save(update_fields=["status", "paid_at"])
-
-
-@receiver(post_save, sender=Payment)
-def _sync_order_status_on_payment(sender, instance: Payment, **kwargs):
-    if instance.status == Payment.CONFIRMED:
-        o = instance.order
-        if o.status != getattr(o, "PAID", "paid"):
-            o.status = getattr(o, "PAID", "paid")
-            o.paid_at = o.paid_at or (instance.completed_at or timezone.now())
-            o.save(update_fields=["status", "paid_at"])
