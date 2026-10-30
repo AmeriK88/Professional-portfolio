@@ -96,9 +96,18 @@ MIDDLEWARE = [
 
 # --- Pi Sandbox (DEV/SANDBOX only) ---
 PI_SANDBOX = env.bool("PI_SANDBOX", default=False)
-if PI_SANDBOX or DEBUG:
-    # Asegura que no esté XFrameOptionsMiddleware y añade el tuyo
-    MIDDLEWARE = [m for m in MIDDLEWARE if m != "django.middleware.clickjacking.XFrameOptionsMiddleware"]
+
+# Permitir incrustación únicamente cuando se configure explícitamente.
+PI_BROWSER_EMBED_ENABLED = env.bool(
+    "PI_BROWSER_EMBED_ENABLED",
+    default=False,
+)
+
+if PI_BROWSER_EMBED_ENABLED:
+    MIDDLEWARE = [
+        m for m in MIDDLEWARE
+        if m != "django.middleware.clickjacking.XFrameOptionsMiddleware"
+    ]
     MIDDLEWARE.append("core.middleware.PiSandboxHeadersMiddleware")
 
 ROOT_URLCONF = "portfolio.urls"
