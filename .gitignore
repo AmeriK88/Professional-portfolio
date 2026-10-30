@@ -38,11 +38,11 @@ node_modules/
 dist/
 build/
 
-# Archivos imgs
+# Archivos multimedia subidos por usuarios (Cloudinary)
 media/
-static/images/
-static/img/
-static/avatars/
+
+# Documentos privados
 private/cv.pdf
 
-
+# Los recursos de static/images/, static/img/ y static/avatars/
+# se versionan cuando forman parte de la interfaz.

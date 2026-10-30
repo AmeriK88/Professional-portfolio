@@ -1,0 +1,35 @@
+ .gitignore                          |  10 [32m+++++[m[31m-----[m
+ static/avatars/presets/astro.png    | Bin [31m0[m -> [32m3559[m bytes
+ static/avatars/presets/dev.png      | Bin [31m0[m -> [32m3133[m bytes
+ static/avatars/presets/motorist.png | Bin [31m0[m -> [32m3827[m bytes
+ static/avatars/presets/ninja.png    | Bin [31m0[m -> [32m2563[m bytes
+ static/avatars/presets/robot.png    | Bin [31m0[m -> [32m2666[m bytes
+ static/avatars/presets/wizard.png   | Bin [31m0[m -> [32m2731[m bytes
+ static/images/default-avatar.png    | Bin [31m0[m -> [32m1399886[m bytes
+ static/images/favicon.ico           | Bin [31m0[m -> [32m283[m bytes
+ static/images/firelogo.webp         | Bin [31m0[m -> [32m79202[m bytes
+ static/images/logo-jfgc-dark.webp   | Bin [31m0[m -> [32m1702[m bytes
+ static/images/logo-jfgc.webp        | Bin [31m0[m -> [32m7808[m bytes
+ static/images/logo-nav.webp         | Bin [31m0[m -> [32m2452[m bytes
+ static/images/pi-icon.svg           |   7 [32m+++++++[m
+ static/images/pic_10.webp           | Bin [31m0[m -> [32m10456[m bytes
+ static/images/pic_11.webp           | Bin [31m0[m -> [32m7500[m bytes
+ static/images/pic_12.webp           | Bin [31m0[m -> [32m9436[m bytes
+ static/images/pic_13.webp           | Bin [31m0[m -> [32m2614[m bytes
+ static/images/pic_14.webp           | Bin [31m0[m -> [32m14118[m bytes
+ static/images/pic_15.webp           | Bin [31m0[m -> [32m8556[m bytes
+ static/images/pic_16.webp           | Bin [31m0[m -> [32m16826[m bytes
+ static/images/pic_17.webp           | Bin [31m0[m -> [32m35512[m bytes
+ static/images/pic_18.webp           | Bin [31m0[m -> [32m4202[m bytes
+ static/images/pic_19.webp           | Bin [31m0[m -> [32m19998[m bytes
+ static/images/pic_20.webp           | Bin [31m0[m -> [32m31066[m bytes
+ static/images/pic_21.webp           | Bin [31m0[m -> [32m7818[m bytes
+ static/images/pic_8.webp            | Bin [31m0[m -> [32m9368[m bytes
+ static/images/pic_9.webp            | Bin [31m0[m -> [32m17818[m bytes
+ static/images/react_0.webp          | Bin [31m0[m -> [32m3888[m bytes
+ static/img/admin/icon-dark.svg      |   1 [32m+[m
+ static/img/admin/icon-light.svg     |   1 [32m+[m
+ static/img/admin/jf_logo.png        | Bin [31m0[m -> [32m1386410[m bytes
+ static/img/admin/login-bg.svg       |   9 [32m+++++++++[m
+ static/img/admin/logo-light.png     | Bin [31m0[m -> [32m1090180[m bytes
+ 34 files changed, 23 insertions(+), 5 deletions(-)
