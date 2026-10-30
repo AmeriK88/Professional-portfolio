@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from orders.models import Order
 from pi_payments.models import Payment
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 PI_API_BASE = "https://api.minepi.com"
 PI_API_KEY  = os.environ.get("PI_API_KEY")
@@ -352,16 +353,18 @@ def pi_complete(request):
             status=400,
         )
 
-    # 5) Comprueba que los metadatos corresponden al pedido local.
-    metadata = info.get("metadata") or {}
+    # 5) Comprueba que los metadatos corresponden
+    # exactamente al pedido y al pago local.
+    metadata = info.get("metadata")
 
     if (
         not isinstance(metadata, dict)
         or str(metadata.get("order_number", "")) != pay.order.number
+        or str(metadata.get("nonce", "")) != pay.nonce
     ):
-        _log("complete.order_mismatch", {"pid": pid})
+        _log("complete.metadata_mismatch", {"pid": pid})
         return JsonResponse(
-            {"ok": False, "error": "payment order mismatch"},
+            {"ok": False, "error": "payment metadata mismatch"},
             status=400,
         )
 
@@ -408,11 +411,10 @@ def pi_complete(request):
             status=502,
         )
 
-    # La respuesta debe identificar el mismo pago y la misma transacción.
-    transaction = final_info.get("transaction") or {}
+    pi_transaction = final_info.get("transaction") or {}
     final_txid = (
-        transaction.get("txid")
-        if isinstance(transaction, dict)
+        pi_transaction.get("txid")
+        if isinstance(pi_transaction, dict)
         else None
     )
 
@@ -426,17 +428,53 @@ def pi_complete(request):
         )
 
     # Pi debe confirmar explícitamente la finalización.
-    if final_info.get("status", {}).get("developer_completed") is not True:
+    status_info = final_info.get("status")
+
+    if (
+        not isinstance(status_info, dict)
+        or status_info.get("developer_completed") is not True
+    ):
         return JsonResponse(
             {"ok": False, "error": "payment not confirmed by Pi"},
             status=409,
         )
+    # 7.1) Revalida el importe y los metadatos finales de Pi.
+    try:
+        final_amount = Decimal(str(final_info["amount"]))
+        expected_amount = Decimal(
+            str((pay.raw_payload or {})["pricing"]["amount_pi"])
+        )
 
+        if (
+            not final_amount.is_finite()
+            or not expected_amount.is_finite()
+            or final_amount <= 0
+            or expected_amount <= 0
+            or final_amount != expected_amount
+        ):
+            raise ValueError("Final payment amount mismatch")
+
+    except (KeyError, TypeError, ValueError, ArithmeticError):
+        return JsonResponse(
+            {"ok": False, "error": "final payment amount mismatch"},
+            status=400,
+        )
+
+    final_metadata = final_info.get("metadata")
+
+    if (
+        not isinstance(final_metadata, dict)
+        or str(final_metadata.get("order_number", "")) != pay.order.number
+        or str(final_metadata.get("nonce", "")) != pay.nonce
+    ):
+        return JsonResponse(
+            {"ok": False, "error": "final payment metadata mismatch"},
+            status=400,
+        )
     
     # 8) Confirma el pago y el pedido dentro de una transacción.
     # Adquirimos los bloqueos en el mismo orden que pi_cancel():
     # primero Order y después Payment.
-    from django.db import transaction
 
     with transaction.atomic():
         order = (

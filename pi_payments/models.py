@@ -68,24 +68,61 @@ class Payment(models.Model):
         order.paid_at = order.paid_at or self.completed_at
         order.save(update_fields=["status", "paid_at"])
 
-
+    @transaction.atomic
     def mark_failed(self, reason: str | None = None, save_order: bool = True):
-        if self.status == self.CONFIRMED:
-            return
-        raw = self.raw_payload or {}
-        if reason:
-            raw.setdefault("fail_reasons", []).append(
-                {"reason": reason, "at": timezone.now().isoformat()}
+        """
+        Marca un pago como fallido únicamente cuando el pago
+        y su pedido permiten la transición.
+
+        El llamador debe verificar previamente el estado externo
+        de Pi Network y bloquear Order y Payment.
+        """
+        from orders.models import Order
+
+        if not save_order:
+            raise ValueError(
+                "Payment failure requires order synchronization"
             )
+
+        order = self.order
+
+        # Idempotencia: una cancelación ya aplicada no se repite.
+        if (
+            self.status == self.FAILED
+            and order.status == Order.CANCELLED
+        ):
+            return
+
+        # Solo permitimos cancelar pagos iniciados.
+        if self.status != self.INITIATED:
+            raise ValueError(
+                "Cannot fail a payment that is not initiated"
+            )
+
+        # El pedido debe estar esperando el pago.
+        if order.status != Order.AWAITING:
+            raise ValueError(
+                "Cannot fail payment: order is not awaiting payment"
+            )
+
+        raw = dict(self.raw_payload or {})
+
+        if reason:
+            reasons = list(raw.get("fail_reasons") or [])
+            reasons.append({
+                "reason": reason,
+                "at": timezone.now().isoformat(),
+            })
+            raw["fail_reasons"] = reasons
+
         self.raw_payload = raw
         self.status = self.FAILED
         self.completed_at = None
-        self.save(update_fields=["status", "raw_payload", "completed_at"])
 
-        if save_order:
-            o = self.order
-            # Solo cancela si aún no está pagado
-            if o.status not in (getattr(o, "PAID", "paid"),):
-                o.status = getattr(o, "CANCELLED", "cancelled")
-                o.paid_at = None
-                o.save(update_fields=["status", "paid_at"])
+        self.save(
+            update_fields=["status", "raw_payload", "completed_at"]
+        )
+
+        order.status = Order.CANCELLED
+        order.paid_at = None
+        order.save(update_fields=["status", "paid_at"])
