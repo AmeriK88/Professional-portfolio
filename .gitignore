@@ -41,7 +41,6 @@ build/
 # Archivos imgs
 media/
 static/images/
-static/icons/
 static/img/
 static/avatars/
 private/cv.pdf
