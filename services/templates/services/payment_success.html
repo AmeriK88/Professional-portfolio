@@ -1,23 +1,44 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}Pago completado{% endblock %}
+{% block title %}{% if payment and payment.status == 'confirmed' %}Pago completado{% else %}Resumen del pago{% endif %}{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/services.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="py-4 py-lg-5">
+<div class="services-page payment-success-page">
   <div class="row justify-content-center">
     <div class="col-12 col-lg-8 col-xl-7">
-      <div class="text-center mb-4">
-        <div class="display-6">¡Gracias por tu compra!</div>
-        <p class="text-muted mb-0">
-          {% if payment %}Tu pago se ha procesado correctamente.{% else %}Mostrando resumen con la información disponible.{% endif %}
+      <header class="payment-success-header">
+        <span class="payment-success-icon{% if payment and payment.status == 'confirmed' %} is-confirmed{% endif %}" aria-hidden="true">
+          {% if payment and payment.status == 'confirmed' %}✓{% else %}↗{% endif %}
+        </span>
+        <p class="services-eyebrow">JFGC DEV <span aria-hidden="true">/</span> PEDIDOS</p>
+        <h1>
+          {% if payment and payment.status == 'confirmed' %}
+            ¡Gracias por tu compra!
+          {% else %}
+            Resumen del pago
+          {% endif %}
+        </h1>
+        <p class="payment-success-intro" role="status" aria-live="polite">
+          {% if payment and payment.status == 'confirmed' %}
+            Tu pago se ha procesado correctamente.
+          {% elif payment %}
+            Este es el resumen disponible para el estado actual del pago.
+          {% else %}
+            Mostrando el resumen con la información disponible.
+          {% endif %}
         </p>
-      </div>
+      </header>
 
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-4 p-lg-5">
+      <div class="payment-receipt">
+        <div class="payment-receipt-body">
 
           <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-            <h1 class="h4 mb-0">Recibo de pago</h1>
+            <h2 class="payment-receipt-title">Recibo de pago</h2>
             {% if payment and payment.status %}
               {% with s=payment.status %}
                 {% if s == 'confirmed' %}
@@ -35,17 +56,17 @@
 
           <div class="row g-3 mb-3">
             <div class="col-12 col-md-6">
-              <div class="small text-muted">Pedido</div>
+              <span class="payment-field-label">Pedido</span>
               <div class="fw-semibold">{% if order %}{{ order.number }}{% else %}-{% endif %}</div>
             </div>
             <div class="col-6 col-md-3">
-              <div class="small text-muted">Importe</div>
+              <span class="payment-field-label">Importe</span>
               <div class="fw-semibold">
                 {% if order %}{{ order.total }} {{ order.currency|default:"EUR" }}{% else %}-{% endif %}
               </div>
             </div>
             <div class="col-6 col-md-3">
-              <div class="small text-muted">Fecha</div>
+              <span class="payment-field-label">Fecha</span>
               <div class="fw-semibold">
                 {% if payment %}
                   {{ payment.completed_at|default:order.created_at|date:"d M Y H:i" }}
@@ -56,13 +77,13 @@
             </div>
           </div>
 
-          <hr class="text-muted">
+          <hr class="payment-divider">
 
           <!-- Identificadores -->
           <div class="row g-3">
             {% if payment_id %}
               <div class="col-12 col-md-6">
-                <div class="small text-muted">ID de pago (Pi)</div>
+                <span class="payment-field-label">ID de pago (Pi)</span>
                 <div class="d-flex align-items-center gap-2">
                   <code id="pid-val" class="text-break">{{ payment_id }}</code>
                   <button class="btn btn-sm btn-outline-cta rounded-pill" type="button" data-copy="#pid-val" aria-label="Copiar ID de pago">Copiar</button>
@@ -70,7 +91,7 @@
               </div>
             {% elif payment and payment.provider_payment_id %}
               <div class="col-12 col-md-6">
-                <div class="small text-muted">ID de pago (Pi)</div>
+                <span class="payment-field-label">ID de pago (Pi)</span>
                 <div class="d-flex align-items-center gap-2">
                   <code id="pid-val" class="text-break">{{ payment.provider_payment_id }}</code>
                   <button class="btn btn-sm btn-outline-secondary" type="button" data-copy="#pid-val" aria-label="Copiar ID de pago">Copiar</button>
@@ -80,7 +101,7 @@
 
             {% if txid %}
               <div class="col-12 col-md-6">
-                <div class="small text-muted">TXID</div>
+                <span class="payment-field-label">TXID</span>
                 <div class="d-flex align-items-center gap-2">
                   <code id="txid-val" class="text-break">{{ txid }}</code>
                   <button class="btn btn-sm btn-outline-secondary" type="button" data-copy="#txid-val" aria-label="Copiar TXID">Copiar</button>
@@ -88,7 +109,7 @@
               </div>
             {% elif payment and payment.raw_payload and payment.raw_payload.txid %}
               <div class="col-12 col-md-6">
-                <div class="small text-muted">TXID</div>
+                <span class="payment-field-label">TXID</span>
                 <div class="d-flex align-items-center gap-2">
                   <code id="txid-val" class="text-break">{{ payment.raw_payload.txid }}</code>
                   <button class="btn btn-outline-cta rounded-pill" type="button" data-copy="#txid-val" aria-label="Copiar TXID">Copiar</button>
@@ -98,19 +119,19 @@
           </div>
 
           {% if payment and payment.raw_payload and payment.raw_payload.pricing %}
-            <div class="rounded-3 p-3 mt-3">
-              <div class="small text-muted mb-2">Resumen de conversión</div>
+            <div class="payment-pricing-summary">
+              <div class="payment-field-label mb-2">Resumen de conversión</div>
               <div class="d-flex flex-wrap gap-4">
-                <div><div class="small text-muted">Precio EUR</div><div class="fw-semibold">{{ payment.raw_payload.pricing.price_eur }} €</div></div>
-                <div><div class="small text-muted">Tasa EUR por π</div><div class="fw-semibold">{{ payment.raw_payload.pricing.eur_per_pi }}</div></div>
-                <div><div class="small text-muted">Importe en π</div><div class="fw-semibold">{{ payment.raw_payload.pricing.amount_pi }}</div></div>
+                <div><span class="payment-field-label">Precio EUR</span><div class="fw-semibold">{{ payment.raw_payload.pricing.price_eur }} €</div></div>
+                <div><span class="payment-field-label">Tasa EUR por π</span><div class="fw-semibold">{{ payment.raw_payload.pricing.eur_per_pi }}</div></div>
+                <div><span class="payment-field-label">Importe en π</span><div class="fw-semibold">{{ payment.raw_payload.pricing.amount_pi }}</div></div>
               </div>
             </div>
           {% endif %}
 
           <div class="mt-4">
-            <div class="h6 fw-semibold mb-2">¿Y ahora qué sigue?</div>
-            <ul class="text-muted mb-0">
+            <h3 class="payment-next-title">¿Y ahora qué sigue?</h3>
+            <ul class="payment-next-list">
               <li>📩 Revisa tu bandeja de entrada: te enviaremos la confirmación del pedido junto con los detalles de tu compra.</li>
               <li>💬 En caso de necesitarlo, podrás comunicarte con nosotros para indicar tus preferencias o comentarios.</li>
               <li>🧾 Puedes consultar el estado del pago y el historial en <strong>“Mis pedidos”</strong>.</li>
@@ -118,8 +139,8 @@
             </ul>
           </div>
 
-          <div class="d-flex flex-wrap gap-2 mt-4">
-            {% if order %}<a href="{{ order.get_absolute_url }}" class="cta-button cta-section px-4 py-2">Ver pedido</a>{% endif %}
+          <div class="payment-actions">
+            {% if order %}<a href="{{ order.get_absolute_url }}" class="cta-button">Ver pedido</a>{% endif %}
             <a href="{% url 'orders:list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2">Mis pedidos</a>
             <a href="{% url 'services:service_list' %}" class="btn btn-ghost">Seguir explorando servicios</a>
           </div>
@@ -127,10 +148,10 @@
         </div>
       </div>
 
-      <div class="text-center text-muted small">
+      <p class="payment-support-note">
         ¿Dudas con el pago?
         {% if order %}Escríbeme y adjunta tu número de pedido {{ order.number }}.{% else %}Escríbeme e indica el ID de pago {{ payment_id|default:"-" }}.{% endif %}
-      </div>
+      </p>
 
     </div>
   </div>

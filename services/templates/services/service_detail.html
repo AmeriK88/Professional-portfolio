@@ -2,144 +2,190 @@
 {% load static %}
 {% load pi_extras %}
 
-
 {% block title %}{{ service.title }}{% endblock %}
 
-{% block content %}
-<div class="container py-5">
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/services.css' %}">
+{% endblock %}
 
-  <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a href="{% url 'services:service_list' %}">Servicios</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        {{ service.title }}
-      </li>
+{% block content %}
+<div class="services-page service-detail">
+  <nav aria-label="Ruta de navegación" class="service-breadcrumb">
+    <ol>
+      <li><a href="{% url 'services:service_list' %}">Servicios</a></li>
+      <li aria-current="page">{{ service.title }}</li>
     </ol>
   </nav>
 
-  <h1 class="mb-3">{{ service.title }}</h1>
-    <p class="text-muted mb-4">
+  <header class="service-detail-header">
+    <p class="services-eyebrow">JFGC DEV <span aria-hidden="true">/</span> SERVICIO</p>
+    <h1>{{ service.title }}</h1>
+    <p class="service-detail-price">
       Desde <strong>{{ service.price }} €</strong>
       {% if PI_EUR_PER_PI %}
-        <span class="text-muted"> (≈ {{ service.price|to_pi:PI_EUR_PER_PI }} π)</span>
+        <span>(≈ {{ service.price|to_pi:PI_EUR_PER_PI }} π)</span>
       {% endif %}
     </p>
+  </header>
 
-  {# Media preview (lazy) #}
-  {% if service.preview %}
-    {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
-      <video
-        class="w-100 rounded mb-4 js-lazy-video"
-        data-src="{{ service.preview.url }}"
-        muted
-        loop
-        playsinline
-        preload="none"
-        {% if service.image %}poster="{{ service.image.url }}"{% endif %}>
-        Tu navegador no soporta vídeo.
-      </video>
-    {% else %}
-      <img src="{{ service.preview.url }}"
-           class="img-fluid rounded mb-4"
-           alt="{{ service.title }}"
-           loading="lazy">
-    {% endif %}
-  {% elif service.image %}
-    <img src="{{ service.image.url }}"
-         class="img-fluid rounded mb-4"
-         alt="{{ service.title }}"
-         loading="lazy">
-  {% endif %}
-
-  <section class="mb-5">
-    <h2 class="h4">Descripción</h2>
-    <div class="lead">
-      {{ service.description|linebreaks }}
-    </div>
-  </section>
-
-  {% if service.features.exists %}
-    <section class="mb-5">
-      <h2 class="h4">Lo que incluye este servicio</h2>
-      <ul class="list-unstyled ps-3">
-        {% for feat in service.features.all %}
-          <li>✅ {{ feat.text|linebreaksbr }}</li>
-        {% endfor %}
-      </ul>
-    </section>
-  {% endif %}
-
-  <div class="d-flex gap-2 mb-5">
-    <a href="{% url 'services:service_list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2">
-      ← Volver
-    </a>
-
-    {% if request.user.is_authenticated %}
-      <button
-        id="pi-pay-btn"
-        class="btn btn-outline-cta rounded-pill px-4 py-2"
-        data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
-        Pagar con
-        <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon">
-      </button>
-    {% else %}
-      <a class="cta-button cta-section" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
-        Inicia sesión
-      </a>
-    {% endif %}
-  </div>
-
-  {% if service.faqs.exists %}
-    <h2 class="h4 mb-3">Preguntas frecuentes</h2>
-    <div class="accordion mb-5" id="faqAccordion">
-      {% for faq in service.faqs.all %}
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="q{{ forloop.counter }}">
-            <button class="accordion-button collapsed" type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#a{{ forloop.counter }}"
-                    aria-expanded="false"
-                    aria-controls="a{{ forloop.counter }}">
-              {{ faq.question }}
-            </button>
-          </h2>
-          <div id="a{{ forloop.counter }}"
-               class="accordion-collapse collapse"
-               data-bs-parent="#faqAccordion">
-            <div class="accordion-body">
-              {{ faq.answer|linebreaks }}
+  <div class="service-detail-layout">
+    <div class="service-detail-main">
+      {% if service.preview %}
+        <div class="service-detail-media">
+          {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
+            <video
+              class="service-media-content js-lazy-video"
+              data-src="{{ service.preview.url }}"
+              muted
+              loop
+              playsinline
+              preload="none"
+              {% if service.image %}poster="{{ service.image.url }}"{% endif %}
+              aria-label="Vista previa en vídeo de {{ service.title }}">
+              Tu navegador no soporta vídeo.
+            </video>
+            <div class="service-media-fallback" data-service-fallback role="status" aria-live="polite" hidden>
+              <span>Vista previa no disponible</span>
             </div>
+          {% else %}
+            <img
+              src="{{ service.preview.url }}"
+              class="service-media-content"
+              data-service-media
+              alt="Vista previa de {{ service.title }}"
+              loading="lazy"
+              decoding="async">
+            <div class="service-media-fallback" data-service-fallback role="status" aria-live="polite" hidden>
+              <span>Vista previa no disponible</span>
+            </div>
+          {% endif %}
+        </div>
+      {% elif service.image %}
+        <div class="service-detail-media">
+          <img
+            src="{{ service.image.url }}"
+            class="service-media-content"
+            data-service-media
+            alt="{{ service.title }}"
+            loading="lazy"
+            decoding="async">
+          <div class="service-media-fallback" data-service-fallback role="status" aria-live="polite" hidden>
+            <span>Imagen no disponible</span>
           </div>
         </div>
-      {% endfor %}
+      {% endif %}
+
+      <section class="service-content-section" aria-labelledby="service-description-title">
+        <p class="service-section-kicker">La propuesta</p>
+        <h2 id="service-description-title">Descripción</h2>
+        <div class="service-description">
+          {{ service.description|linebreaks }}
+        </div>
+      </section>
+
+      {% if service.features.exists %}
+        <section class="service-content-section service-features" aria-labelledby="service-features-title">
+          <p class="service-section-kicker">Alcance</p>
+          <h2 id="service-features-title">Lo que incluye este servicio</h2>
+          <ul>
+            {% for feat in service.features.all %}
+              <li><span aria-hidden="true">✓</span><div>{{ feat.text|linebreaksbr }}</div></li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {% if service.faqs.exists %}
+        <section class="service-content-section service-faq" aria-labelledby="service-faq-title">
+          <p class="service-section-kicker">Información</p>
+          <h2 id="service-faq-title">Preguntas frecuentes</h2>
+          <div class="accordion" id="faqAccordion">
+            {% for faq in service.faqs.all %}
+              <div class="accordion-item">
+                <h3 class="accordion-header" id="q{{ forloop.counter }}">
+                  <button class="accordion-button collapsed" type="button"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#a{{ forloop.counter }}"
+                          aria-expanded="false"
+                          aria-controls="a{{ forloop.counter }}">
+                    {{ faq.question }}
+                  </button>
+                </h3>
+                <div id="a{{ forloop.counter }}"
+                     class="accordion-collapse collapse"
+                     data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    {{ faq.answer|linebreaks }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {% for faq in service.faqs.all %}
+            {
+              "@type": "Question",
+              "name": "{{ faq.question|escapejs }}",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "{{ faq.answer|linebreaksbr|escapejs }}"
+              }
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+          ]
+        }
+        </script>
+      {% endif %}
     </div>
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {% for faq in service.faqs.all %}
-        {
-          "@type": "Question",
-          "name": "{{ faq.question|escapejs }}",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "{{ faq.answer|linebreaksbr|escapejs }}"
-          }
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-      ]
-    }
-    </script>
-  {% endif %}
+    <aside class="service-purchase-panel" aria-labelledby="service-purchase-title">
+      <p class="service-section-kicker">Siguiente paso</p>
+      <h2 id="service-purchase-title">¿Te interesa este servicio?</h2>
+      <p class="service-purchase-copy">Consulta el precio y continúa con la opción disponible para tu cuenta.</p>
+      <p class="service-purchase-price">
+        <span>Precio</span>
+        <strong>{{ service.price }} €</strong>
+        {% if PI_EUR_PER_PI %}
+          <small>≈ {{ service.price|to_pi:PI_EUR_PER_PI }} π</small>
+        {% endif %}
+      </p>
+
+      {% if request.user.is_authenticated %}
+        <button
+          id="pi-pay-btn"
+          class="btn btn-outline-cta rounded-pill px-4 py-2 service-pay-button"
+          data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
+          Pagar con
+          <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon">
+        </button>
+      {% else %}
+        <a class="cta-button service-pay-button" href="{% url 'users:login' %}?next={{ request.get_full_path }}">
+          Inicia sesión para continuar
+        </a>
+      {% endif %}
+
+      <p class="service-payment-note">
+        {% if request.user.is_authenticated %}
+          El pago se inicia al continuar con el botón.
+        {% else %}
+          Inicia sesión para acceder a las opciones de compra.
+        {% endif %}
+      </p>
+      <a href="{% url 'services:service_list' %}" class="service-back-link">← Volver a servicios</a>
+    </aside>
+  </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-  <!-- Config pi_payments.js -->
+  {{ block.super }}
   <script>
     window.PI_CFG = {
       sandbox: true,
@@ -149,10 +195,7 @@
       successUrl: "{% url 'services:payment_success' %}"
     };
   </script>
-
-  <!-- Handler de pagos -->
   <script src="{% static 'js/pi_payments/pi_payments.js' %}" defer></script>
-
-  <!-- Lazy video -->
   <script src="{% static 'js/previews/project-previews.js' %}" defer></script>
+  <script src="{% static 'js/services/services-media.js' %}" defer></script>
 {% endblock %}

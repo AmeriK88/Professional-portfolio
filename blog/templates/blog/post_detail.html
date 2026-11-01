@@ -1,29 +1,60 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ post.title }} - Blog{% endblock %}
-<!-- Extiende la plantilla base y define el título de la página con el título del post. -->
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/blog.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <!-- Encabezado del post -->
-    <div class="post-header text-center">
-        <h1 class="mb-4 display-4">{{ post.title }}</h1>
-        <!-- Imagen asociada, se muestra aquí -->
-        {% if post.image %}
-            <img src="{{ post.image.url }}" class="img-fluid mb-4 rounded shadow-lg" alt="{{ post.title }}">
-        {% endif %}
-        <!-- Fecha de publicación del post -->
-        <p class="text-muted">Publicado el {{ post.created_at|date:"d M Y" }}</p>
-    </div>
-    
-    <!-- Contenido principal del post -->
-    <div class="post-content mt-4">
-        {{ post.content|safe }}
-    </div>
-    
-    <!-- Pie de página -->
-    <div class="post-footer text-center mt-5">
-        <a href="{% url 'blog:post_list' %}" class="cta-button cta-section">Volver al blog</a>
-    </div>
-</div>
+<article class="blog-page blog-article">
+  <nav class="blog-breadcrumb" aria-label="Navegación de artículos">
+    <a href="{% url 'blog:post_list' %}">
+      <span aria-hidden="true">←</span> Todos los artículos
+    </a>
+  </nav>
+
+  <header class="blog-article-header">
+    <p class="blog-eyebrow">JFGC DEV <span aria-hidden="true">/</span> ARTÍCULO</p>
+    <h1>{{ post.title }}</h1>
+    {% if post.created_at %}
+      <p class="blog-article-meta">
+        <time datetime="{{ post.created_at|date:'Y-m-d' }}">
+          Publicado el {{ post.created_at|date:"j F Y" }}
+        </time>
+      </p>
+    {% endif %}
+  </header>
+
+  {% if post.image %}
+    <figure class="blog-article-media">
+      <img
+        src="{{ post.image.url }}"
+        alt="Imagen del artículo {{ post.title }}"
+        class="blog-media-image"
+        data-blog-media
+        decoding="async">
+      <div class="blog-media-fallback" data-blog-fallback hidden>
+        <span>Imagen no disponible</span>
+      </div>
+    </figure>
+  {% endif %}
+
+  <div class="blog-content">
+    {{ post.content|safe }}
+  </div>
+
+  <footer class="blog-article-footer">
+    <a class="blog-back-link" href="{% url 'blog:post_list' %}">
+      <span aria-hidden="true">←</span> Volver a todos los artículos
+    </a>
+  </footer>
+</article>
+{% endblock %}
+
+{% block extra_scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/blog/blog-media.js' %}" defer></script>
 {% endblock %}

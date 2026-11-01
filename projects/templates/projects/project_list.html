@@ -2,62 +2,116 @@
 {% load static %}
 {% block title %}Proyectos - JFGC ⇒ Dev{% endblock %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/projects.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container">
-  <h1 class="mb-5 text-center display-4">Trabajos personales</h1>
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+<div class="projects-page">
+  <header class="projects-header">
+    <p class="projects-eyebrow">JFGC DEV <span aria-hidden="true">/</span> PROYECTOS</p>
+    <h1>Ideas convertidas en experiencias digitales.</h1>
+    <p class="projects-intro">
+      Explora proyectos y sus vistas previas disponibles. Cada ficha reúne la información pública asociada.
+    </p>
+  </header>
+
+  <div class="projects-grid">
     {% for project in projects %}
-    <div class="col">
-      <div class="card h-100 shadow">
+      <article class="projects-card">
+        <div class="projects-media">
         {% if project.preview %}
           {% if project.preview.url|lower|slice:"-4:" == ".mp4" %}
             <video
-              class="card-img-top js-lazy-video"
+              class="projects-media-content js-lazy-video"
               data-src="{{ project.preview.url }}"
               muted
               loop
               playsinline
               preload="none"
-              poster="{{ project.image.url }}"
-              aria-label="Preview de {{ project.name }}">
+              {% if project.image %}poster="{{ project.image.url }}"{% endif %}
+              aria-label="Vista previa en vídeo de {{ project.name }}">
               Tu navegador no soporta vídeo.
             </video>
           {% else %}
             <img
               src="{{ project.preview.url }}"
-              alt="Preview de {{ project.name }}"
-              class="card-img-top"
-              loading="lazy">
+              alt="Vista previa del proyecto {{ project.name }}"
+              class="projects-media-content"
+              loading="lazy"
+              decoding="async">
           {% endif %}
-        {% else %}
+        {% elif project.image %}
           <img
             src="{{ project.image.url }}"
-            alt="{{ project.name }}"
-            class="card-img-top"
-            loading="lazy">
+            alt="Imagen del proyecto {{ project.name }}"
+            class="projects-media-content"
+            loading="lazy"
+            decoding="async">
         {% endif %}
+          {% if project.is_preview_video %}
+            <div class="projects-media-fallback projects-media-video-placeholder" role="status">
+              <span>Reproduce la vista previa</span>
+            </div>
+          {% elif project.preview or project.image %}
+            <div class="projects-media-fallback" role="status" hidden>
+              <span>Vista previa no disponible</span>
+            </div>
+          {% else %}
+            <div class="projects-media-fallback" role="status">
+              <span>Vista previa no disponible</span>
+            </div>
+          {% endif %}
+        </div>
 
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">{{ project.name }}</h5>
-          <p class="card-text mb-4">
-            {{ project.description|truncatechars:120 }}
-          </p>
+        <div class="projects-card-content">
+          <div class="projects-card-meta">
+            <span>PROYECTO</span>
+            <span>{{ forloop.counter|stringformat:"02d" }}</span>
+          </div>
+          <h2 class="projects-card-title">{{ project.name }}</h2>
+          {% if project.description %}
+            <p class="projects-card-description">
+              {{ project.description|striptags|truncatechars:180 }}
+            </p>
+          {% endif %}
           {% if project.url %}
             <a
               href="{{ project.url }}"
-              class="btn btn-outline-cta rounded-pill px-4 py-2"
+              class="projects-card-link"
               target="_blank"
-              rel="noopener">
-              Ver Proyecto
+              rel="noopener noreferrer"
+              aria-label="Visitar proyecto: {{ project.name }}">
+              Visitar proyecto <span aria-hidden="true">↗</span>
             </a>
           {% endif %}
         </div>
+      </article>
+    {% empty %}
+      <div class="projects-empty-state">
+        <p class="projects-card-meta">PRÓXIMAMENTE</p>
+        <h2>Aún no hay proyectos publicados.</h2>
+        <p>Vuelve pronto para descubrir los proyectos disponibles.</p>
       </div>
-    </div>
     {% endfor %}
   </div>
-</div>
 
-{# Incluye el JS de previews (estático) #}
-<script src="{% static 'js/previews/project-previews.js' %}" defer></script>
+  <aside class="projects-cta" aria-labelledby="projects-cta-title">
+    <div>
+      <p class="projects-eyebrow">SIGUIENTE PASO</p>
+      <h2 id="projects-cta-title">¿Tienes un proyecto en mente?</h2>
+      <p>Conoce los servicios profesionales disponibles.</p>
+    </div>
+    <a class="projects-cta-link" href="{% url 'services:service_list' %}">
+      Explorar servicios <span aria-hidden="true">↗</span>
+    </a>
+  </aside>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/projects/project-media.js' %}" defer></script>
+  <script src="{% static 'js/previews/project-previews.js' %}" defer></script>
 {% endblock %}

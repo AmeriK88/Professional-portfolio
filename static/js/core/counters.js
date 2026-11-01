@@ -1,14 +1,20 @@
-// static/js/counter.js
+// static/js/core/counters.js
 (() => {
   const els = document.querySelectorAll(".counter");
   if (!els.length) return;
 
   const fmt = new Intl.NumberFormat(undefined); // separadores de miles
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const animate = (el) => {
     const target = parseInt(el.dataset.target || "0", 10);
     const duration = parseInt(el.dataset.duration || "900", 10); // ms (opcional)
     const from = parseInt(el.dataset.from || "0", 10);
+
+    if (reducedMotion) {
+      el.textContent = fmt.format(target);
+      return;
+    }
 
     const start = performance.now();
 

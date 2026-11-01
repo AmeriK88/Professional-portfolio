@@ -2,74 +2,112 @@
 {% load static %}
 {% block title %}Servicios - JFGC ⇒ Dev{% endblock %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/services.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container">
-  <h1 class="mb-5 text-center display-4">Servicios Profesionales</h1>
-  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-    {% for service in services %}
-    <div class="col">
-      <div class="card h-100 shadow position-relative">
+<div class="services-page services-catalogue">
+  <header class="services-hero">
+    <p class="services-eyebrow">JFGC DEV <span aria-hidden="true">/</span> SERVICIOS</p>
+    <h1>Soluciones digitales para llevar tus ideas más lejos.</h1>
+    <p class="services-intro">
+      Explora los servicios disponibles y encuentra los detalles de cada propuesta.
+    </p>
+  </header>
 
-        {% if service.preview %}
-          {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
-            <video
-              class="card-img-top js-lazy-video"
-              data-src="{{ service.preview.url }}"
-              muted
-              loop
-              playsinline
-              preload="none"
-              {% if service.image %}poster="{{ service.image.url }}"{% endif %}
-              aria-label="Preview de {{ service.title }}">
-              Tu navegador no soporta vídeo.
-            </video>
-          {% else %}
-            <img
-              src="{{ service.preview.url }}"
-              alt="Preview de {{ service.title }}"
-              class="card-img-top"
-              loading="lazy">
-          {% endif %}
-        {% elif service.image %}
-          <img
-            src="{{ service.image.url }}"
-            alt="{{ service.title }}"
-            class="card-img-top"
-            loading="lazy">
-        {% endif %}
+  <section class="services-listing" aria-labelledby="services-listing-title">
+    <div class="services-section-heading">
+      <h2 id="services-listing-title">Servicios profesionales</h2>
+      {% if services %}
+        <span>{{ services|length }} disponibles</span>
+      {% endif %}
+    </div>
 
-        <div class="card-body">
-          <h5 class="card-title">{{ service.title }}</h5>
-          <div class="card-text">
-            {{ service.description|linebreaks }}
+    <div class="services-grid">
+      {% for service in services %}
+        <article class="service-card">
+          <div class="service-card-media">
+            {% if service.preview %}
+              {% if service.preview.url|lower|slice:"-4:" == ".mp4" %}
+                <video
+                  class="service-media-content js-lazy-video"
+                  data-src="{{ service.preview.url }}"
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  {% if service.image %}poster="{{ service.image.url }}"{% endif %}
+                  aria-label="Vista previa en vídeo de {{ service.title }}">
+                  Tu navegador no soporta vídeo.
+                </video>
+                <div class="service-media-fallback" data-service-fallback role="status" aria-live="polite" hidden>
+                  <span>Vista previa no disponible</span>
+                </div>
+              {% else %}
+                <img
+                  src="{{ service.preview.url }}"
+                  alt="Vista previa de {{ service.title }}"
+                  class="service-media-content"
+                  data-service-media
+                  loading="lazy"
+                  decoding="async">
+                <div class="service-media-fallback" data-service-fallback role="status" aria-live="polite" hidden>
+                  <span>Vista previa no disponible</span>
+                </div>
+              {% endif %}
+            {% elif service.image %}
+              <img
+                src="{{ service.image.url }}"
+                alt="{{ service.title }}"
+                class="service-media-content"
+                data-service-media
+                loading="lazy"
+                decoding="async">
+              <div class="service-media-fallback" data-service-fallback role="status" aria-live="polite" hidden>
+                <span>Imagen no disponible</span>
+              </div>
+            {% else %}
+              <div class="service-media-fallback">
+                <span>Servicio <i aria-hidden="true">/</i> JFGC Dev</span>
+              </div>
+            {% endif %}
           </div>
 
-          <p class="mt-3">
-            <strong>{{ service.price }} €</strong>
-          </p>
-
-          <button
-            class="btn btn-outline-cta rounded-pill px-4 py-2">
-            Paga con
-            <img
-              src="{% static 'images/pi-icon.svg' %}"
-              alt="Pi"
-              class="pi-icon">
-          </button>
-
-          <a href="{{ service.get_absolute_url }}"
-             class="stretched-link"
-             aria-label="Ver detalles de {{ service.title }}"></a>
+          <div class="service-card-content">
+            <p class="service-card-kicker">Servicio profesional</p>
+            <h3 class="service-card-title">{{ service.title }}</h3>
+            <div class="service-card-description">
+              {{ service.description|linebreaks }}
+            </div>
+            <div class="service-card-footer">
+              <p class="service-card-price">
+                <span>Desde</span>
+                <strong>{{ service.price }} €</strong>
+              </p>
+              <a href="{{ service.get_absolute_url }}"
+                 class="service-link"
+                 aria-label="Ver detalles de {{ service.title }}">
+                Ver servicio <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <div class="services-empty-state">
+          <p class="services-eyebrow">PRÓXIMAMENTE</p>
+          <h3>No hay servicios disponibles en este momento.</h3>
+          <p>Vuelve pronto para conocer las próximas propuestas.</p>
         </div>
-
-      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
+  </section>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-  <!-- Lazy video (mismo script que en projects) -->
+  {{ block.super }}
   <script src="{% static 'js/previews/project-previews.js' %}" defer></script>
+  <script src="{% static 'js/services/services-media.js' %}" defer></script>
 {% endblock %}

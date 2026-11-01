@@ -1,36 +1,87 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Blog -  JFGC ⇒ Dev{% endblock %}
+{% block title %}Blog - JFGC ⇒ Dev{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/blog.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Header -->
-    <h1 class="mb-5 text-center display-4">Últimos Artículos</h1>
-    <div class="row g-4">
-        <!-- Post list -->
-        {% for post in posts %}
-        <div class="col-md-4">
-            <div class="card blog-card h-100 shadow-sm border-0">
-                {% if post.image %}
-                    <img src="{{ post.image.url }}" class="card-img-top rounded-top" alt="{{ post.title }}">
-                {% endif %}
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title mb-3">
-                        <a href="{% url 'blog:post_detail' post.id %}" class="stretched-link text-decoration-none text-primary">
-                            {{ post.title }}
-                        </a>
-                    </h5>
-                    <!-- Brief description - max 100 chr -->
-                    <p class="card-text text-muted small">{{ post.content|striptags|truncatechars:100 }}</p>
-                </div>
-                <!-- Post date -->
-                <div class="card-footer text-muted small">
-                    Publicado el {{ post.created_at|date:"d M Y" }}
-                </div>
-            </div>
-        </div>
-        {% endfor %}
+<div class="blog-page">
+  <header class="blog-hero">
+    <p class="blog-eyebrow">JFGC DEV <span aria-hidden="true">/</span> IDEAS Y APRENDIZAJES</p>
+    <h1>Notas sobre tecnología y producto.</h1>
+    <p class="blog-intro">
+      Artículos y reflexiones sobre desarrollo de software, herramientas y el proceso de crear productos digitales.
+    </p>
+  </header>
 
-    </div>    
+  <section class="blog-listing" aria-labelledby="blog-listing-title">
+    <div class="blog-section-heading">
+      <h2 id="blog-listing-title">Últimos artículos</h2>
+      {% if posts %}
+        <span>{{ posts|length }} publicaciones</span>
+      {% endif %}
+    </div>
+
+    <div class="blog-grid">
+      {% for post in posts %}
+        <article class="blog-card">
+          <div class="blog-card-media">
+            {% if post.image %}
+              <img
+                src="{{ post.image.url }}"
+                alt="Imagen del artículo {{ post.title }}"
+                class="blog-media-image"
+                data-blog-media
+                loading="lazy"
+                decoding="async">
+              <div class="blog-media-fallback" data-blog-fallback hidden>
+                <span>Imagen no disponible</span>
+              </div>
+            {% else %}
+              <div class="blog-media-fallback">
+                <span>Artículo <i aria-hidden="true">/</i> JFGC Dev</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="blog-card-content">
+            {% if post.created_at %}
+              <time class="blog-date" datetime="{{ post.created_at|date:'Y-m-d' }}">
+                {{ post.created_at|date:"j F Y" }}
+              </time>
+            {% endif %}
+            <h3 class="blog-card-title">
+              <a href="{% url 'blog:post_detail' post.id %}">
+                {{ post.title }}
+              </a>
+            </h3>
+            {% if ".article-pro" in post.content %}
+              <p class="blog-card-excerpt" data-blog-excerpt-source="{{ post.content }}"></p>
+            {% else %}
+              <p class="blog-card-excerpt">{{ post.content|striptags|truncatechars:180 }}</p>
+            {% endif %}
+            <a class="blog-read-link" href="{% url 'blog:post_detail' post.id %}">
+              Leer artículo <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+        </article>
+      {% empty %}
+        <div class="blog-empty-state">
+          <p class="blog-eyebrow">PRÓXIMAMENTE</p>
+          <h3>Aún no hay artículos publicados.</h3>
+          <p>Vuelve pronto para encontrar nuevas notas sobre desarrollo y producto.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+  {{ block.super }}
+  <script src="{% static 'js/blog/blog-media.js' %}" defer></script>
 {% endblock %}

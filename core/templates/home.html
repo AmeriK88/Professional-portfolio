@@ -1,304 +1,352 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Inicio - JFGC ⇒ Dev{% endblock %}
+{% block title %}JFGC Dev | Desarrollo Full-Stack y productos digitales{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-  <div class="row align-items-center">
-    <!-- Hero -->
-    <div class="col-12 col-lg-6 text-center text-lg-start mb-4 mb-lg-0">
-      <div class="animated-text-container">
-        <h1 id="typing-effect" class="animated-text">¡Hola! ¿Desarrollamos el futuro?</h1>
-      </div>
-      <p class="mt-3 text-muted">
-        Plataforma para contratar, pagar y gestionar servicios de desarrollo de software con total transparencia.
-      </p>
-      <div class="d-flex gap-2 justify-content-center justify-content-lg-start mt-3">
-        <a href="{% url 'services:service_list' %}" class="cta-button cta-section ">Servicios</a>
-
-        <a href="https://wa.me/+34639949187"
-          class="btn btn-outline-success  d-inline-flex align-items-center"
-          target="_blank" rel="noopener noreferrer nofollow">
-          <i class="fab fa-whatsapp me-2"></i>
-          Hablar ahora
-        </a>
-      </div>
-    </div>
-
-    <!-- Card hero (ligera) -->
-    <div class="col-12 col-lg-6 text-center">
-      <div class="profile-card mx-auto">
-        <div class="profile-image-container mx-auto">
-          <img src="{% static 'images/logo-jfgc.webp' %}"
-               class="profile-image"
-               alt="Logo plataforma"
-               width="256" height="256"
-               loading="lazy" decoding="async">
+<div class="home-page">
+  <section class="home-hero" aria-labelledby="home-hero-title">
+    <div class="home-hero-inner">
+      <div class="home-hero-copy">
+        <p class="home-eyebrow"><span aria-hidden="true"></span> Full-Stack Developer <span class="home-eyebrow-divider">·</span> Product Builder</p>
+        <h1 id="home-hero-title">Transformo ideas <span>en productos digitales.</span></h1>
+        <p id="typing-effect" class="home-typing animated-text">¡Hola! ¿Desarrollamos el futuro?</p>
+        <p class="home-hero-description">
+          Desarrollo aplicaciones web, plataformas SaaS y soluciones de software a medida,
+          combinando tecnología, diseño y visión de producto.
+        </p>
+        <div class="home-hero-actions">
+          <a class="home-button home-button-primary" href="#featured-projects">Ver proyectos</a>
+          <a class="home-button home-button-secondary" href="{% url 'services:service_list' %}">Explorar servicios</a>
         </div>
+        <p class="home-hero-note">De la idea al producto, con una base técnica sólida.</p>
+      </div>
 
-        <div class="card-body">
-          <h5 class="card-title mt-3">Desarrollamos tu software</h5>
-          <p class="card-text mb-3">Contrata packs cerrados o solicita un presupuesto a medida.</p>
-
-          <div class="mt-3 text-center">
-            <ul class="list-unstyled text-start small text-light d-inline-block my-0">
-              <li class="d-flex align-items-center mb-1">
-                <i class="fa-solid fa-circle-check me-2 text-success"></i>
-                <span>Pagos seguros y seguimiento</span>
-              </li>
-              <li class="d-flex align-items-center mb-1">
-                <i class="fa-solid fa-circle-check me-2 text-success"></i>
-                <span>Entregas iterativas</span>
-              </li>
-              <li class="d-flex align-items-center">
-                <i class="fa-solid fa-circle-check me-2 text-success"></i>
-                <span>Soporte post-entrega</span>
-              </li>
-            </ul>
+      <div class="home-hero-visual" aria-hidden="true">
+        <div class="home-visual-orbit home-visual-orbit-one"></div>
+        <div class="home-visual-orbit home-visual-orbit-two"></div>
+        <div class="home-visual-panel">
+          <div class="home-visual-panel-top">
+            <span class="home-visual-mark">J</span>
+            <span>JFGC <span class="home-visual-muted">/ ESTUDIO DIGITAL</span></span>
+            <span class="home-visual-status"><i></i> EN DESARROLLO</span>
           </div>
-
-          <div class="pb-3 mt-5">
-            <a href="{% url 'services:service_list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2">Explorar servicios</a>
+          <div class="home-visual-title">Ideas en<br><span>productos digitales.</span></div>
+          <div class="home-visual-rule"></div>
+          <div class="home-visual-stack-label">STACK DE PRODUCTO</div>
+          <div class="home-visual-stack">
+            <span>Python</span><span>Django</span><span>JavaScript</span>
           </div>
+          <div class="home-visual-footer">
+            <span>DESARROLLO FULL-STACK</span>
+            <span aria-hidden="true">↗</span>
+          </div>
+        </div>
+        <div class="home-visual-float home-visual-float-code">
+          <span class="home-code-dot"></span><span>backend.py</span>
         </div>
       </div>
     </div>
-  </div>
+    <a class="home-scroll-link" href="#featured-projects">Trabajo seleccionado <span aria-hidden="true">↓</span></a>
+  </section>
 
-  <!-- Tecnologías (lazy) -->
-  <div class="mt-4 text-center">
-    <h5>Tecnologías</h5>
-    <div class="d-flex justify-content-center flex-wrap mt-3">
-      <img src="{% static 'icons/git.png' %}"         alt="Git"         class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/html5.png' %}"       alt="HTML5"       class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/css3.png' %}"        alt="CSS3"        class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/javascript.png' %}"  alt="JavaScript"  class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/python.png' %}"      alt="Python"      class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/django.png' %}"      alt="Django"      class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/bootstrap.png' %}"   alt="Bootstrap"   class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/react.png' %}"       alt="React"       class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/mysql.png' %}"       alt="MySQL"       class="m-2" loading="lazy" decoding="async">
-      <img src="{% static 'icons/vite.png' %}"        alt="Vite"        class="m-2" loading="lazy" decoding="async">
+  <section id="featured-projects" class="home-section home-projects" aria-labelledby="home-projects-title">
+    <div class="home-section-heading">
+      <div>
+        <p class="home-kicker">01 / TRABAJO SELECCIONADO</p>
+        <h2 id="home-projects-title">Productos hechos realidad.</h2>
+        <p>Proyectos que muestran cómo una idea se convierte en una experiencia digital funcional.</p>
+      </div>
+      <a class="home-text-link" href="{% url 'projects:project_list' %}">Explorar todos los proyectos <span aria-hidden="true">↗</span></a>
     </div>
-  </div>
 
-  <!-- Cómo funciona -->
-  <div id="about" class="about-section mt-5">
-    <h2 class="about-title">Cómo funciona</h2>
-    <p class="about-text mt-3">
-      1) Explora servicios y packs.<br>
-      2) Contrata y paga con seguridad.<br>
-      3) Seguimiento ágil y entregas iterativas.<br>
-      4) Soporte post-entrega y mejoras continuas.
-    </p>
-    <div class="d-flex justify-content-center mt-4">
-      <a href="{% url 'services:service_list' %}" class="cta-button cta-section px-4 py-2 w-100" aria-label="Ver servicios">
-        Ver servicios
-      </a>
-    </div>
-  </div>
-
-  {# Servicios destacados (vídeo lazy, sin autoplay) #}
-  {% if featured_services %}
-  <section class="mt-5">
-    <h2 class="mb-4 text-center">Servicios destacados</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-      {% for s in featured_services %}
-      <div class="col">
-        <a href="{{ s.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none position-relative">
-          {% if s.preview %}
-            {% if s.preview.url|lower|slice:"-4:" == ".mp4" %}
-              <video
-                class="card-img-top js-lazy-video"
-                data-src="{{ s.preview.url }}"
-                muted loop playsinline
-                preload="none"
-                {% if s.image %}poster="{{ s.image.url }}"{% endif %}
-                aria-label="Preview de {{ s.title }}">
-                Tu navegador no soporta vídeo.
-              </video>
+    <div class="row g-4 home-card-grid">
+      {% for p in latest_projects %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="home-project-card">
+          <div class="home-media home-project-media">
+            {% if p.preview and p.preview.name|lower|slice:"-4:" == ".mp4" %}
+              <div class="home-media-fallback" aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> PROYECTO</span>
+                <span class="home-fallback-title">{{ p.name|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+              <video class="home-preview-video js-lazy-video" data-src="{{ p.preview.url }}"
+                     muted loop playsinline preload="none" aria-hidden="true"></video>
+            {% elif p.preview %}
+              <div class="home-media-fallback" hidden aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> PROYECTO</span>
+                <span class="home-fallback-title">{{ p.name|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+              <img class="home-media-image" src="{{ p.preview.url }}" alt="Vista previa del proyecto {{ p.name }}"
+                   loading="lazy" decoding="async">
+            {% elif p.image %}
+              <div class="home-media-fallback" hidden aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> PROYECTO</span>
+                <span class="home-fallback-title">{{ p.name|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+              <img class="home-media-image" src="{{ p.image.url }}" alt="Imagen del proyecto {{ p.name }}"
+                   loading="lazy" decoding="async">
             {% else %}
-              <img src="{{ s.preview.url }}" class="card-img-top" alt="Preview de {{ s.title }}" loading="lazy" decoding="async">
+              <div class="home-media-fallback" aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> PROYECTO</span>
+                <span class="home-fallback-title">{{ p.name|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
             {% endif %}
-          {% elif s.image %}
-            <img src="{{ s.image.url }}" class="card-img-top" alt="{{ s.title }}" loading="lazy" decoding="async">
-          {% endif %}
-          <div class="card-body d-flex flex-column">
-            <h5 class="card-title mb-2 text-center">{{ s.title }}</h5>
-            {% if s.price %}
-              <p class="text-center small text-muted mb-3">Desde <strong>{{ s.price }} €</strong></p>
-            {% endif %}
-            {% if s.description %}
-              <p class="card-text text-muted small mb-3">{{ s.description|striptags|truncatechars:120 }}</p>
-            {% endif %}
-            <div class="mt-auto text-center">
-              <span class="btn btn-outline-cta rounded-pill px-4 py-2">Ver detalles</span>
-            </div>
+            <span class="home-media-index" aria-hidden="true">0{{ forloop.counter }}</span>
           </div>
-          <span class="stretched-link"></span>
-        </a>
+          <div class="home-project-content">
+            <div class="home-project-heading">
+              <h3>{{ p.name }}</h3>
+              <span class="home-project-type">Proyecto</span>
+            </div>
+            <p>{{ p.description|striptags|truncatechars:155 }}</p>
+            {% if p.url %}
+              <a class="home-card-link" href="{{ p.url }}" target="_blank" rel="noopener noreferrer">
+                Ver proyecto <span aria-hidden="true">↗</span>
+              </a>
+            {% else %}
+              <span class="home-card-note">Sin enlace público disponible</span>
+            {% endif %}
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <p class="home-empty-state">Los proyectos aparecerán aquí próximamente.</p>
       </div>
       {% endfor %}
     </div>
-    <div class="d-flex justify-content-center mt-4">
-      <a href="{% url 'services:service_list' %}" class="cta-button text-nowrap">Ver todos los servicios</a>
+  </section>
+
+  {% if stats %}
+  <section class="home-stats" aria-label="En números">
+    <p class="home-kicker home-stats-kicker">EN NÚMEROS <span aria-hidden="true">/</span> EXPERIENCIA Y TRABAJO</p>
+    <div class="home-stats-grid">
+      {% for num, label in stats %}
+      <div class="home-stat">
+        <span class="home-stat-value counter" data-target="{{ num }}" data-duration="900">{{ num }}</span>
+        <span class="home-stat-label">{{ label }}</span>
+      </div>
+      {% endfor %}
     </div>
   </section>
   {% endif %}
 
-  {# Proyectos (vídeo lazy, sin autoplay) #}
-  <section class="mt-5">
-    <h2 class="mb-4 text-center">Últimos proyectos</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-      {% for p in latest_projects %}
-      <div class="col">
-        <a href="{{ p.get_absolute_url|default:'#' }}" class="card h-100 shadow-sm text-decoration-none position-relative">
-          {% if p.preview %}
-            {% if p.preview.url|lower|slice:"-4:" == ".mp4" %}
-              <video
-                class="card-img-top js-lazy-video"
-                data-src="{{ p.preview.url }}"
-                muted loop playsinline
-                preload="none"
-                poster="{{ p.image.url }}"
-                aria-label="Preview de {{ p.name }}">
-                Tu navegador no soporta vídeo.
-              </video>
-            {% else %}
-              <img src="{{ p.preview.url }}" class="card-img-top" alt="Preview de {{ p.name }}" loading="lazy" decoding="async">
-            {% endif %}
+  <section id="home-services" class="home-section home-services" aria-labelledby="home-services-title">
+    <div class="home-section-heading">
+      <div>
+        <p class="home-kicker">02 / SERVICIOS</p>
+        <h2 id="home-services-title">Soluciones digitales para ideas que merecen hacerse realidad.</h2>
+        <p>Desarrollo de software pensado para resolver necesidades reales y acompañar cada etapa del producto.</p>
+      </div>
+      <a class="home-text-link" href="{% url 'services:service_list' %}">Descubrir servicios <span aria-hidden="true">↗</span></a>
+    </div>
+
+    <div class="row g-3 home-service-grid">
+      {% for s in featured_services %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <a class="home-service-card" href="{{ s.get_absolute_url }}">
+          {% if s.preview and s.preview.name|lower|slice:"-4:" == ".mp4" %}
+            <div class="home-media home-service-media">
+              <div class="home-media-fallback" aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> SERVICIO</span>
+                <span class="home-fallback-title">{{ s.title|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+              <video class="home-preview-video js-lazy-video" data-src="{{ s.preview.url }}"
+                     muted loop playsinline preload="none" aria-hidden="true"></video>
+            </div>
+          {% elif s.preview %}
+            <div class="home-media home-service-media">
+              <div class="home-media-fallback" hidden aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> SERVICIO</span>
+                <span class="home-fallback-title">{{ s.title|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+              <img class="home-media-image" src="{{ s.preview.url }}" alt="Vista previa del servicio {{ s.title }}"
+                   loading="lazy" decoding="async">
+            </div>
+          {% elif s.image %}
+            <div class="home-media home-service-media">
+              <div class="home-media-fallback" hidden aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> SERVICIO</span>
+                <span class="home-fallback-title">{{ s.title|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+              <img class="home-media-image" src="{{ s.image.url }}" alt="Imagen del servicio {{ s.title }}"
+                   loading="lazy" decoding="async">
+            </div>
           {% else %}
-            <img src="{{ p.image.url }}" class="card-img-top" alt="{{ p.name }}" loading="lazy" decoding="async">
+            <div class="home-media home-service-media">
+              <div class="home-media-fallback" aria-hidden="true">
+                <span class="home-fallback-mark">JFGC <i>·</i> SERVICIO</span>
+                <span class="home-fallback-title">{{ s.title|truncatechars:34 }}</span>
+                <span class="home-fallback-caption">Vista previa no disponible</span>
+              </div>
+            </div>
           {% endif %}
-          <div class="card-body">
-            <h5 class="card-title mb-0 text-center">{{ p.name }}</h5>
+          <div class="home-service-topline">
+            <span class="home-service-number">0{{ forloop.counter }}</span>
+            <span class="home-service-arrow" aria-hidden="true">↗</span>
           </div>
-          <span class="stretched-link"></span>
-        </a>
-      </div>
-      {% empty %}
-      <p class="text-muted">Aún no hay proyectos publicados.</p>
-      {% endfor %}
-    </div>
-
-    <div class="d-flex justify-content-center mt-4">
-      <a href="{% url 'projects:project_list' %}" class="cta-button">Ver todos los proyectos</a>
-    </div>
-  </section>
-
-  <!-- CTA -->
-  <div class="cta-section text-center my-5">
-    <h2 class="cta-text mb-4">¿Tienes un proyecto en mente?</h2>
-    <p class="cta-subtext mb-5">¡Hablemos y construyamos algo increíble juntos!</p>
-    <a href="https://wa.me/+34639949187"
-       class="cta-button"
-       target="_blank" rel="noopener noreferrer nofollow">
-      ¡Contáctame Ahora!
-    </a>
-  </div>
-
-  <!-- Blog (imágenes lazy) -->
-  <section class="mt-5">
-    <h2 class="mb-4 text-center">En el blog</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-      {% for post in latest_posts %}
-      <div class="col">
-        <a href="{% url 'blog:post_detail' post.id %}" class="card h-100 shadow-sm text-decoration-none">
-          {% if post.image %}
-            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}" loading="lazy" decoding="async">
+          <h3>{{ s.title }}</h3>
+          {% if s.description %}
+            <p>{{ s.description|striptags|truncatechars:150 }}</p>
           {% endif %}
-          <div class="card-body">
-            <h6 class="card-title mb-2">{{ post.title|truncatechars:60 }}</h6>
-            <p class="card-text text-muted small mb-0">{{ post.content|striptags|truncatechars:80 }}</p>
+          <div class="home-service-bottom">
+            {% if s.price %}
+              <span class="home-service-price">Desde <strong>{{ s.price }} €</strong></span>
+            {% endif %}
+            <span class="home-service-action">Consultar detalles</span>
           </div>
         </a>
       </div>
       {% empty %}
-      <p class="text-muted">Sin entradas todavía.</p>
+      <div class="col-12">
+        <p class="home-empty-state">Consulta los servicios disponibles para encontrar la solución adecuada.</p>
+      </div>
       {% endfor %}
     </div>
   </section>
 
-  <!-- Sobre mí -->
-  <section id="about-me" class="about-section mt-5">
-    <div class="about-content mx-auto">
-      <h2 class="about-title text-center text-md-start">Sobre mí</h2>
-      <p class="about-text mt-3">
-        Soy <strong>José Félix</strong>, desarrollador <strong>full-stack</strong> especializado en
-        <strong>Python</strong> y <strong>Django</strong>. Ayudo a startups y pymes a pasar de idea a producto
-        en ciclos cortos, con foco en calidad, seguridad y escalabilidad.
-      </p>
+  <section class="home-section home-process" aria-labelledby="home-process-title">
+    <div class="home-section-heading home-section-heading-compact">
+      <div>
+        <p class="home-kicker">03 / FORMA DE TRABAJO</p>
+        <h2 id="home-process-title">Un proceso claro, paso a paso.</h2>
+        <p>Cada proyecto empieza por entender el problema y se construye con intención.</p>
+      </div>
+    </div>
+    <ol class="home-process-grid">
+      <li><span class="home-process-number">01</span><h3>Descubrimiento</h3><p>Entender el problema, el contexto y los objetivos del proyecto.</p></li>
+      <li><span class="home-process-number">02</span><h3>Diseño y planificación</h3><p>Definir la solución, su arquitectura y la experiencia que necesita.</p></li>
+      <li><span class="home-process-number">03</span><h3>Desarrollo</h3><p>Construir el producto de forma iterativa y con atención al detalle.</p></li>
+      <li><span class="home-process-number">04</span><h3>Entrega y evolución</h3><p>Preparar la entrega, aprender del uso y seguir mejorando el producto.</p></li>
+    </ol>
+  </section>
 
-      <ul class="about-features list-unstyled my-3">
-        <li class="d-flex align-items-start">
-          <i class="fa-solid fa-circle-check me-2 mt-1 shrink-0"></i>
-          <span>Backends robustos, APIs REST y paneles de administración a medida.</span>
-        </li>
-        <li class="d-flex align-items-start">
-          <i class="fa-solid fa-circle-check me-2 mt-1 shrink-0"></i>
-          <span>Automatización con Python (Selenium, tareas, notificaciones).</span>
-        </li>
-        <li class="d-flex align-items-start">
-          <i class="fa-solid fa-circle-check me-2 mt-1 shrink-0"></i>
-          <span>Frontends modernos con React/Bootstrap y buenas prácticas UX.</span>
-        </li>
-      </ul>
-
-      <div class="btn-stack mt-3">
+  <section class="home-section home-expertise" aria-labelledby="home-expertise-title">
+    <div class="home-expertise-intro">
+      <p class="home-kicker">04 / TECNOLOGÍA Y EXPERIENCIA</p>
+      <h2 id="home-expertise-title">La tecnología adecuada para cada reto.</h2>
+      <p>Soy José Félix, desarrollador full-stack especializado en Python y Django. Trabajo desde la arquitectura hasta los detalles de interfaz.</p>
+      <div class="home-profile-links">
         {% if request.user.is_authenticated %}
-          <a href="{% url 'users:cv_page' %}"
-             class="cta-button text-nowrap"
-             aria-label="Descargar CV (PDF)">
-            <i class="fa-regular fa-file-pdf me-1"></i>
-            <span class="d-none d-sm-inline">Descargar CV</span>
-            <span class="d-inline d-sm-none">CV</span>
-          </a>
+          <a href="{% url 'users:cv_page' %}">Ver perfil profesional <span aria-hidden="true">↗</span></a>
         {% else %}
-          <a href="{% url 'users:login' %}?next={% url 'users:cv_page' %}"
-             class="cta-button text-nowrap"
-             aria-label="Iniciar sesión para descargar CV">
-            <span class="d-none d-sm-inline">Iniciar sesión para descargar CV</span>
-            <span class="d-inline d-sm-none">Inicia sesión</span>
-          </a>
+          <a href="{% url 'users:login' %}?next={% url 'users:cv_page' %}">Ver perfil profesional <span aria-hidden="true">↗</span></a>
         {% endif %}
-        <a href="https://www.linkedin.com/in/jose-felix-gordo-casta%C3%B1o-dev-es/"
-          class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
-          target="_blank" rel="noopener noreferrer nofollow">
-          <i class="fab fa-linkedin-in me-2"></i>
-          Ver LinkedIn
-        </a>
-
-        <a href="https://github.com/AmeriK88"
-          class="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
-          target="_blank" rel="noopener noreferrer nofollow">
-          <i class="fab fa-github me-2"></i>
-          Ver GitHub
-        </a>
+        <a href="https://github.com/AmeriK88" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        <a href="https://www.linkedin.com/in/jose-felix-gordo-casta%C3%B1o-dev-es/" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <div class="home-expertise-groups">
+      <div class="home-tech-group">
+        <h3>Backend</h3>
+        <div class="home-tech-list">
+          <span><img src="{% static 'icons/python.png' %}" alt="" loading="lazy">Python</span>
+          <span><img src="{% static 'icons/django.png' %}" alt="" loading="lazy">Django</span>
+        </div>
+      </div>
+      <div class="home-tech-group">
+        <h3>Frontend</h3>
+        <div class="home-tech-list">
+          <span><img src="{% static 'icons/javascript.png' %}" alt="" loading="lazy">JavaScript</span>
+          <span><img src="{% static 'icons/html5.png' %}" alt="" loading="lazy">HTML</span>
+          <span><img src="{% static 'icons/css3.png' %}" alt="" loading="lazy">CSS</span>
+          <span><img src="{% static 'icons/react.png' %}" alt="" loading="lazy">React</span>
+          <span><img src="{% static 'icons/bootstrap.png' %}" alt="" loading="lazy">Bootstrap</span>
+          <span><img src="{% static 'icons/tailwindcss.png' %}" alt="" loading="lazy">Tailwind</span>
+        </div>
+      </div>
+      <div class="home-tech-group">
+        <h3>Datos y herramientas</h3>
+        <div class="home-tech-list">
+          <span><img src="{% static 'icons/mysql.png' %}" alt="" loading="lazy">MySQL</span>
+          <span><img src="{% static 'icons/postgresql.png' %}" alt="" loading="lazy">PostgreSQL</span>
+          <span><img src="{% static 'icons/git.png' %}" alt="" loading="lazy">Git</span>
+          <span><img src="{% static 'icons/vite.png' %}" alt="" loading="lazy">Vite</span>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Stats -->
-  <section class="stats my-5 py-5 bg-light rounded">
-    <h2 class="text-center mb-4">En números</h2>
-    <div class="container">
-      <div class="row text-center">
-        {% for num, label in stats %}
-        <div class="col-4">
-          <h2 class="counter fw-bold display-6" data-target="{{ num }}">0</h2>
-          <p class="small text-uppercase text-muted mb-0">{{ label }}</p>
-        </div>
-        {% endfor %}
+  <section class="home-section home-blog" aria-labelledby="home-blog-title">
+    <div class="home-section-heading">
+      <div>
+        <p class="home-kicker">05 / IDEAS Y APRENDIZAJES</p>
+        <h2 id="home-blog-title">Notas desde el proceso.</h2>
+        <p>Artículos y recursos sobre desarrollo, producto y tecnología.</p>
       </div>
+      <a class="home-text-link" href="{% url 'blog:post_list' %}">Ver el blog <span aria-hidden="true">↗</span></a>
+    </div>
+    <div class="row g-4 home-blog-grid">
+      {% for post in latest_posts %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="home-blog-card">
+          <a href="{% url 'blog:post_detail' post.id %}" class="home-blog-card-link">
+            {% if post.image %}
+              <div class="home-media home-blog-media">
+                <div class="home-media-fallback" hidden aria-hidden="true">
+                  <span class="home-fallback-mark">JFGC <i>·</i> NOTES</span>
+                  <span class="home-fallback-title">{{ post.title|truncatechars:34 }}</span>
+                  <span class="home-fallback-caption">Imagen no disponible</span>
+                </div>
+                <img class="home-media-image" src="{{ post.image.url }}" alt="Imagen del artículo {{ post.title }}"
+                     loading="lazy" decoding="async">
+              </div>
+            {% else %}
+              <div class="home-media home-blog-media">
+                <div class="home-media-fallback" aria-hidden="true">
+                  <span class="home-fallback-mark">JFGC <i>·</i> NOTES</span>
+                  <span class="home-fallback-title">{{ post.title|truncatechars:34 }}</span>
+                  <span class="home-fallback-caption">Imagen no disponible</span>
+                </div>
+              </div>
+            {% endif %}
+            <div class="home-blog-content">
+              <time datetime="{{ post.created_at|date:'Y-m-d' }}">{{ post.created_at|date:"j F Y" }}</time>
+              <h3>{{ post.title|truncatechars:72 }}</h3>
+              {% if ".article-pro" not in post.content %}
+                <p>{{ post.content|striptags|truncatechars:125 }}</p>
+              {% endif %}
+              <span class="home-card-link">Leer artículo <span aria-hidden="true">↗</span></span>
+            </div>
+          </a>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <p class="home-empty-state">Los próximos artículos aparecerán aquí.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="home-final-cta" aria-labelledby="home-final-cta-title">
+    <div>
+      <p class="home-kicker">¿EMPEZAMOS?</p>
+      <h2 id="home-final-cta-title">¿Tienes una idea? Hagámosla realidad.</h2>
+      <p>Explora los servicios o cuéntame qué producto tienes en mente.</p>
+    </div>
+    <div class="home-final-actions">
+      <a class="home-button home-button-primary" href="{% url 'services:service_list' %}">Descubrir servicios</a>
+      <a class="home-button home-button-secondary" href="https://wa.me/+34639949187"
+         target="_blank" rel="noopener noreferrer nofollow">Hablemos <span aria-hidden="true">↗</span></a>
     </div>
   </section>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
-  {# Reutilizamos el lazy video de projects/services #}
   <script src="{% static 'js/previews/project-previews.js' %}" defer></script>
-  {# Animación de contadores #}
-  <script src="{% static 'js/core/counters.js' %}" defer></script>
+  <script src="{% static 'js/core/home-media.js' %}" defer></script>
 {% endblock %}

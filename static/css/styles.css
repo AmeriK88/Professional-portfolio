@@ -306,8 +306,6 @@ a:hover {
   color: #fff;
 }
 
-#userMenu.dropdown-toggle::after { display: none; }
-
 .nav-avatar { width: 36px; height: 36px; object-fit: cover; display: block; box-shadow: 0 0 0 1px var(--color-border); }
 
 .avatar-ring { line-height: 0; }
@@ -528,8 +526,6 @@ a:hover {
 .footer-social a:hover{color:var(--color-accent-secondary);}
 
 .site-footer .btn-outline-light{ --bs-btn-color:var(--color-accent); --bs-btn-border-color:var(--color-accent); --bs-btn-hover-bg:var(--color-accent-solid); --bs-btn-hover-border-color:var(--color-accent-solid); --bs-btn-hover-color:#fff;}
-
-#about-me { scroll-margin-top: 80px; }
 
 .btn-stack{ display:flex; flex-wrap:wrap; gap:.5rem; justify-content:center; align-items:center;}
 
@@ -790,7 +786,7 @@ a:hover {
   overflow-wrap: anywhere;
 }
 
-#about-me {
+#home-expertise-title {
   scroll-margin-top: 1.5rem;
 }
 
