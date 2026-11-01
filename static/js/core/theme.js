@@ -31,7 +31,7 @@
 
     // Actualiza barra de navegador en móviles
     if (themeMeta) {
-      themeMeta.setAttribute('content', t === 'dark' ? '#0b0f14' : '#0d6efd');
+      themeMeta.setAttribute('content', t === 'dark' ? '#0b1120' : '#f5f7fb');
     }
 
     // Icono del botón

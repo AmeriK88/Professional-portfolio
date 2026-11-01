@@ -42,13 +42,14 @@
                     {% elif status == 'cancelled' %} text-bg-danger
                     {% elif status == 'refunded' %} text-bg-info
                     {% else %} text-bg-secondary
-                    {% endif %}
+                    {% endif %}">
                     {% if status == 'paid' %}Pagado
                     {% elif status == 'awaiting_payment' %}Pendiente de pago
                     {% elif status == 'cancelled' %}Cancelado
                     {% elif status == 'refunded' %}Reembolsado
-                    {% else %}{{ s|capfirst }}
-                    {% endif %}">
+                    {% elif status == 'pending' %}Pendiente
+                    {% else %}{{ status|capfirst }}
+                    {% endif %}
                   </span>
                   {% endwith %}
                 </td>
