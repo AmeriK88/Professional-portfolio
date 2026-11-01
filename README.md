@@ -1,263 +1,263 @@
-# JFGC · Dev — Full‑Stack Services Platform (Django)
+# JFGC Dev — Full-Stack Portfolio & Services Platform
 
-A production‑ready platform to **sell software services**, take **Pi Network payments**, and manage customer communication end‑to‑end. Built with **Django**, **Bootstrap**, and **django‑unfold** for a sleek admin.
+**A Django-powered professional portfolio and services platform** combining project showcases, a blog, service listings, customer orders, an order-linked inbox, and Pi Network SDK integration.
 
----
+**Release:** `v1.0.0` (intended first stable release; publish the tag/release after final acceptance testing)  
+**Stack:** Python · Django · Bootstrap · JavaScript · django-unfold · Pi Network SDK · Railway
 
-## ✨ Highlights
+> **Integration status:** The application has successfully started on Railway, including the `users.0002_user_pi_uid` migration and static-file collection. This does **not** by itself verify live Pi payments, all authenticated routes inside Pi Browser, or production login. Validate these flows before describing them as fully operational.
 
-- **Services marketplace** with rich detail pages, FAQs, features, and media previews.
-- **Orders & checkout** in EUR with **on‑the‑fly conversion to π** (configurable `PI_EUR_PER_PI`).
-- **Pi Network payments** (approve / complete / cancel / webhook) with robust reconciliation and idempotency.
-- **Inbox** per order for system/user/admin messaging.
-- **Blog + Projects** with preview compression via **FFmpeg**.
-- **Auth**: classic username/password + **Pi Login**; **reCAPTCHA v3** on auth flows.
-- Hardened **security**: `django-axes`, strict cookies/HSTS in prod, sandbox middleware for Pi iFrame.
-- Polished **admin** using **django‑unfold** (bulk actions, badges, filters, pretty JSON, thumbnails).
-- Thoughtful **SEO/PWA**: OpenGraph/Twitter tags, canonical links, minimal service worker.
+## ✨ Features
 
----
+- **Professional portfolio:** project gallery, individual project pages, blog, and responsive presentation.
+- **Service catalog:** detailed services with features, FAQs, images, and optional video previews.
+- **Orders and checkout:** EUR-denominated orders with configurable EUR-to-π price conversion and checkout-time pricing snapshots.
+- **Pi Network integration:** Pi SDK authentication, server-side token verification, payment lifecycle endpoints, and configurable Sandbox mode.
+- **Customer inbox:** per-order threads for customer, administrator, and system messages, including unread indicators.
+- **Administration:** customized `django-unfold` dashboard with status indicators, filters, thumbnails, and operational actions.
+- **Security and delivery:** Django Axes, reCAPTCHA for applicable authentication flows, production cookie/HTTPS settings, WhiteNoise, SEO metadata, and a lightweight PWA service worker.
 
-## 🏗️ Architecture & Apps
+## 🏗️ Application Structure
 
+```text
+core/           Homepage, legal pages, shared templates, Pi iframe middleware
+blog/           Blog posts, listing/detail pages, administration
+projects/       Portfolio projects and media previews
+services/       Service catalog, features, FAQs, service detail pages
+orders/         Orders, order items, checkout, customer order views
+pi_payments/    Payment records, SDK callback endpoints, reconciliation tools
+inbox/          Per-order threads, messages, unread counts
+users/          Custom user, Pi UID, authentication, profile, CV download
+portfolio/      Django settings, URL configuration, WSGI
+static/js/      Frontend JavaScript, including Pi SDK initialization and flows
 ```
-core/          Home, legal pages, sandbox middleware, base templates
-blog/          Simple CMS (Post) + list/detail + admin thumbnails
-projects/      Portfolio projects with preview compression (signals/admin)
-services/      Sellable services (+ features, FAQs), list/detail, payment success
-orders/        Order & OrderItem, checkout, list/detail, totals in EUR
-pi_payments/   Payment model + views (approve/complete/cancel/webhook), admin tools
-inbox/         Per‑order thread + messages (system/user/admin) + unread badge
-users/         Custom User, profile edit, Pi login, CV download, auth flows
-portfolio/     Project URLs, settings, admin dashboard, WSGI
+
+## 🔐 Authentication and Pi Network
+
+The platform supports Django authentication functionality and a configurable **Pi-only login experience**. When `PI_ONLY_LOGIN=True`, the login interface prioritizes Pi authentication rather than the traditional login form.
+
+The Pi login flow uses the SDK in the browser, submits an access token to the Django endpoint `/users/pi/login/`, and verifies the token on the server before authenticating the associated user. The custom user model includes `pi_uid`, introduced through migration `users.0002_user_pi_uid`.
+
+`PI_ACCOUNT_MIGRATION_LOCK` is a deployment control for the account migration/login policy. Review the associated backend logic before changing it, particularly when existing accounts must be preserved.
+
+### SDK initialization
+
+- `static/js/pi_payments/pi-init.js` initializes the Pi SDK and reads the Sandbox setting exposed by Django.
+- `static/js/users/pi-login.js` handles the frontend login interaction.
+- `core.context_processors.pi_settings` makes `PI_SANDBOX` available to templates.
+- **Sandbox:** use `PI_SANDBOX=True` with the registered Pi Sandbox application context.
+- **Production:** use `PI_SANDBOX=False` for the live Pi environment, subject to registration and real-device validation.
+
+Opening a development tunnel directly inside Pi Browser is **not equivalent** to launching the registered Pi application. SDK authorization may depend on the registered app context.
+
+## 💳 Orders and Pi Payments
+
+The implemented payment workflow is designed around server-side checks and persisted pricing snapshots:
+
+1. A customer selects a service and starts checkout.
+2. Django creates the order/payment records and calculates the π amount using `PI_EUR_PER_PI`.
+3. The frontend starts the payment through the Pi SDK.
+4. Backend callbacks handle approval, completion, cancellation, and optional reconciliation.
+5. The backend verifies payment details and updates the relevant payment/order state according to the implemented state machine.
+6. Confirmed payments can generate system messages in the order inbox.
+
+### Payment endpoints
+
+```text
+/pi/approve/
+/pi/complete/
+/pi/cancel/
+/pi/webhook/
 ```
 
-### Data Flow (Happy Path)
+The integration is designed to associate payments with orders using metadata, validate amounts against checkout snapshots, and avoid duplicate state transitions. **Live Mainnet settlement, callback delivery, and full end-to-end payment behavior still require production verification.**
 
-1. **Browse services** → `services:list` / `services:detail`.
-2. **Checkout (POST)** → creates `Order` (EUR) + `Payment` (snapshots pricing) → returns Pi SDK payload where **`amount` is in π**.
-3. **Pi SDK** calls server:
-   - `/pi/approve/` → marks `Payment` *initiated* (links by metadata `order_number`).
-   - `/pi/complete/` with `txid` → validates amount vs snapshot → marks `Payment` *confirmed* → cascades `Order` → *paid*.
-   - `/pi/cancel/` (or insufficient balance) → marks *failed* and cancels order if not paid.
-   - `/pi/webhook/` (optional) → reconciles late/duplicate events, idempotent by status/txid.
-4. **Inbox** posts a system message on confirmed payment (signal).  
-5. User sees **Orders** and **Payment success** receipt (IDs copy‑to‑clipboard, π/EUR breakdown).
+Relevant frontend files:
 
----
+```text
+static/js/pi_payments/pi-init.js
+static/js/pi_payments/pi_payments.js
+```
+
+## 🛡️ Pi Browser Embedding and Security Headers
+
+`core.middleware.PiSandboxHeadersMiddleware` is controlled by **`PI_BROWSER_EMBED_ENABLED`**, not by `PI_SANDBOX` or `DEBUG`.
+
+When enabled, it allows embedding from configured Pi-related origins for selected routes:
+
+```text
+Public:  /, /users/login/, /blog/, /projects/, /services/
+Private: /orders/, /inbox/, /users/profile/
+```
+
+For allowed paths, the middleware removes `X-Frame-Options` from the response and sets a restricted Content Security Policy `frame-ancestors` directive. Other paths receive `X-Frame-Options: DENY` and `frame-ancestors 'none'`.
+
+**Important:** iframe permissions do not bypass authentication or authorization. Protected pages must still enforce normal Django access controls. Check actual URL patterns when adding new authenticated views; only the listed paths/prefixes are covered by this middleware implementation.
+
+Do not confuse the two settings:
+
+| Setting | Purpose |
+| --- | --- |
+| `PI_SANDBOX` | Selects Sandbox behavior for the Pi SDK integration. |
+| `PI_BROWSER_EMBED_ENABLED` | Enables route-specific iframe response-header handling. |
+| `PI_ONLY_LOGIN` | Configures the Pi-focused login experience. |
+| `PI_ACCOUNT_MIGRATION_LOCK` | Controls the account migration/login restriction implemented in the backend. |
+
+Additional security controls include Django Axes, CSRF protection, configurable secure cookies and HSTS, and reCAPTCHA on applicable non-Pi authentication forms.
 
 ## ⚙️ Requirements
 
-- **Python 3.11+**
-- **Django 4+** (project uses `django-environ`, `dj-database-url`, `django-axes`, `django-unfold`, `whitenoise`)
-- **FFmpeg** in `$PATH` (used by `projects`/`services` signals & admin to compress preview MP4)
-- A **database** (MySQL or Postgres). MySQL is supported via `mysqlclient` or **PyMySQL** shim.
+- Python **3.12** is used in the current Railway build; use a compatible local Python version.
+- Django and all dependencies from `requirements.txt` (consult the file for exact versions).
+- A configured database supported by the project's settings (PostgreSQL or MySQL, as applicable).
+- FFmpeg for video-preview compression features.
+- A registered Pi application and appropriate credentials for Pi integration testing.
 
-> Previews: when you upload an MP4, a lightweight `*_s.mp4` is created (3s, 240px, 12fps, CRF 32, no audio) and the original is removed. Works locally (FileSystemStorage). For S3/GCS, move this to a background task or media pipeline.
+## 🚀 Local Setup
 
----
+### Windows PowerShell
 
-## 🚀 Quick Start (Local)
-
-```bash
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt                      # provide your lock/constraints file
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
 python manage.py migrate
-python manage.py createsuperuser
+python manage.py check
 python manage.py runserver
 ```
 
-- Ensure **FFmpeg** is installed (`ffmpeg -version`).  
-- Visit `http://127.0.0.1:8000/admin/` for the admin (Unfold).  
-- Default email backend prints to console (for password reset).
+### Linux / macOS
 
----
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py check
+python manage.py runserver
+```
 
-## 🔐 Environment & Settings
+Create a local `.env` with the settings required by your deployment. Do not commit `.env`, API keys, database credentials, or other secrets.
 
-The project is driven by `.env`. Most important keys:
+## 🔧 Environment Variables
 
-```env
-# Core
-DEBUG=true
-SECRET_KEY=your-django-secret
+The following is an **illustrative configuration**, not a complete production `.env`. Confirm variable names against `portfolio/settings.py` before deployment.
+
+```dotenv
+# Django
+DEBUG=True
+SECRET_KEY=replace-with-a-local-development-secret
 ALLOWED_HOSTS=localhost,127.0.0.1
 CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
 
-# Database (either DATABASE_URL or explicit engine block)
-DATABASE_URL=postgres://user:pass@host:5432/dbname
-# or for MySQL: mysql://user:pass@host:3306/dbname
-# If not using DATABASE_URL, set DB_ENGINE/DB_NAME/DB_USER/DB_PASSWORD/DB_HOST/DB_PORT
+# Database (example only)
+DATABASE_URL=postgres://user:password@localhost:5432/portfolio
 
-# Media & static
-USE_VOLUME_MEDIA=false
+# Media processing
+USE_VOLUME_MEDIA=False
 FFMPEG_CMD=ffmpeg
 
-# Pi payments
-PI_API_KEY=your-pi-server-key
-PI_EUR_PER_PI=0.30           # EUR per π (conversion rate used for pricing snapshot)
-PI_ONLY_LOGIN=false          # force Pi-only login UI/flows if true
-PI_SANDBOX=true              # relax headers for Pi Browser embedding in dev/sandbox
+# Pi Network — local Sandbox example
+PI_API_KEY=replace-with-your-server-api-key
+PI_SANDBOX=True
+PI_EUR_PER_PI=0.07753
+PI_ONLY_LOGIN=True
+PI_BROWSER_EMBED_ENABLED=True
+PI_ACCOUNT_MIGRATION_LOCK=True
 
-# reCAPTCHA v3
-RECAPTCHA_SITE_KEY=your-site-key
-RECAPTCHA_SECRET_KEY=your-secret-key
+# reCAPTCHA (if applicable to enabled forms)
+RECAPTCHA_SITE_KEY=replace-with-site-key
+RECAPTCHA_SECRET_KEY=replace-with-secret-key
 RECAPTCHA_MIN_SCORE=0.5
 ```
 
-### Security & Cookies
+`PI_EUR_PER_PI` is a **manually configured application pricing input**, not a live market exchange-rate feed. `0.07753` reflects a recent project configuration and should be reviewed before accepting real payments.
 
-- **Prod (`DEBUG=false`)**: `Secure` cookies, `SameSite=None`, **HSTS** enabled.
-- **Dev (`DEBUG=true`)**: If using an HTTPS tunnel (`*.devtunnels.ms`/`*.ngrok.io`) cookies switch to `Secure` + `SameSite=None`. Otherwise `Lax` locally.
-- Proxy friendly: `USE_X_FORWARDED_HOST=True`, `SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO","https")`.
+For a live Pi environment, configure `PI_SANDBOX=False`. Only enable iframe embedding where required by the actual Pi Browser integration, and test login, navigation, cookies, and payment callbacks in that environment.
 
-### Pi Sandbox Middleware
+## 📦 Media, Static Files, and PWA
 
-`core.middleware.PiSandboxHeadersMiddleware` (enabled when `PI_SANDBOX` or `DEBUG`) adjusts headers so the app can run inside **Pi Browser** iframed:
+- WhiteNoise serves collected static assets in production.
+- Django's `collectstatic` runs during deployment startup.
+- The project includes a lightweight service worker and SEO/social metadata.
+- Project/service MP4 previews may be compressed using FFmpeg. Confirm FFmpeg availability and persistent media storage in the deployment environment.
+- If moving to object storage, consider asynchronous media processing instead of relying on filesystem-based signals.
 
-- Unsets `X-Frame-Options`
-- Extends CSP with allowed `frame-ancestors` for Pi
-- Drops COOP/COEP/CORP that block cross‑origin iframes
-- Adds `Permissions-Policy: payment=(self "https://*.minepi.com")`
-- Marks responses with `X-Pi-Sandbox-MW: on`
+## 🧪 Verification Checklist
 
-> **Do not enable this in real production** unless you know you need iframe embedding for Pi Browser.
+Before announcing a release as fully validated:
 
----
+- [ ] `python manage.py check` completes successfully.
+- [ ] `python manage.py makemigrations --check --dry-run` reports no unexpected model changes.
+- [ ] JavaScript files pass syntax checks (`node --check`).
+- [ ] Railway deployment is healthy and the homepage loads over HTTPS.
+- [ ] Project, blog, and service pages work in a regular browser.
+- [ ] Pi login works in the **registered** Sandbox app and the intended live Pi environment.
+- [ ] Orders, inbox, and profile views load inside the supported Pi Browser context.
+- [ ] Payment approval, completion, cancellation, and duplicate callbacks are tested end-to-end.
+- [ ] Production secrets, CSRF origins, cookies, and iframe headers have been reviewed.
 
-## 🧩 Notable Features by App
+### Latest confirmed deployment checks
 
-### `services`
-- `Service` (price/image/preview, unique slug), `ServiceFeature`, `ServiceFAQ` with ordering.
-- List & detail pages with **lazy video** or image preview and π estimation (`to_pi` filter).
-- Admin actions: activate/deactivate, **recompress previews** (bulk/row).
-- Signal compresses MP4 previews to `service_previews/*_s.mp4` idempotently.
+The deployment logs shared during preparation showed:
 
-### `orders`
-- `Order` with `OrderItem`; totals in EUR. `get_absolute_url()` for detail.
-- `checkout_service(slug)` creates order in EUR and a `Payment` with pricing snapshot; converts EUR→π using `PI_EUR_PER_PI` and returns Pi SDK payload (with `amount` in **π**).
-- User **order list/detail** with π approximation.
+- `users.0002_user_pi_uid` applied successfully.
+- Static assets collected and post-processed.
+- Gunicorn 23.0.0 started and bound to the configured port.
 
-### `pi_payments`
-- Endpoints: `/pi/approve/`, `/pi/complete/`, `/pi/cancel/`, `/pi/webhook/`.
-- Links Pi payment by reading `/v2/payments/<pid>` **metadata.order_number**.
-- Validates **π amount** against the checkout snapshot, records **`txid`**, stores raw payloads & webhooks for audit.
-- `Payment.mark_confirmed()` cascades `Order` → paid; `mark_failed()` cancels if not paid.
-- Admin: one‑click **Sync from Pi**, status badges, pretty JSON, bulk status fixes.
+These are **startup checks**, not evidence that every user flow or live Pi transaction has passed acceptance testing.
 
-### `inbox`
-- One **Thread per Order**, **Message** entries (system/user/admin) with read tracking.
-- Context processor exposes `inbox_unread_count` to draw an unread badge in the navbar.
-- Signals create a system message on **confirmed payments**.
+## 🌐 Selected Routes
 
-### `blog`
-- Minimal `Post` with image, list/detail, admin with text/date filters and **“Clear image”** bulk action.
+```text
+/                   Homepage
+/blog/              Blog
+/projects/          Portfolio projects
+/services/          Service catalog
+/orders/            Customer orders
+/inbox/             Customer messaging
+/users/login/       Login
+/users/pi/login/    Pi authentication endpoint
+/users/profile/     User profile
+/pi/approve/        Payment approval callback
+/pi/complete/       Payment completion callback
+/pi/cancel/         Payment cancellation callback
+/pi/webhook/        Optional payment reconciliation endpoint
+/sw.js              Service worker
+```
 
-### `projects`
-- `Project` with image and optional preview; compression signal/admin identical to `services`.
-- Grid template with lazy previews.
+Routes and permissions are subject to the active Django URL configuration.
 
-### `users`
-- Custom `User` (avatar upload + preset **avatar_choice**, `display_name`, `avatar_url`).
-- Classic auth + **Pi Login** (`/users/pi/login/`) using Pi token → `/v2/me` → create/login user.
-- Profile edit form, CV download protected (`/private/cv.pdf`).
-- reCAPTCHA v3 mixin used in auth forms.
-- Admin: actions (activate/deactivate/send reset), avatar thumb, orders count column.
+## 🚢 Deployment
 
-### `core`
-- Home with featured services, latest projects/posts, animated stats; legal pages.
-- **Base template** with SEO, social OG/Twitter, canonical URLs, and cookie consent UI.
-- Minimal service worker (`/sw.js`) and a `validation-key.txt` view for external verification.
+The project is deployed through **Railway** with GitHub-connected deployment, dependency installation, database migrations, static-file collection, and Gunicorn.
 
----
+Typical application startup:
 
-## 🔄 Pi Payment Flow (SDK Integration)
+```bash
+python manage.py migrate --noinput && \
+python manage.py collectstatic --noinput && \
+gunicorn portfolio.wsgi:application --bind 0.0.0.0:$PORT
+```
 
-On the **service detail** page, the button triggers JS (see `static/js/pi_payments.js`) that:
+Review the configured branch and commit in Railway when diagnosing deployments. A previous deployment's logs may not represent the code currently on GitHub.
 
-1. `POST /orders/checkout/<slug>/` → returns JSON with `{ memo, metadata, amount (π) }`.
-2. Calls **Pi SDK** with that payload.
-3. Pi SDK then pings your backend:
-   - `POST /pi/approve/` → backend fetches `/v2/payments/<pid>` and links to our `Payment` by `metadata.order_number`.
-   - `POST /pi/complete/` with `txid` → validates against snapshot and confirms.
-   - `POST /pi/cancel/` if the user aborts or balance is insufficient.
-4. (Optional) Pi **webhook** → reconciles statuses and preserves **idempotency**.
+## 🗺️ Release Status and Roadmap
 
-**Important**: snapshot at checkout stores `{ price_eur, eur_per_pi, amount_pi }` inside `Payment.raw_payload.pricing`. All later checks compare against this snapshot.
+**`v1.0.0`** is the intended first stable release following `v1.0.0-rc.1` and `v1.0.0-rc.2`.
 
----
+Near-term verification priorities:
 
-## 🛡️ Security & Hardening
+1. Confirm production Pi Browser authentication in the registered app.
+2. Test order details, inbox, and other protected pages in Pi Browser.
+3. Complete live Pi payment acceptance testing, including reconciliation and retries.
+4. Add automated tests around iframe security policies and payment state transitions.
 
-- **django-axes**: brute‑force protection (lockout page wired at `errors/locked_out.html`).
-- **reCAPTCHA v3**: validates `action` + `score` with configurable threshold.
-- **CSP/COOP/COEP**: relaxed only in sandbox to allow iframe (Pi Browser) — locked down otherwise.
-- **Strict cookies & HSTS** in production; **WhiteNoise** for static files with immutable caching.
-- **Proxy aware** headers for Railway / tunnels; trusted origins required for CSRF.
+## 👨‍💻 Author
 
----
-
-## 🗃️ Database & Migrations
-
-- Configure via `DATABASE_URL` (preferred) or individual engine keys.
-- MySQL detection removes `sslmode` (not supported) and sets `utf8mb4` properly.
-- `makemigrations` is already run for the included models. Apply with `migrate`.
-
----
-
-## 🖼️ Media & Static
-
-- `MEDIA_ROOT` defaults to `BASE_DIR/media` (or `/data/media` if `USE_VOLUME_MEDIA=true`).
-- **WhiteNoise** serves static files; in prod it uses `CompressedManifestStaticFilesStorage` with **immutable cache** for hashed assets.
-
----
-
-## 🧪 Testing Tips
-
-- Switch `EMAIL_BACKEND` to console locally (already set) to verify password reset flows.
-- For Pi flows without real wallet, run with `PI_SANDBOX=true` and simulate callbacks to `/pi/*` endpoints.
-- Use **admin actions** in `pi_payments` to toggle statuses or **Sync from Pi** during debugging.
-
----
-
-## 🔧 Admin (django‑unfold)
-
-- Custom branding (logos, colors), dashboard shortcut to key models.
-- List pages show **status badges**, **thumbnails**, pretty JSON, **row actions** (e.g., “Recompress”).
-
----
-
-## 🔗 Routes Overview (selected)
-
-- `/` Home · `core:home`
-- `/blog/` · list/detail
-- `/projects/` · list
-- `/services/` · list/detail, `payment_success`
-- `/orders/` · list/detail
-- `/inbox/` · thread list/detail
-- `/pi/approve|complete|cancel|webhook/` (server callbacks)
-- `/users/login|register|profile|logout|cv|get/`
-- `/validation-key.txt` (static key view)
-- `/sw.js` (minimal SW)
-
----
-
-## 🧰 Operations & Deployment Notes
-
-- Set **`ALLOWED_HOSTS`** and **`CSRF_TRUSTED_ORIGINS`** precisely (schema required for CSRF, no trailing slash).
-- Behind a proxy/CDN (Railway, Fly, Render), keep `SECURE_PROXY_SSL_HEADER` and `USE_X_FORWARDED_HOST` enabled.
-- Ensure **FFmpeg** exists in production image or layer.
-- Disable `PI_SANDBOX` in real prod unless you explicitly support Pi Browser iframe.
-- For object storage (S3/GCS), move video compression to an async worker and write back to the bucket.
-
----
+**José Félix** — Full-Stack Developer & Product Builder  
+GitHub: [@AmeriK88](https://github.com/AmeriK88)
 
 ## 📄 License
 
-Choose your preferred license (e.g., **MIT**) and place it as `LICENSE` in the repo.
-
----
-
-## 🙌 Credits
-
-- Built by José Félix using **Django**, **Bootstrap**, **django‑unfold**, and the **Pi Network SDK**.
+No license is declared in this README. Consult the repository for a `LICENSE` file and its terms before reusing or distributing the code. If you intend to open-source the project, add a license that reflects your preferred permissions.
