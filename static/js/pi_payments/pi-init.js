@@ -1,6 +1,7 @@
 
 (function initPi() {
   'use strict';
+  const cfg = window.PI_CFG || {};
 
   // Evitar inicializaciones duplicadas.
   if (window.__piInitPromise) {
@@ -98,6 +99,7 @@
           // Inicializar SDK una sola vez.
           window.Pi.init({
             version: '2.0',
+            sandbox: Boolean(cfg.sandbox),
           });
 
           // Verificar que la API de autenticación existe.

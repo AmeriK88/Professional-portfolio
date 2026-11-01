@@ -42,13 +42,13 @@
             {% if payment and payment.status %}
               {% with s=payment.status %}
                 {% if s == 'confirmed' %}
-                  <span class="badge rounded-pill text-bg-success px-3 py-2">Confirmado</span>
+                  <span class="badge rounded-pill text-bg-success px-3 py-2" role="status">Confirmado</span>
                 {% elif s == 'initiated' %}
-                  <span class="badge rounded-pill text-bg-info px-3 py-2">Iniciado</span>
+                  <span class="badge rounded-pill text-bg-info px-3 py-2" role="status">Iniciado</span>
                 {% elif s == 'failed' %}
-                  <span class="badge rounded-pill text-bg-danger px-3 py-2">Fallido</span>
+                  <span class="badge rounded-pill text-bg-danger px-3 py-2" role="status">Fallido</span>
                 {% else %}
-                  <span class="badge rounded-pill text-bg-secondary px-3 py-2">{{ payment.get_status_display }}</span>
+                  <span class="badge rounded-pill text-bg-secondary px-3 py-2" role="status">{{ payment.get_status_display }}</span>
                 {% endif %}
               {% endwith %}
             {% endif %}
@@ -132,7 +132,6 @@
           <div class="mt-4">
             <h3 class="payment-next-title">¿Y ahora qué sigue?</h3>
             <ul class="payment-next-list">
-              <li>📩 Revisa tu bandeja de entrada: te enviaremos la confirmación del pedido junto con los detalles de tu compra.</li>
               <li>💬 En caso de necesitarlo, podrás comunicarte con nosotros para indicar tus preferencias o comentarios.</li>
               <li>🧾 Puedes consultar el estado del pago y el historial en <strong>“Mis pedidos”</strong>.</li>
               <li>🆔 Si contactas con soporte, menciona tu <strong>número de pedido</strong> para una atención más rápida.</li>

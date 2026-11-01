@@ -70,14 +70,20 @@ def checkout_service(request, slug):
 
 @login_required
 def my_orders(request):
-    orders = (
+    queryset = (
         Order.objects
         .filter(user=request.user)
         .select_related("payment")
         .prefetch_related(Prefetch("items", queryset=OrderItem.objects.select_related("service")))
         .order_by("-id")
     )
-    return render(request, "orders/list.html", {"orders": orders})
+    page_obj = Paginator(queryset, 10).get_page(request.GET.get("page"))
+    return render(request, "orders/list.html", {
+        "orders": page_obj,
+        "is_paginated": page_obj.has_other_pages(),
+        "page_obj": page_obj,
+        "eur_per_pi": getattr(settings, "DEFAULT_EUR_PER_PI", None),
+    })
 
 @login_required
 def order_detail(request, number):

@@ -161,6 +161,7 @@
         <button
           id="pi-pay-btn"
           class="btn btn-outline-cta rounded-pill px-4 py-2 service-pay-button"
+          aria-describedby="service-payment-note"
           data-checkout-url="{% url 'orders:checkout_service' service.slug %}">
           Pagar con
           <img src="{% static 'images/pi-icon.svg' %}" alt="Pi" class="pi-icon">
@@ -171,7 +172,7 @@
         </a>
       {% endif %}
 
-      <p class="service-payment-note">
+      <p class="service-payment-note" id="service-payment-note">
         {% if request.user.is_authenticated %}
           El pago se inicia al continuar con el botón.
         {% else %}
@@ -187,13 +188,12 @@
 {% block extra_scripts %}
   {{ block.super }}
   <script>
-    window.PI_CFG = {
-      sandbox: true,
+    window.PI_CFG = Object.assign(window.PI_CFG || {}, {
       approveUrl: "{% url 'pi:approve' %}",
       completeUrl: "{% url 'pi:complete' %}",
       cancelUrl: "{% url 'pi:cancel' %}",
       successUrl: "{% url 'services:payment_success' %}"
-    };
+    });
   </script>
   <script src="{% static 'js/pi_payments/pi_payments.js' %}" defer></script>
   <script src="{% static 'js/previews/project-previews.js' %}" defer></script>

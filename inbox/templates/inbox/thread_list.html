@@ -1,24 +1,63 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Inbox{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/inbox.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <h1 class="h3 mb-3">Inbox</h1>
+<div class="inbox-page inbox-list-page">
+  <header class="inbox-header">
+    <div>
+      <p class="inbox-eyebrow">JFGC DEV <span aria-hidden="true">/</span> MENSAJES</p>
+      <h1>Inbox</h1>
+      <p class="inbox-intro">Consulta tus conversaciones relacionadas con tus pedidos.</p>
+    </div>
+    {% if inbox_unread_count %}
+      <p class="inbox-unread-summary" role="status">
+        <span class="inbox-unread-dot" aria-hidden="true"></span>
+        {{ inbox_unread_count }} mensaje{{ inbox_unread_count|pluralize:"s" }} sin leer
+      </p>
+    {% endif %}
+  </header>
 
   {% if threads %}
-    <div class="list-group">
-      {% for t in threads %}
-        <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-           href="{% url 'inbox:thread_detail' t.id %}">
-          <div>
-            <div class="fw-semibold">{{ t.subject }}</div>
-            <div class="small text-muted">Pedido {{ t.order.number }}</div>
-          </div>
-          <small class="text-muted">{{ t.last_message_at|date:"d M Y H:i" }}</small>
-        </a>
-      {% endfor %}
-    </div>
+    <section class="inbox-thread-list" aria-labelledby="inbox-threads-title">
+      <div class="inbox-section-heading">
+        <h2 id="inbox-threads-title">Conversaciones</h2>
+      </div>
+      <ul class="inbox-thread-items">
+        {% for t in threads %}
+          <li>
+            <a class="inbox-thread-card" href="{% url 'inbox:thread_detail' t.id %}">
+              <span class="inbox-thread-indicator" aria-hidden="true">↗</span>
+              <span class="inbox-thread-main">
+                <span class="inbox-thread-subject">{{ t.subject|default:"Conversación del pedido" }}</span>
+                <span class="inbox-thread-order">Pedido <span>{{ t.order.number }}</span></span>
+              </span>
+              <span class="inbox-thread-date">
+                {% if t.last_message_at %}
+                  <time datetime="{{ t.last_message_at|date:'c' }}">{{ t.last_message_at|date:"d M Y, H:i" }}</time>
+                {% else %}
+                  Sin actividad registrada
+                {% endif %}
+              </span>
+              <span class="inbox-thread-arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
   {% else %}
-    <div class="text-muted">No tienes conversaciones aún.</div>
+    <section class="inbox-empty-state" aria-labelledby="inbox-empty-title">
+      <span class="inbox-empty-mark" aria-hidden="true">✉</span>
+      <p class="inbox-eyebrow">MENSAJES</p>
+      <h2 id="inbox-empty-title">Aún no tienes conversaciones</h2>
+      <p>Las conversaciones relacionadas con tus pedidos aparecerán aquí.</p>
+      <a class="inbox-empty-link" href="{% url 'orders:list' %}">Ver mis pedidos <span aria-hidden="true">→</span></a>
+    </section>
   {% endif %}
 </div>
 {% endblock %}

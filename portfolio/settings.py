@@ -94,13 +94,13 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-# --- Pi Sandbox (DEV/SANDBOX only) ---
+# --- Pi Sandbox (live mode must be explicitly selected) ---
 PI_ACCOUNT_MIGRATION_LOCK = env.bool(
     "PI_ACCOUNT_MIGRATION_LOCK",
     default=False,
 )
 
-PI_SANDBOX = env.bool("PI_SANDBOX", default=False)
+PI_SANDBOX = env.bool("PI_SANDBOX", default=True)
 
 # Permitir incrustación únicamente cuando se configure explícitamente.
 PI_BROWSER_EMBED_ENABLED = env.bool(

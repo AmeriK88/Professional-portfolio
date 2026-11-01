@@ -1,43 +1,63 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Conversación{% endblock %}
+
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/inbox.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-  <a href="{% url 'inbox:thread_list' %}" class="btn btn-outline-cta rounded-pill px-4 py-2 mb-3">← Volver al inbox</a>
+<div class="inbox-page inbox-detail-page">
+  <nav class="inbox-breadcrumb" aria-label="Ruta de navegación">
+    <a href="{% url 'inbox:thread_list' %}"><span aria-hidden="true">←</span> Volver al inbox</a>
+    <span aria-hidden="true">/</span>
+    <span aria-current="page">Pedido {{ thread.order.number }}</span>
+  </nav>
 
-  <div class="card shadow-sm position-relative" style="z-index:3;">
-    <div class="card-body">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <div>
-          <div class="h5 mb-0">{{ thread.subject }}</div>
-          <div class="small text-muted">Pedido {{ thread.order.number }}</div>
-        </div>
+  <div class="inbox-conversation">
+    <header class="inbox-conversation-header">
+      <div>
+        <p class="inbox-eyebrow">CONVERSACIÓN <span aria-hidden="true">/</span> PEDIDO {{ thread.order.number }}</p>
+        <h1>{{ thread.subject|default:"Conversación del pedido" }}</h1>
       </div>
-      <hr>
+      <a class="inbox-order-link" href="{% url 'orders:detail' thread.order.number %}">
+        Ver pedido <span aria-hidden="true">↗</span>
+      </a>
+    </header>
 
-      <div class="mb-3" style="max-height: 50vh; overflow:auto;">
-        {% for m in thread_messages %}
-          <div class="mb-3">
-            <div class="small text-muted">
+    <section class="inbox-message-history" aria-label="Historial de mensajes" tabindex="0">
+      {% for m in thread_messages %}
+        <article class="inbox-message
+          {% if m.sender_type == 'user' %} inbox-message-outgoing
+          {% elif m.sender_type == 'system' %} inbox-message-system
+          {% else %} inbox-message-incoming
+          {% endif %}">
+          <header class="inbox-message-meta">
+            <span class="inbox-message-sender">
               {% if m.sender_type == 'system' %}Sistema{% elif m.sender_type == 'admin' %}Admin{% else %}Tú{% endif %}
-              · {{ m.created_at|date:"d M Y H:i" }}
-            </div>
-            <div>{{ m.body|linebreaksbr }}</div>
-          </div>
-        {% empty %}
-          <div class="text-muted">Sin mensajes todavía.</div>
-        {% endfor %}
+            </span>
+            <time datetime="{{ m.created_at|date:'c' }}">{{ m.created_at|date:"d M Y, H:i" }}</time>
+          </header>
+          <div class="inbox-message-body">{{ m.body|linebreaksbr }}</div>
+        </article>
+      {% empty %}
+        <p class="inbox-no-messages">Sin mensajes todavía.</p>
+      {% endfor %}
+    </section>
+
+    <form method="post"
+          action="{% url 'inbox:thread_detail' thread.id %}"
+          class="inbox-reply-form">
+      {% csrf_token %}
+      <label for="inbox-reply-body">Tu mensaje</label>
+      <textarea id="inbox-reply-body" class="form-control" name="body" rows="4"
+                placeholder="Escribe un mensaje…" required></textarea>
+      <div class="inbox-reply-actions">
+        <p class="inbox-reply-note">Tu respuesta se añadirá a esta conversación.</p>
+        <button class="cta-button inbox-send-button" type="submit">Enviar mensaje</button>
       </div>
-
-
-      <form method="post"
-            action="{% url 'inbox:thread_detail' thread.id %}"
-            class="d-flex flex-column flex-sm-row gap-2 align-items-stretch">
-        {% csrf_token %}
-        <textarea class="form-control" name="body" rows="2"
-                  placeholder="Escribe un mensaje…" required></textarea>
-        <button class="cta-button cta-section px-4 py-2 w-100" type="submit">Enviar</button>
-      </form>
-    </div>
+    </form>
   </div>
 </div>
 {% endblock %}

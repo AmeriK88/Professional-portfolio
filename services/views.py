@@ -14,26 +14,25 @@ def service_detail(request, slug):
     service = get_object_or_404(Service, slug=slug, is_active=True)
     return render(request, "services/service_detail.html", {"service": service})
 
+@login_required
 def payment_success(request):
     pid = request.GET.get("pid")
     payment = None
     order = None
     txid = None
 
-    # Intentamos resolver por provider_payment_id recibido en la URL
     if pid:
         payment = (
             Payment.objects
             .select_related("order", "order__user")
-            .filter(provider_payment_id=pid)
+            .filter(provider_payment_id=pid, order__user=request.user)
             .first()
         )
         if payment:
             order = payment.order
             txid = (payment.raw_payload or {}).get("txid")
 
-    # Fallback: si no hay pid o no encontramos el Payment, usamos el último pedido del usuario
-    if not order and request.user.is_authenticated:
+    if not pid:
         order = (
             Order.objects
             .filter(user=request.user)
@@ -46,7 +45,7 @@ def payment_success(request):
                 txid = (payment.raw_payload or {}).get("txid")
 
     ctx = {
-        "payment_id": pid,
+        "payment_id": payment.provider_payment_id if payment else None,
         "payment": payment,
         "order": order,
         "txid": txid,

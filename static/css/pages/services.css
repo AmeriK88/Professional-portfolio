@@ -454,6 +454,37 @@
   text-align: center;
 }
 
+.service-purchase-panel #pi-pay-btn {
+  border-color: var(--color-accent-solid);
+  background: var(--color-accent-solid);
+  color: #fff;
+  font-weight: 650;
+}
+
+.service-purchase-panel #pi-pay-btn:hover:not(:disabled) {
+  border-color: var(--color-accent-solid);
+  background: var(--color-accent-solid);
+  color: #fff;
+}
+
+:root[data-bs-theme="dark"] .service-purchase-panel #pi-pay-btn:hover:not(:disabled) {
+  border-color: var(--color-accent-hover);
+  background: var(--color-accent-hover);
+  color: var(--color-bg);
+}
+
+.service-purchase-panel #pi-pay-btn:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+  box-shadow: none;
+}
+
+.service-purchase-panel #pi-pay-btn:disabled,
+.service-purchase-panel #pi-pay-btn[aria-busy="true"] {
+  cursor: wait;
+  opacity: .7;
+}
+
 .service-payment-note {
   margin: .85rem 0 0;
   color: var(--color-muted);
@@ -681,7 +712,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .service-card,
-  .service-link span {
+  .service-link span,
+  .service-purchase-panel #pi-pay-btn {
     transition: none;
   }
 }

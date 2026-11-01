@@ -3,183 +3,186 @@
 
 {% block title %}Pedido {{ order.number }}{% endblock %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/orders.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-
-  {# ===== Header responsive ===== #}
-  <div class="order-header d-flex flex-column flex-sm-row align-items-start align-items-sm-center justify-content-between gap-2 mb-3">
-    <h1 class="h4 mb-0 grow text-break">Pedido {{ order.number }}</h1>
-
-    <div class="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+<div class="orders-page order-detail">
+  <nav aria-label="Ruta de navegación" class="order-breadcrumb">
+    <ol>
       {% url 'orders:list' as orders_list_url %}
-      <a class="btn btn-outline-cta rounded-pill px-4 py-2"
-         href="{% if orders_list_url %}{{ orders_list_url }}{% else %}javascript:history.back(){% endif %}">
+      <li><a href="{% if orders_list_url %}{{ orders_list_url }}{% else %}javascript:history.back(){% endif %}">Mis pedidos</a></li>
+      <li aria-current="page">Pedido {{ order.number }}</li>
+    </ol>
+  </nav>
+
+  <header class="order-detail-header">
+    <div>
+      <p class="orders-eyebrow">JFGC DEV <span aria-hidden="true">/</span> PEDIDO</p>
+      <h1>Pedido <span class="order-reference">{{ order.number }}</span></h1>
+      <p class="order-created">Creado el {{ order.created_at|date:"d M Y, H:i" }}</p>
+    </div>
+    <div class="order-header-actions">
+      <a class="btn btn-outline-cta rounded-pill px-4 py-2" href="{% if orders_list_url %}{{ orders_list_url }}{% else %}javascript:history.back(){% endif %}">
         ← Volver
       </a>
-      <button class="cta-button cta-section px-4 py-2 w-100" onclick="window.print()">
-        <i class="fa-solid fa-print me-1"></i> Imprimir
+      <button class="cta-button order-print-button" type="button" onclick="window.print()" aria-label="Imprimir pedido {{ order.number }}">
+        <i class="fa-solid fa-print me-1" aria-hidden="true"></i> Imprimir
       </button>
     </div>
-  </div>
+  </header>
 
-  <div class="row g-4">
-    <div class="col-lg-8">
-
-      {# -- Artículos -- #}
-      <div class="card shadow-sm mb-3">
-        <div class="card-header">
-          <strong>Artículos</strong>
-        </div>
-        <div class="card-body">
-          <div class="card table-responsive">
-            <table class="table table-sm align-middle">
-              <thead class="table">
-                <tr>
-                  <th>Servicio</th>
-                  <th class="text-end">Precio</th>
-                  <th class="text-end">Cant.</th>
-                  <th class="text-end">Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
+  <div class="order-detail-layout">
+    <div class="order-detail-main">
+      <section class="order-panel order-items-panel" aria-labelledby="order-items-title">
+        <header class="order-panel-heading">
+          <div>
+            <p class="order-section-kicker">Resumen</p>
+            <h2 id="order-items-title">Artículos del pedido</h2>
+          </div>
+        </header>
+        <div class="order-table-wrap">
+          <table class="table order-items-table align-middle mb-0">
+            <caption class="visually-hidden">Servicios, precio unitario, cantidad y subtotal.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Servicio</th>
+                <th scope="col" class="text-end">Precio</th>
+                <th scope="col" class="text-end">Cant.</th>
+                <th scope="col" class="text-end">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
               {% for it in order.items.all %}
                 <tr>
-                  <td class="text-break">{{ it.service.title }}</td>
-                  <td class="text-end">{{ it.unit_price|floatformat:2 }} {{ order.currency }}</td>
-                  <td class="text-end">{{ it.quantity }}</td>
-                  <td class="text-end">
-                    {{ it.unit_price|floatformat:2 }} × {{ it.quantity }}
-                  </td>
+                  <th scope="row" data-label="Servicio" class="order-item-name">{{ it.service.title }}</th>
+                  <td data-label="Precio" class="text-end">{{ it.unit_price|floatformat:2 }} {{ order.currency }}</td>
+                  <td data-label="Cantidad" class="text-end">{{ it.quantity }}</td>
+                  <td data-label="Subtotal" class="text-end">{{ it.unit_price|floatformat:2 }} × {{ it.quantity }}</td>
                 </tr>
               {% endfor %}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th colspan="3" class="text-end">Total</th>
-                  <th class="text-end">
-                    {{ order.total|floatformat:2 }} {{ order.currency }}
-                    {% if eur_per_pi and order.currency == "EUR" %}
-                      <div class="small text-muted">
-                        ≈ {{ order.total|to_pi:eur_per_pi|floatformat:2 }} π
-                      </div>
-                    {% endif %}
-                  </th>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+            </tbody>
+            <tfoot>
+              <tr>
+                <th scope="row" colspan="3" class="text-end">Total</th>
+                <td class="order-grand-total text-end">
+                  <strong>{{ order.total|floatformat:2 }} {{ order.currency }}</strong>
+                  {% if eur_per_pi and order.currency == "EUR" %}
+                    <span class="order-conversion">≈ {{ order.total|to_pi:eur_per_pi|floatformat:2 }} π</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
-      </div>
-
+      </section>
     </div>
 
-    <div class="col-lg-4">
-
-      {# -- Estado del pedido -- #}
-      <div class="card shadow-sm mb-3">
-        <div class="card-header">
-          <strong>Estado del pedido</strong>
-        </div>
-        <div class="card-body">
-          {% with status=order.status %}
-            <div class="mb-2">
-              <span class="me-2 fw-semibold">Estado:</span>
-              <span class="badge
-                {% if status == 'paid' %} bg-success
-                {% elif status == 'awaiting_payment' %} bg-warning text-dark
-                {% elif status == 'cancelled' %} bg-danger
-                {% elif status == 'refunded' %} bg-info text-dark
-                {% else %} bg-secondary
-                {% endif %}">
-                {{ status|capfirst }}
-              </span>
+    <aside class="order-detail-aside">
+      {% with status=order.status %}
+        <section class="order-panel order-status-panel" aria-labelledby="order-status-title">
+          <header class="order-panel-heading">
+            <div>
+              <p class="order-section-kicker">Seguimiento</p>
+              <h2 id="order-status-title">Estado del pedido</h2>
             </div>
+            <span class="order-status
+              {% if status == 'paid' %} order-status-paid
+              {% elif status == 'awaiting_payment' %} order-status-awaiting
+              {% elif status == 'cancelled' %} order-status-cancelled
+              {% elif status == 'refunded' %} order-status-refunded
+              {% else %} order-status-pending
+              {% endif %}" role="status">
+              {% if status == 'paid' %}Pagado
+              {% elif status == 'awaiting_payment' %}Pendiente de pago
+              {% elif status == 'cancelled' %}Cancelado
+              {% elif status == 'refunded' %}Reembolsado
+              {% elif status == 'pending' %}Pendiente
+              {% else %}{{ status|capfirst }}
+              {% endif %}
+            </span>
+          </header>
 
-            <div class="progress" style="height:6px;">
-              <div class="progress-bar
-                {% if status == 'paid' %} bg-success
-                {% elif status == 'awaiting_payment' %} bg-warning
-                {% elif status == 'cancelled' %} bg-danger
-                {% elif status == 'refunded' %} bg-info
-                {% else %} bg-secondary
-                {% endif %}"
-                role="progressbar"
-                style="width:
-                  {% if status == 'paid' %}100%
-                  {% elif status == 'awaiting_payment' %}50%
-                  {% elif status == 'refunded' %}100%
-                  {% elif status == 'cancelled' %}100%
-                  {% else %}25%
-                  {% endif %};">
-              </div>
+          <dl class="order-dates">
+            <div>
+              <dt>Creado</dt>
+              <dd><time datetime="{{ order.created_at|date:'c' }}">{{ order.created_at|date:"d M Y, H:i" }}</time></dd>
             </div>
-          {% endwith %}
-
-          <dl class="row small mb-0 mt-3">
-            <dt class="col-5 text-muted">Creado</dt>
-            <dd class="col-7">{{ order.created_at|date:"d M Y, H:i" }}</dd>
             {% if order.paid_at %}
-              <dt class="col-5 text-muted">Pagado</dt>
-              <dd class="col-7">{{ order.paid_at|date:"d M Y, H:i" }}</dd>
+              <div>
+                <dt>Pagado</dt>
+                <dd><time datetime="{{ order.paid_at|date:'c' }}">{{ order.paid_at|date:"d M Y, H:i" }}</time></dd>
+              </div>
             {% endif %}
           </dl>
-        </div>
-      </div>
+        </section>
+      {% endwith %}
 
-      {# -- Pago -- #}
-      <div class="card shadow-sm">
-        <div class="card-header">
-          <strong>Pago</strong>
-        </div>
-        <div class="card-body">
+      <section class="order-panel order-payment-panel" aria-labelledby="order-payment-title">
+        <header class="order-panel-heading">
+          <div>
+            <p class="order-section-kicker">Transacción</p>
+            <h2 id="order-payment-title">Pago</h2>
+          </div>
+        </header>
+        <div class="order-payment-content">
           {% if order.payment %}
-            <div class="d-flex align-items-center justify-content-between">
+            <div class="order-payment-provider">
               <div>
-                <div class="small text-muted">Proveedor</div>
-                <div class="fw-semibold">{{ order.payment.provider|default:"pi" }}</div>
+                <span class="order-field-label">Proveedor</span>
+                <strong>{{ order.payment.provider|default:"pi" }}</strong>
               </div>
-              <span class="badge
-                {% if order.payment.status == 'confirmed' %} bg-success
-                {% elif order.payment.status == 'initiated' %} bg-warning text-dark
-                {% elif order.payment.status == 'failed' %} bg-danger
-                {% else %} bg-secondary
-                {% endif %}">
-                {{ order.payment.status|capfirst }}
+              <span class="order-status
+                {% if order.payment.status == 'confirmed' %} order-status-paid
+                {% elif order.payment.status == 'initiated' %} order-status-awaiting
+                {% elif order.payment.status == 'failed' %} order-status-cancelled
+                {% else %} order-status-pending
+                {% endif %}" role="status">
+                {% if order.payment.status == 'confirmed' %}Confirmado
+                {% elif order.payment.status == 'initiated' %}Iniciado
+                {% elif order.payment.status == 'failed' %}Fallido
+                {% else %}{{ order.payment.status|capfirst }}
+                {% endif %}
               </span>
             </div>
 
             {% if order.payment.provider_payment_id %}
-              <hr>
-              <div class="small">
-                <div class="text-muted">Pi payment id</div>
-                <code id="pid-text">{{ order.payment.provider_payment_id }}</code>
-                <button class="btn btn-outline-cta rounded-pill btn-sm" type="button"
-                        onclick="navigator.clipboard.writeText(document.getElementById('pid-text').innerText)">
-                  Copiar
-                </button>
+              <div class="order-transaction-reference">
+                <span class="order-field-label">ID de pago (Pi)</span>
+                <div class="order-copy-row">
+                  <code id="pid-text">{{ order.payment.provider_payment_id }}</code>
+                  <button class="btn btn-outline-cta rounded-pill btn-sm"
+                          type="button"
+                          aria-label="Copiar ID de pago Pi"
+                          onclick="navigator.clipboard.writeText(document.getElementById('pid-text').innerText)">
+                    Copiar
+                  </button>
+                </div>
               </div>
             {% endif %}
 
             {% if order.payment.raw_payload and order.payment.raw_payload.pricing %}
-              <hr>
-              <div class="small">
-                <div>EUR: {{ order.payment.raw_payload.pricing.price_eur|floatformat:2 }}</div>
-                <div>EUR/π: {{ order.payment.raw_payload.pricing.eur_per_pi|floatformat:4 }}</div>
-                <div>π cobrado: {{ order.payment.raw_payload.pricing.amount_pi|floatformat:6 }}</div>
+              <div class="order-payment-pricing">
+                <span class="order-field-label">Resumen de conversión</span>
+                <dl>
+                  <div><dt>EUR</dt><dd>{{ order.payment.raw_payload.pricing.price_eur }}</dd></div>
+                  <div><dt>EUR/π</dt><dd>{{ order.payment.raw_payload.pricing.eur_per_pi }}</dd></div>
+                  <div><dt>π cobrado</dt><dd>{{ order.payment.raw_payload.pricing.amount_pi }}</dd></div>
+                </dl>
               </div>
             {% endif %}
           {% else %}
-            <p class="text-muted mb-0">Sin datos de pago.</p>
+            <p class="order-no-payment">Sin datos de pago.</p>
           {% endif %}
         </div>
-      </div>
+      </section>
 
-      {# Botón volver extra solo en móvil #}
       {% if orders_list_url %}
-        <a class="btn btn-outline-cta rounded-pill w-100 d-sm-none mt-3" href="{{ orders_list_url }}">← Volver</a>
+        <a class="btn btn-outline-cta rounded-pill w-100 d-sm-none order-mobile-back" href="{{ orders_list_url }}">← Volver a mis pedidos</a>
       {% endif %}
-    </div>
+    </aside>
   </div>
-
 </div>
 {% endblock %}
