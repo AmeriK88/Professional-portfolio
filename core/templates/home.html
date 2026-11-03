@@ -30,20 +30,58 @@
         <div class="home-visual-orbit home-visual-orbit-one"></div>
         <div class="home-visual-orbit home-visual-orbit-two"></div>
         <div class="home-visual-panel">
-          <div class="home-visual-panel-top">
-            <span class="home-visual-mark">J</span>
-            <span>JFGC <span class="home-visual-muted">/ ESTUDIO DIGITAL</span></span>
-            <span class="home-visual-status"><i></i> EN DESARROLLO</span>
+          <div class="home-visual-brand">
+            <div class="home-visual-panel-top">
+              <span class="home-visual-mark">J</span>
+              <span>JFGC <span class="home-visual-muted">/ ESTUDIO DIGITAL</span></span>
+              <span class="home-visual-status"><i></i> EN DESARROLLO</span>
+            </div>
+            <div class="home-visual-title">Ideas en<br><span>productos digitales.</span></div>
+            <div class="home-visual-rule"></div>
+            <div class="home-visual-stack-label">STACK DE PRODUCTO</div>
+            <div class="home-visual-stack">
+              <span>Python</span><span>Django</span><span>JavaScript</span>
+            </div>
+            <div class="home-visual-footer">
+              <span>DESARROLLO FULL-STACK</span>
+              <span aria-hidden="true">↗</span>
+            </div>
           </div>
-          <div class="home-visual-title">Ideas en<br><span>productos digitales.</span></div>
-          <div class="home-visual-rule"></div>
-          <div class="home-visual-stack-label">STACK DE PRODUCTO</div>
-          <div class="home-visual-stack">
-            <span>Python</span><span>Django</span><span>JavaScript</span>
-          </div>
-          <div class="home-visual-footer">
-            <span>DESARROLLO FULL-STACK</span>
-            <span aria-hidden="true">↗</span>
+
+          <div class="home-visual-terminal">
+            <div class="home-term-top">
+              <span>JFGC <span class="home-visual-muted">/ DEV STUDIO</span></span>
+            </div>
+            <div class="home-visual-rule"></div>
+            <div class="home-term-body">
+              <div class="home-term-step" data-term-step data-command="django-admin startproject jfgc_app">
+                <p class="home-term-command"><span class="home-term-prompt">$</span> <span data-term-typed></span><span class="home-term-cursor"></span></p>
+                <p class="home-term-line">Creating project structure...</p>
+                <p class="home-term-line is-ok">✓ Project initialized</p>
+                <p class="home-term-line is-ok">✓ Django configured</p>
+              </div>
+              <div class="home-term-step" data-term-step data-command="python manage.py test">
+                <p class="home-term-command"><span class="home-term-prompt">$</span> <span data-term-typed></span><span class="home-term-cursor"></span></p>
+                <p class="home-term-line">Running application checks...</p>
+                <p class="home-term-line is-ok">✓ Tests passed</p>
+                <p class="home-term-line is-ok">✓ Build ready</p>
+              </div>
+              <div class="home-term-step" data-term-step data-command="git push origin main">
+                <p class="home-term-command"><span class="home-term-prompt">$</span> <span data-term-typed></span><span class="home-term-cursor"></span></p>
+                <p class="home-term-line">Deploying to Railway...</p>
+                <p class="home-term-line is-ok">✓ Static assets collected</p>
+                <p class="home-term-line is-ok">✓ Application online</p>
+              </div>
+              <div class="home-term-step" data-term-done>
+                <p class="home-term-line is-ok">✓ Build completed</p>
+                <p class="home-term-line is-ok">✓ Deployment successful</p>
+                <p class="home-term-line is-ok">✓ Application ready</p>
+              </div>
+            </div>
+            <div class="home-term-note">
+              <span class="home-term-badge"><i></i> BUILD PREVIEW</span>
+              <span>DEMO ILUSTRATIVA</span>
+            </div>
           </div>
         </div>
         <div class="home-visual-float home-visual-float-code">
@@ -349,4 +387,5 @@
 {% block extra_scripts %}
   <script src="{% static 'js/previews/project-previews.js' %}" defer></script>
   <script src="{% static 'js/core/home-media.js' %}" defer></script>
+  <script src="{% static 'js/core/hero-terminal.js' %}" defer></script>
 {% endblock %}
