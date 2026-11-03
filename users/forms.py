@@ -40,10 +40,12 @@ class StyledAuthenticationForm(RecaptchaV3Mixin, AuthenticationForm):
         self.fields["username"].widget.attrs.setdefault("class", "form-control")
         self.fields["username"].widget.attrs.setdefault("autocomplete", "username")
         self.fields["username"].widget.attrs.setdefault("placeholder", "Tu usuario")
+        self.fields["username"].widget.attrs["aria-describedby"] = "login-username-feedback"
 
         self.fields["password"].widget.attrs.setdefault("class", "form-control")
         self.fields["password"].widget.attrs.setdefault("autocomplete", "current-password")
         self.fields["password"].widget.attrs.setdefault("placeholder", "Tu contraseña")
+        self.fields["password"].widget.attrs["aria-describedby"] = "login-password-feedback"
 
 
 # ---------- Registro ----------
@@ -87,6 +89,10 @@ class CustomUserCreationForm(RecaptchaV3Mixin, UserCreationForm):
             "autocomplete": "new-password",
             "placeholder": "Repite la contraseña",
         })
+        self.fields["username"].widget.attrs["aria-describedby"] = "register-username-feedback"
+        self.fields["email"].widget.attrs["aria-describedby"] = "register-email-feedback"
+        self.fields["password1"].widget.attrs["aria-describedby"] = "register-password1-feedback"
+        self.fields["password2"].widget.attrs["aria-describedby"] = "register-password2-feedback"
 
     def clean_email(self):
         email = self.cleaned_data["email"].lower().strip()
@@ -112,6 +118,14 @@ class ProfileUpdateForm(forms.ModelForm):
             "last_name":  forms.TextInput(attrs={"class": "form-control", "placeholder": "Apellidos"}),
             "email":      forms.EmailInput(attrs={"class": "form-control", "autocomplete": "email", "placeholder": "tu@correo.com"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["first_name"].widget.attrs["autocomplete"] = "given-name"
+        self.fields["first_name"].widget.attrs["aria-describedby"] = "profile-first-name-feedback"
+        self.fields["last_name"].widget.attrs["autocomplete"] = "family-name"
+        self.fields["last_name"].widget.attrs["aria-describedby"] = "profile-last-name-feedback"
+        self.fields["email"].widget.attrs["aria-describedby"] = "profile-email-feedback"
 
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()

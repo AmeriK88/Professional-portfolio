@@ -1,173 +1,244 @@
 {% extends "base.html" %}
-{% load static %}  
+{% load static %}
 {% block title %}Mi perfil{% endblock %}
 
+{% block extra_head %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'css/pages/account.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container py-4">
+<div class="account-page">
+  <header class="account-header">
+    <div>
+      <p class="account-eyebrow">JFGC DEV <span aria-hidden="true">/</span> CUENTA</p>
+      <h1>Tu perfil</h1>
+      <p class="account-intro">Consulta tu información y administra los datos de tu cuenta.</p>
+    </div>
+  </header>
+
   <div class="row g-4">
-
-    <!-- Resumen -->
-    <div class="col-12 col-lg-4">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h2 class="h5 mb-3">Resumen de cuenta</h2>
-
-          <!-- Cabecera con avatar + nombre -->
-          <div class="d-flex align-items-center mb-3">
-            <img
-              src="{{ request.user.avatar_url|default:'/static/images/default-avatar.png' }}"
-              alt="Avatar"
-              class="rounded-circle me-3"
-              width="64" height="64"
-              style="object-fit: cover;"
-            >
-            <div>
-              <div class="fw-semibold">
-                {{ request.user.display_name|default:request.user.username }}
-              </div>
-              <div class="text-muted small">@{{ request.user.username }}</div>
-            </div>
-          </div>
-
-          <dl class="row mb-0 small">
-            <dt class="col-5 text-muted">Usuario</dt>
-            <dd class="col-7">{{ request.user.username }}</dd>
-
-            <dt class="col-5 text-muted">Nombre</dt>
-            <dd class="col-7">{{ request.user.first_name|default:"—" }}</dd>
-
-            <dt class="col-5 text-muted">Apellidos</dt>
-            <dd class="col-7">{{ request.user.last_name|default:"—" }}</dd>
-
-            <dt class="col-5 text-muted">Email</dt>
-            <dd class="col-7">{{ request.user.email|default:"—" }}</dd>
-
-            <dt class="col-5 text-muted">Alta</dt>
-            <dd class="col-7">{{ request.user.date_joined|date:"d M Y, H:i" }}</dd>
-
-            <dt class="col-5 text-muted">Último acceso</dt>
-            <dd class="col-7">{{ request.user.last_login|date:"d M Y, H:i"|default:"—" }}</dd>
-          </dl>
-
-          <hr class="my-3">
-
-          <div class="d-grid gap-2 mt-5">
-            <a class="btn btn-outline-cta rounded-pill px-4 py-2" href="{% url 'users:password_change' %}">
-              <i class="fa-solid fa-key me-2"></i> Cambiar contraseña
-            </a>
-            <form action="{% url 'users:logout' %}" method="post" class="m-0">
-              {% csrf_token %}
-              <button class="cta-button cta-section px-4 py-2 w-100" type="submit">
-                <i class="fa-solid fa-right-from-bracket me-2"></i> Cerrar sesión
-              </button>
-            </form>
+    <div class="col-12 col-lg-5">
+      <section class="account-card account-overview h-100" aria-labelledby="account-overview-title">
+        <div class="account-card-heading">
+          <div>
+            <p class="account-kicker">INFORMACIÓN PERSONAL</p>
+            <h2 id="account-overview-title">Resumen de cuenta</h2>
           </div>
         </div>
-      </div>
+
+        <div class="account-identity">
+          <img
+            src="{{ request.user.avatar_url|default:'/static/images/default-avatar.png' }}"
+            alt=""
+            class="account-avatar"
+            width="76" height="76"
+          >
+          <div class="account-identity-copy">
+            <h3>{{ request.user.display_name|default:request.user.username }}</h3>
+            <p>@{{ request.user.username }}</p>
+          </div>
+        </div>
+
+        <dl class="account-details">
+          <div>
+            <dt>Usuario</dt>
+            <dd>{{ request.user.username }}</dd>
+          </div>
+          <div>
+            <dt>Nombre</dt>
+            <dd>{{ request.user.first_name|default:"—" }}</dd>
+          </div>
+          <div>
+            <dt>Apellidos</dt>
+            <dd>{{ request.user.last_name|default:"—" }}</dd>
+          </div>
+          <div>
+            <dt>Email</dt>
+            <dd>{{ request.user.email|default:"—" }}</dd>
+          </div>
+          <div>
+            <dt>Alta</dt>
+            <dd>{{ request.user.date_joined|date:"d M Y, H:i" }}</dd>
+          </div>
+          <div>
+            <dt>Último acceso</dt>
+            <dd>{{ request.user.last_login|date:"d M Y, H:i"|default:"—" }}</dd>
+          </div>
+        </dl>
+
+        <div class="account-security" aria-label="Seguridad de la cuenta">
+          <a class="btn btn-outline-cta rounded-pill px-4 py-2" href="{% url 'users:password_change' %}">
+            <i class="fa-solid fa-key me-2" aria-hidden="true"></i>Cambiar contraseña
+          </a>
+          <a class="btn btn-outline-cta rounded-pill px-4 py-2" href="{% url 'users:cv_page' %}">
+            <i class="fa-regular fa-file-lines me-2" aria-hidden="true"></i>Acceder al CV
+          </a>
+          <form action="{% url 'users:logout' %}" method="post">
+            {% csrf_token %}
+            <button class="cta-button cta-section px-4 py-2 w-100" type="submit">
+              <i class="fa-solid fa-right-from-bracket me-2" aria-hidden="true"></i>Cerrar sesión
+            </button>
+          </form>
+        </div>
+      </section>
     </div>
 
-    <!-- Editar perfil -->
-    <div class="col-12 col-lg-5">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h2 class="h5 mb-3">Editar perfil</h2>
-          <form method="post" novalidate>
-            {% csrf_token %}
-            {{ form.non_field_errors }}
+    <div class="col-12 col-lg-7">
+      <section class="account-card h-100" aria-labelledby="account-edit-title">
+        <div class="account-card-heading">
+          <div>
+            <p class="account-kicker">DATOS DE TU CUENTA</p>
+            <h2 id="account-edit-title">Editar perfil</h2>
+          </div>
+          <span class="account-edit-icon" aria-hidden="true"><i class="fa-regular fa-pen-to-square"></i></span>
+        </div>
 
-            <div class="mb-3">
-              <label class="form-label">Nombre</label>
-              {{ form.first_name }}
+        <form class="account-form" method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="account-feedback account-feedback--error" role="alert">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="account-field">
+            <label class="form-label" for="{{ form.first_name.id_for_label }}">Nombre</label>
+            {{ form.first_name }}
+            <div class="account-field-feedback" id="profile-first-name-feedback" role="alert">
               {{ form.first_name.errors }}
             </div>
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label">Apellidos</label>
-              {{ form.last_name }}
+          <div class="account-field">
+            <label class="form-label" for="{{ form.last_name.id_for_label }}">Apellidos</label>
+            {{ form.last_name }}
+            <div class="account-field-feedback" id="profile-last-name-feedback" role="alert">
               {{ form.last_name.errors }}
             </div>
+          </div>
 
-            <div class="mb-3">
-              <label class="form-label">Email</label>
-              {{ form.email }}
-              <div class="form-text">Usado para notificaciones y recibos.</div>
-              {{ form.email.errors }}
+          <div class="account-field">
+            <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+            <div class="account-field-feedback" id="profile-email-feedback">
+              <p class="account-help">Usado para notificaciones y recibos.</p>
+              <div role="alert">{{ form.email.errors }}</div>
             </div>
+          </div>
 
-            {# ---- AVATAR PREDEFINIDO (galería) ---- #}
-            <div class="mb-3">
-              <label class="form-label">Avatar</label>
-
-              {% with selected=form.avatar_choice.value|default:request.user.avatar_choice %}
-              <div class="row row-cols-3 row-cols-sm-4 g-3 avatar-picker">
+          <fieldset class="account-avatar-field">
+            <legend>Avatar</legend>
+            {% with selected=form.avatar_choice.value|default:request.user.avatar_choice %}
+              <div class="row row-cols-3 row-cols-sm-4 g-3 avatar-picker" role="radiogroup" aria-describedby="profile-avatar-feedback">
                 {% for key,label in avatar_choices %}
                   <div class="col">
-                    <label class="d-block text-center avatar-option">
-                      <!-- Radio oculto pero accesible -->
+                    <label class="account-avatar-option avatar-option">
                       <input
+                        id="avatar-{{ key }}"
                         type="radio"
                         name="avatar_choice"
                         value="{{ key }}"
                         class="visually-hidden"
+                        aria-describedby="profile-avatar-feedback"
                         {% if selected == key %}checked{% endif %}
                       >
-                      <!-- La imagen debe ir justo DESPUÉS del input para el selector :checked + img -->
                       <img
                         src="{% static 'avatars/presets/' %}{{ key }}.png"
-                        alt="{{ label }}"
-                        class="rounded-circle avatar-img"
+                        alt=""
+                        class="account-avatar-choice avatar-img"
                         width="72" height="72"
-                        style="object-fit:cover;"
                       >
-                      <span class="small text-muted d-block mt-1">{{ label }}</span>
+                      <span>{{ label }}</span>
                     </label>
                   </div>
                 {% endfor %}
               </div>
-              {% endwith %}
-
-              {{ form.avatar_choice.errors }}
-              <div class="form-text">Elige un avatar. Si no seleccionas, usaré el predeterminado.</div>
+            {% endwith %}
+            <div class="account-field-feedback" id="profile-avatar-feedback">
+              <p class="account-help">Elige un avatar. Si no seleccionas, usaré el predeterminado.</p>
+              <div role="alert">{{ form.avatar_choice.errors }}</div>
             </div>
+          </fieldset>
 
-
-            <button type="submit" class="cta-button cta-section px-4 py-2 w-100">Guardar cambios</button>
-          </form>
-        </div>
-      </div>
+          <button type="submit" class="cta-button cta-section px-4 py-2 w-100 account-save">Guardar cambios</button>
+        </form>
+      </section>
     </div>
+  </div>
 
-    <!-- Pedidos (si existe) -->
-    <div class="col-12 col-lg-3">
-      <div class="card shadow-sm h-100">
-        <div class="card-body">
-          <h2 class="h5 mb-3">Pedidos</h2>
+  <div class="row g-4 mt-1">
+    <div class="col-12 col-lg-6">
+      <section class="account-card account-linked-card h-100" aria-labelledby="account-orders-title">
+        <div class="account-card-heading">
+          <div>
+            <p class="account-kicker">ACTIVIDAD</p>
+            <h2 id="account-orders-title">Pedidos</h2>
+          </div>
+          <span class="account-shortcut-icon" aria-hidden="true"><i class="fa-solid fa-box-open"></i></span>
+        </div>
 
-          {% if orders_url %}
-            {% if orders_count != None %}
-              <p class="mb-2 small text-muted">Total de pedidos: <strong>{{ orders_count }}</strong></p>
-            {% endif %}
-
-            {% if last_order %}
-              <div class="small text-muted mb-2">Último pedido:</div>
-              <div class="border rounded p-2 small">
-                ID: {{ last_order.pk }}<br>
-                {% if last_order.created_at %}Fecha: {{ last_order.created_at|date:"d M Y, H:i" }}{% endif %}
-                {% if last_order.status %}<br>Estado: {{ last_order.status }}{% endif %}
-                {% if last_order.total %}<br>Total: {{ last_order.total }}{% endif %}
-              </div>
-            {% else %}
-              <p class="small text-muted">Aún no hay pedidos.</p>
-            {% endif %}
-
-            <a class="btn btn-outline-cta rounded-pill px-4 py-2 mt-3" href="{{ orders_url }}">Ver mis pedidos</a>
-          {% else %}
-            <p class="small text-muted mb-0">La sección de pedidos estará disponible pronto.</p>
+        {% if orders_url %}
+          {% if orders_count != None %}
+            <p class="account-secondary">Total de pedidos: <strong>{{ orders_count }}</strong></p>
           {% endif %}
-        </div>
-      </div>
+
+          {% if last_order %}
+            <div class="account-order-summary">
+              <h3>Último pedido</h3>
+              <dl>
+                <div>
+                  <dt>ID</dt>
+                  <dd>{{ last_order.pk }}</dd>
+                </div>
+                {% if last_order.created_at %}
+                  <div>
+                    <dt>Fecha</dt>
+                    <dd>{{ last_order.created_at|date:"d M Y, H:i" }}</dd>
+                  </div>
+                {% endif %}
+                {% if last_order.status %}
+                  <div>
+                    <dt>Estado</dt>
+                    <dd>{{ last_order.status }}</dd>
+                  </div>
+                {% endif %}
+                {% if last_order.total %}
+                  <div>
+                    <dt>Total</dt>
+                    <dd>{{ last_order.total }}</dd>
+                  </div>
+                {% endif %}
+              </dl>
+            </div>
+          {% else %}
+            <p class="account-secondary">Aún no hay pedidos.</p>
+          {% endif %}
+
+          <a class="btn btn-outline-cta rounded-pill px-4 py-2 account-card-action" href="{{ orders_url }}">
+            Ver mis pedidos
+          </a>
+        {% else %}
+          <p class="account-secondary">La sección de pedidos estará disponible pronto.</p>
+        {% endif %}
+      </section>
     </div>
 
+    <div class="col-12 col-lg-6">
+      <section class="account-card account-linked-card h-100" aria-labelledby="account-inbox-title">
+        <div class="account-card-heading">
+          <div>
+            <p class="account-kicker">COMUNICACIÓN</p>
+            <h2 id="account-inbox-title">Bandeja de entrada</h2>
+          </div>
+          <span class="account-shortcut-icon" aria-hidden="true"><i class="fa-regular fa-envelope"></i></span>
+        </div>
+        <p class="account-secondary">Consulta tus conversaciones relacionadas con tus pedidos.</p>
+        <a class="btn btn-outline-cta rounded-pill px-4 py-2 account-card-action" href="{% url 'inbox:thread_list' %}">
+          Ir a la bandeja de entrada
+        </a>
+      </section>
+    </div>
   </div>
 </div>
 {% endblock %}

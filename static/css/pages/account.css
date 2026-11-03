@@ -1,0 +1,406 @@
+.account-page {
+  width: min(100%, 1160px);
+  margin-inline: auto;
+  padding-block: clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.account-header {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.account-eyebrow,
+.account-kicker {
+  margin: 0 0 .65rem;
+  color: var(--color-accent-secondary);
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.account-eyebrow span {
+  margin-inline: .35rem;
+  opacity: .7;
+}
+
+.account-header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 650;
+  letter-spacing: -.05em;
+  line-height: 1.1;
+}
+
+.account-intro {
+  margin: .7rem 0 0;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.account-card {
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 1.75rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.account-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.account-card-heading .account-kicker {
+  margin-bottom: .35rem;
+}
+
+.account-card-heading h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+
+.account-edit-icon,
+.account-shortcut-icon {
+  display: grid;
+  width: 2.65rem;
+  height: 2.65rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-accent-secondary);
+}
+
+.account-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  margin-bottom: 1.35rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.account-avatar {
+  width: clamp(3.75rem, 15vw, 4.75rem);
+  height: clamp(3.75rem, 15vw, 4.75rem);
+  flex: 0 0 auto;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--color-border);
+}
+
+.account-identity-copy {
+  min-width: 0;
+}
+
+.account-identity-copy h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 1.05rem;
+  font-weight: 650;
+  letter-spacing: -.02em;
+}
+
+.account-identity-copy p {
+  margin: .2rem 0 0;
+  color: var(--color-muted);
+  overflow-wrap: anywhere;
+}
+
+.account-details,
+.account-order-summary dl {
+  display: grid;
+  gap: .75rem;
+  margin: 0;
+}
+
+.account-details > div,
+.account-order-summary dl > div {
+  display: grid;
+  grid-template-columns: minmax(5rem, .7fr) minmax(0, 1.3fr);
+  gap: .75rem;
+  min-width: 0;
+}
+
+.account-details dt,
+.account-order-summary dt {
+  color: var(--color-muted);
+  font-size: .88rem;
+  font-weight: 500;
+}
+
+.account-details dd,
+.account-order-summary dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--color-text);
+  font-size: .9rem;
+  font-weight: 550;
+}
+
+.account-security {
+  display: grid;
+  gap: .65rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.account-security .btn,
+.account-security .cta-button {
+  width: 100%;
+  min-height: 2.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.account-security form {
+  margin: 0;
+}
+
+.account-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.account-field {
+  min-width: 0;
+}
+
+.account-field .form-label,
+.account-avatar-field legend {
+  margin-bottom: .4rem;
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.account-field .form-control {
+  min-height: 2.9rem;
+  border-color: var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.account-field .form-control:focus-visible,
+.account-save:focus-visible,
+.account-card-action:focus-visible,
+.account-security a:focus-visible,
+.account-security button:focus-visible {
+  border-color: var(--color-accent-secondary);
+  outline: 3px solid var(--color-accent-secondary);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.account-field-feedback {
+  color: var(--color-muted);
+  font-size: .875rem;
+}
+
+.account-field-feedback > [role="alert"]:empty {
+  display: none;
+}
+
+.account-field-feedback[role="alert"]:empty {
+  display: none;
+}
+
+.account-field-feedback .errorlist,
+.account-feedback .errorlist {
+  margin: .4rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--color-danger);
+}
+
+.account-feedback--error {
+  padding: .8rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--color-danger) 40%, var(--color-border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-surface));
+  color: var(--color-danger);
+}
+
+.account-feedback--error .errorlist {
+  margin: 0;
+}
+
+.account-help {
+  margin: .4rem 0 0;
+  color: var(--color-muted);
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+.account-avatar-field {
+  min-width: 0;
+  margin: .15rem 0 0;
+  padding: 0;
+  border: 0;
+}
+
+.account-avatar-field legend {
+  float: none;
+  width: auto;
+  font-size: 1rem;
+}
+
+.account-avatar-option {
+  display: grid;
+  justify-items: center;
+  gap: .55rem;
+  height: 100%;
+  padding: .65rem .25rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  cursor: pointer;
+  text-align: center;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.account-avatar-choice {
+  width: clamp(3.5rem, 12vw, 4.5rem);
+  height: clamp(3.5rem, 12vw, 4.5rem);
+  border: 2px solid var(--color-border);
+  border-radius: 50%;
+  object-fit: cover;
+  transition: transform .15s ease, box-shadow .15s ease, outline-color .15s ease;
+}
+
+.account-avatar-option:hover {
+  border-color: var(--color-border);
+  background: var(--color-bg);
+}
+
+.account-avatar-option input:checked + .account-avatar-choice {
+  outline: 2px solid var(--color-accent-secondary);
+  outline-offset: 3px;
+}
+
+.account-avatar-option input:focus-visible + .account-avatar-choice {
+  outline: 3px solid var(--color-accent-secondary);
+  outline-offset: 3px;
+}
+
+.account-avatar-option span {
+  overflow-wrap: anywhere;
+  font-size: .8rem;
+  font-weight: 550;
+}
+
+.account-save {
+  min-height: 3rem;
+  margin-top: .25rem;
+}
+
+.account-save:disabled {
+  cursor: wait;
+  opacity: .72;
+}
+
+.account-linked-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.account-linked-card .account-card-heading {
+  width: 100%;
+}
+
+.account-secondary {
+  margin: 0 0 1rem;
+  color: var(--color-muted);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.account-secondary strong {
+  color: var(--color-text);
+}
+
+.account-order-summary {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.account-order-summary h3 {
+  margin: 0 0 .75rem;
+  font-size: .95rem;
+  font-weight: 650;
+}
+
+.account-order-summary dl {
+  gap: .5rem;
+}
+
+.account-order-summary dl > div {
+  grid-template-columns: minmax(4rem, .55fr) minmax(0, 1.45fr);
+  gap: .5rem;
+}
+
+.account-order-summary dt,
+.account-order-summary dd {
+  font-size: .84rem;
+}
+
+.account-card-action {
+  margin-top: auto;
+}
+
+:root[data-bs-theme="dark"] .account-feedback--error,
+:root[data-bs-theme="dark"] .account-feedback--error .errorlist,
+:root[data-bs-theme="dark"] .account-field-feedback .errorlist {
+  color: #fecaca;
+}
+
+@media (max-width: 575.98px) {
+  .account-page {
+    padding-block: .5rem 1.25rem;
+  }
+
+  .account-card {
+    padding: 1.15rem;
+    border-radius: var(--radius-md);
+  }
+
+  .account-details > div {
+    grid-template-columns: minmax(4.5rem, .65fr) minmax(0, 1.35fr);
+    gap: .5rem;
+  }
+
+  .account-avatar-option {
+    padding-inline: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account-page *,
+  .account-page *::before,
+  .account-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
